@@ -4,7 +4,7 @@ import {useState} from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { User, EyeOff, Eye } from "lucide-react";
+import { User, EyeOff, Eye, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 
@@ -173,20 +173,30 @@ export default function LoginModal() {
               Don't have an account?{" "}
               <button
                 onClick={() => router.push("/")}
-                className="text-[#2563eb] hover:text-[#1d4ed8] font-semibold transition-colors duration-200"
+                className="text-[#286BBD] hover:text-[#1d4ed8] font-semibold transition-colors duration-200"
               >
                 Create Account
               </button>
             </span>
           </div>
 
-          {/* Demo Credentials */}
-          <div className="bg-gray-50 rounded-xl p-4 text-xs text-gray-600 border border-gray-200 mt-4">
-            <div className="font-semibold text-gray-800 mb-2">
-              Demo Credentials:
+          {/* Trust Badge */}
+          <div className="mt-4 mx-auto max-w-[240px]">
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#122E5F]/10 to-[#286BBD]/10 animate-pulse rounded-xl"></div>
+              <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl border border-[#286BBD]/20 text-center">
+                <div className="flex items-center justify-center space-x-1.5">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-[#286BBD]/20 blur-sm rounded-full"></div>
+                    <CheckCircle className="h-3.5 w-3.5 text-[#286BBD] relative" />
+                  </div>
+                  <span className="text-[11px] font-medium text-[#122E5F]">
+                    Trusted by 2K+ Pros
+                  </span>
+                  <span className="text-[11px] text-[#286BBD]">💫</span>
+                </div>
+              </div>
             </div>
-            <div>emailAddress: contractor1, Password: pass123</div>
-            <div>emailAddress: contractor2, Password: pass456</div>
           </div>
         </div>
       </div>
