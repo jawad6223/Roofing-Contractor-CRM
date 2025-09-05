@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import {useState} from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { User, X } from "lucide-react";
+import { User, EyeOff, Eye } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 
@@ -34,6 +34,7 @@ export default function LoginModal() {
 
   const router = useRouter();
   const { login } = useAuth();
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // 3. Setup react-hook-form
   const {
@@ -126,12 +127,21 @@ export default function LoginModal() {
               <label className="block text-gray-700 text-sm font-semibold mb-2">
                 Password
               </label>
+              <div className="relative">
               <input
-                type="password"
+                type={showConfirmPassword ? "text" : "password"}
                 placeholder="Enter password"
                 {...register("password")}
                 className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] text-gray-900 placeholder-gray-500 transition-all duration-300"
               />
+              <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.password.message}
