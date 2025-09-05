@@ -8,7 +8,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Missing input" }, { status: 400 });
   }
 
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY || "AIzaSyAwRYINwIrDt_mPuOPk1eewPa7SvSFEBg0";
   if (!apiKey) {
     return NextResponse.json(
       { error: "Server configuration error: missing API key" },
