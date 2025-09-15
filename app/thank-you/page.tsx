@@ -15,7 +15,7 @@ export default function ThankYouPage() {
     }, [])
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-slate-200 flex items-center justify-center p-4">
+<div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-100 to-slate-200 flex items-center justify-center p-4">
             <div className="relative bg-white rounded-3xl shadow-2xl border border-gray-100 p-10 max-w-xl w-full overflow-hidden">
                 {/* Decorative confetti */}
                 <div className="absolute inset-0 pointer-events-none z-0">
@@ -76,6 +76,6 @@ export default function ThankYouPage() {
                     50% { transform: translateY(-12px);}
                 }
             `}</style>
-        </div>
+        </div>        
     );
 }
