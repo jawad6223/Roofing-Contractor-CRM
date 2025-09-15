@@ -33,6 +33,7 @@ const CrmDashboard = () => {
     info.emailAddress === user
   );
   const currentUserFullName = currentUserInfo?.fullName || user;
+  console.log('currentUserFullName',currentUserFullName);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -747,7 +748,7 @@ const CrmDashboard = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                        <Input value={user} className="text-gray-900 h-11" />
+                        <Input value={currentUserFullName} className="text-gray-900 h-11" />
                       </div>
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">Service Radius</label>
