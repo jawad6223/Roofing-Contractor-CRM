@@ -17,7 +17,7 @@ const CrmDashboard = () => {
     { icon: Home, label: 'Dashboard' },
     { icon: BarChart3, label: 'CRM' },
     { icon: Users, label: 'Leads' },
-    { icon: FileText, label: 'My Leads' },
+    // { icon: FileText, label: 'My Leads' },
     { icon: Settings, label: 'Settings' },
     { icon: UserPlus, label: 'Teams' },
   ]
@@ -372,7 +372,7 @@ const CrmDashboard = () => {
                 <Card className="border-2 border-[#286BBD] shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 relative overflow-hidden">
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#286BBD] to-[#2563eb]"></div>
                   <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <div className="bg-[#286BBD] text-white px-4 py-1 rounded-full text-sm font-bold">
+                    <div className="bg-[#286BBD] text-white px-4 py-2 mt-1 rounded-full text-sm font-bold">
                       Most Popular
                     </div>
                   </div>
@@ -529,7 +529,7 @@ const CrmDashboard = () => {
               </div>
 
               {/* Filters */}
-              <div className="bg-white rounded-lg shadow-sm border p-4">
+              {/* <div className="bg-white rounded-lg shadow-sm border p-4">
                 <div className="flex flex-wrap items-center gap-4">
                   <div className="flex items-center space-x-2">
                     <MapPin className="h-4 w-4 text-gray-500" />
@@ -551,7 +551,7 @@ const CrmDashboard = () => {
                     </select>
                   </div>
                 </div>
-              </div>
+              </div> */}
               
               {/* Lead Cards */}
               <div className="space-y-4">
@@ -579,10 +579,10 @@ const CrmDashboard = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="text-right">
+                        {/* <div className="text-right">
                           <div className="text-3xl font-bold text-[#286BBD] mb-1">$89</div>
                           <p className="text-sm text-gray-500">per lead</p>
-                        </div>
+                        </div> */}
                       </div>
                       
                       <p className="text-gray-700 mb-4 leading-relaxed">
@@ -613,10 +613,10 @@ const CrmDashboard = () => {
                             <span>Expires in 18 hours</span>
                           </div>
                         </div>
-                        <Button className="bg-gradient-to-r from-[#286BBD] to-[#2563eb] hover:from-[#1d4ed8] hover:to-[#1e40af] text-white font-semibold px-6">
+                        {/* <Button className="bg-gradient-to-r from-[#286BBD] to-[#2563eb] hover:from-[#1d4ed8] hover:to-[#1e40af] text-white font-semibold px-6">
                           <ShoppingCart className="h-4 w-4 mr-2" />
                           Buy Lead
-                        </Button>
+                        </Button> */}
                       </div>
                     </CardContent>
                   </Card>
