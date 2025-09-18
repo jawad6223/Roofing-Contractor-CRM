@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Home, Users, FileText, Calendar, Settings, BarChart3, MessageSquare, Menu, X, User, Search, LogOut, ShoppingCart, MapPin, CreditCard, Bell, UserPlus, DollarSign, TrendingUp, Package, Clock } from 'lucide-react'
+import { Home, Users, FileText, Calendar, Settings, BarChart3, MessageSquare, Menu, X, User, Search, LogOut, ShoppingCart, MapPin, CreditCard, Bell, UserPlus, DollarSign, TrendingUp, Package, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,6 +22,37 @@ const CrmDashboard = () => {
     { icon: UserPlus, label: 'Teams' },
   ]
 
+  const leadPricing = [
+    {
+      zipCode: '75201',
+      firstName:'John',
+      lastName:'Doe',
+      phoneno:'1234567890',
+      email:'john.doe@example.com',
+      company:'ABC Inc',
+      policy:'1234567890'
+
+    },
+    {
+      zipCode: '75202',
+      firstName:'Jane',
+      lastName:'Doe',
+      phoneno:'1234567890',
+      email:'jane.doe@example.com',
+      company:'ABC Inc',
+      policy:'1234567890'
+    },
+    {
+      zipCode: '75203',
+      firstName:'Jim',
+      lastName:'Beam',
+      phoneno:'1234567890',
+      email:'jim.beam@example.com',
+      company:'ABC Inc',
+      policy:'1234567890'
+    }
+  ];
+
   const handleLogout = () => {
     logout()
   }
@@ -36,7 +67,7 @@ const CrmDashboard = () => {
   console.log('currentUserFullName',currentUserFullName);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -46,12 +77,11 @@ const CrmDashboard = () => {
       )}
 
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:inset-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:inset-0 lg:flex lg:flex-col lg:h-full ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}>
-        <div className="flex items-center justify-between p-5 border-b">
+        <div className="flex items-center justify-between p-5 border-b flex-shrink-0">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-blue-900 rounded-lg flex items-center justify-center">
-              {/* <span className="text-white font-bold text-sm">R</span> */}
               <Home className="h-4 w-4 text-white" />
             </div>
             <span className="text-xl font-bold text-gray-900">Roofing CRM</span>
@@ -66,8 +96,8 @@ const CrmDashboard = () => {
           </Button>
         </div>
 
-        <div className="flex flex-col h-[calc(100vh-120px)]">
-          <nav className="flex-1 p-4 space-y-2 overflow-y-auto min-h-0">
+        <div className="flex flex-col flex-1 min-h-0">
+          <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {menuItems.map((item, index) => (
               <button
                 key={index}
@@ -84,7 +114,7 @@ const CrmDashboard = () => {
             ))}
           </nav>
 
-          <div className="p-4 border-t bg-white h-[100px]">
+          <div className="p-4 border-t bg-white flex-shrink-0">
             <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 mb-2">
               <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-white" />
@@ -95,7 +125,6 @@ const CrmDashboard = () => {
                 </p>
                 <p className="text-xs text-gray-500 truncate">
                   {user}
-                  {/* {user}@roofingcrm.com */}
                 </p>
               </div>
             </div>
@@ -113,9 +142,9 @@ const CrmDashboard = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 lg:ml-0">
+      <div className="flex-1 lg:ml-0 flex flex-col h-full overflow-hidden">
         {/* Top header */}
-        <header className="bg-white shadow-sm border-b px-4 sm:px-6 py-4">
+        <header className="bg-white shadow-sm border-b px-4 sm:px-6 py-4 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button
@@ -143,7 +172,7 @@ const CrmDashboard = () => {
         </header>
 
         {/* Main content area */}
-        <main className="p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {/* Dynamic content based on active tab */}
           {activeTab === 'Dashboard' && (
             <>
@@ -512,117 +541,178 @@ const CrmDashboard = () => {
 
           {activeTab === 'Leads' && (
             <div className="space-y-6">
-              {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                    Available Leads
-                  </h1>
-                  <p className="text-gray-600">Premium leads within your 25-mile service radius</p>
-                </div>
-                <div className="mt-4 sm:mt-0">
-                  <div className="flex items-center space-x-2 bg-green-50 px-4 py-2 rounded-lg">
-                    <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm font-medium text-green-700">5 New Leads Today</span>
-                  </div>
-                </div>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Lead Pricing Settings</h2>
+                <p className="text-gray-600">Configure pricing for different lead categories and locations</p>
               </div>
-
-              {/* Filters */}
-              {/* <div className="bg-white rounded-lg shadow-sm border p-4">
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex items-center space-x-2">
-                    <MapPin className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-700">Radius:</span>
-                    <select className="text-sm border rounded px-2 py-1">
-                      <option>25 miles</option>
-                      <option>50 miles</option>
-                      <option>75 miles</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <DollarSign className="h-4 w-4 text-gray-500" />
-                    <span className="text-sm font-medium text-gray-700">Min Value:</span>
-                    <select className="text-sm border rounded px-2 py-1">
-                      <option>Any</option>
-                      <option>$15,000+</option>
-                      <option>$25,000+</option>
-                      <option>$35,000+</option>
-                    </select>
-                  </div>
-                </div>
-              </div> */}
-              
-              {/* Lead Cards */}
-              <div className="space-y-4">
-                {[
-                  { id: 1, type: 'Hail Damage', location: 'Dallas, TX', distance: '15 miles', value: '$28,000', urgency: 'High', posted: '2 hours ago' },
-                  { id: 2, type: 'Wind Damage', location: 'Houston, TX', distance: '22 miles', value: '$35,000', urgency: 'Medium', posted: '4 hours ago' },
-                  { id: 3, type: 'Storm Damage', location: 'Austin, TX', distance: '18 miles', value: '$42,000', urgency: 'High', posted: '6 hours ago' },
-                  { id: 4, type: 'Hail Damage', location: 'Fort Worth, TX', distance: '12 miles', value: '$25,000', urgency: 'Low', posted: '8 hours ago' },
-                  { id: 5, type: 'Wind Damage', location: 'Plano, TX', distance: '20 miles', value: '$31,000', urgency: 'Medium', posted: '1 day ago' }
-                ].map((lead) => (
-                  <Card key={lead.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-r from-white to-blue-50/30">
-                    <CardContent className="p-6">
-                      <div className="flex justify-between items-start mb-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
-                            <Home className="h-6 w-6 text-[#286BBD]" />
-                          </div>
-                          <div>
-                            <h3 className="text-xl font-bold text-gray-900">
-                              {lead.type} Repair
-                            </h3>
-                            <div className="flex items-center text-gray-600 mt-1">
-                              <MapPin className="h-4 w-4 mr-1" />
-                              <span className="text-sm">{lead.location} • {lead.distance} away</span>
-                            </div>
-                          </div>
-                        </div>
-                        {/* <div className="text-right">
-                          <div className="text-3xl font-bold text-[#286BBD] mb-1">$89</div>
-                          <p className="text-sm text-gray-500">per lead</p>
-                        </div> */}
-                      </div>
-                      
-                      <p className="text-gray-700 mb-4 leading-relaxed">
-                        Insurance approved claim for complete roof replacement. Homeowner has received adjuster approval and is ready to hire immediately. All permits and documentation ready.
-                      </p>
-                      
-                      <div className="flex flex-wrap items-center gap-3 mb-4">
-                        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                          ✓ Insurance Approved
-                        </Badge>
-                        <Badge variant="outline" className="border-[#286BBD] text-[#286BBD]">
-                          {lead.value} Est. Value
-                        </Badge>
-                        <Badge variant={lead.urgency === 'High' ? 'destructive' : lead.urgency === 'Medium' ? 'default' : 'secondary'}>
-                          {lead.urgency} Priority
-                        </Badge>
-                        <span className="text-sm text-gray-500">Posted {lead.posted}</span>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4 text-sm text-gray-600">
-                          <div className="flex items-center space-x-1">
-                            <Users className="h-4 w-4" />
-                            <span>2 contractors competing</span>
-                          </div>
-                          <div className="flex items-center space-x-1">
-                            <Clock className="h-4 w-4" />
-                            <span>Expires in 18 hours</span>
-                          </div>
-                        </div>
-                        {/* <Button className="bg-gradient-to-r from-[#286BBD] to-[#2563eb] hover:from-[#1d4ed8] hover:to-[#1e40af] text-white font-semibold px-6">
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Buy Lead
-                        </Button> */}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+              <Button className="bg-[#122E5F] hover:bg-[#0f2347] text-white">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Pricing Rule
+              </Button>
             </div>
+      
+            {/* Pricing Table */}
+            <Card className="border-0 shadow-lg">
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zip Code</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">First Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone No</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Insurance Company</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Policy Number</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {leadPricing.map((pricing, index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-medium text-gray-900">{pricing.zipCode}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-bold text-[#122E5F]">{pricing.firstName}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-bold text-[#286BBD]">{pricing.lastName}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm text-gray-900">{pricing.phoneno}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <span className="text-sm text-gray-900">{pricing.email}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <span className="text-sm text-gray-900">{pricing.company}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <span className="text-sm text-gray-900">{pricing.policy}</span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+            // <div className="space-y-6">
+            //   {/* Header */}
+            //   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            //     <div>
+            //       <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            //         Available Leads
+            //       </h1>
+            //       <p className="text-gray-600">Premium leads within your 25-mile service radius</p>
+            //     </div>
+            //     <div className="mt-4 sm:mt-0">
+            //       <div className="flex items-center space-x-2 bg-green-50 px-4 py-2 rounded-lg">
+            //         <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            //         <span className="text-sm font-medium text-green-700">5 New Leads Today</span>
+            //       </div>
+            //     </div>
+            //   </div>
+
+            //   {/* Filters */}
+            //   {/* <div className="bg-white rounded-lg shadow-sm border p-4">
+            //     <div className="flex flex-wrap items-center gap-4">
+            //       <div className="flex items-center space-x-2">
+            //         <MapPin className="h-4 w-4 text-gray-500" />
+            //         <span className="text-sm font-medium text-gray-700">Radius:</span>
+            //         <select className="text-sm border rounded px-2 py-1">
+            //           <option>25 miles</option>
+            //           <option>50 miles</option>
+            //           <option>75 miles</option>
+            //         </select>
+            //       </div>
+            //       <div className="flex items-center space-x-2">
+            //         <DollarSign className="h-4 w-4 text-gray-500" />
+            //         <span className="text-sm font-medium text-gray-700">Min Value:</span>
+            //         <select className="text-sm border rounded px-2 py-1">
+            //           <option>Any</option>
+            //           <option>$15,000+</option>
+            //           <option>$25,000+</option>
+            //           <option>$35,000+</option>
+            //         </select>
+            //       </div>
+            //     </div>
+            //   </div> */}
+              
+            //   {/* Lead Cards */}
+            //   <div className="space-y-4">
+            //     {[
+            //       { id: 1, type: 'Hail Damage', location: 'Dallas, TX', distance: '15 miles', value: '$28,000', urgency: 'High', posted: '2 hours ago' },
+            //       { id: 2, type: 'Wind Damage', location: 'Houston, TX', distance: '22 miles', value: '$35,000', urgency: 'Medium', posted: '4 hours ago' },
+            //       { id: 3, type: 'Storm Damage', location: 'Austin, TX', distance: '18 miles', value: '$42,000', urgency: 'High', posted: '6 hours ago' },
+            //       { id: 4, type: 'Hail Damage', location: 'Fort Worth, TX', distance: '12 miles', value: '$25,000', urgency: 'Low', posted: '8 hours ago' },
+            //       { id: 5, type: 'Wind Damage', location: 'Plano, TX', distance: '20 miles', value: '$31,000', urgency: 'Medium', posted: '1 day ago' }
+            //     ].map((lead) => (
+            //       <Card key={lead.id} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-r from-white to-blue-50/30">
+            //         <CardContent className="p-6">
+            //           <div className="flex justify-between items-start mb-4">
+            //             <div className="flex items-center space-x-3">
+            //               <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
+            //                 <Home className="h-6 w-6 text-[#286BBD]" />
+            //               </div>
+            //               <div>
+            //                 <h3 className="text-xl font-bold text-gray-900">
+            //                   {lead.type} Repair
+            //                 </h3>
+            //                 <div className="flex items-center text-gray-600 mt-1">
+            //                   <MapPin className="h-4 w-4 mr-1" />
+            //                   <span className="text-sm">{lead.location} • {lead.distance} away</span>
+            //                 </div>
+            //               </div>
+            //             </div>
+            //             {/* <div className="text-right">
+            //               <div className="text-3xl font-bold text-[#286BBD] mb-1">$89</div>
+            //               <p className="text-sm text-gray-500">per lead</p>
+            //             </div> */}
+            //           </div>
+                      
+            //           <p className="text-gray-700 mb-4 leading-relaxed">
+            //             Insurance approved claim for complete roof replacement. Homeowner has received adjuster approval and is ready to hire immediately. All permits and documentation ready.
+            //           </p>
+                      
+            //           <div className="flex flex-wrap items-center gap-3 mb-4">
+            //             <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+            //               ✓ Insurance Approved
+            //             </Badge>
+            //             <Badge variant="outline" className="border-[#286BBD] text-[#286BBD]">
+            //               {lead.value} Est. Value
+            //             </Badge>
+            //             <Badge variant={lead.urgency === 'High' ? 'destructive' : lead.urgency === 'Medium' ? 'default' : 'secondary'}>
+            //               {lead.urgency} Priority
+            //             </Badge>
+            //             <span className="text-sm text-gray-500">Posted {lead.posted}</span>
+            //           </div>
+                      
+            //           <div className="flex items-center justify-between">
+            //             <div className="flex items-center space-x-4 text-sm text-gray-600">
+            //               <div className="flex items-center space-x-1">
+            //                 <Users className="h-4 w-4" />
+            //                 <span>2 contractors competing</span>
+            //               </div>
+            //               <div className="flex items-center space-x-1">
+            //                 <Clock className="h-4 w-4" />
+            //                 <span>Expires in 18 hours</span>
+            //               </div>
+            //             </div>
+            //             {/* <Button className="bg-gradient-to-r from-[#286BBD] to-[#2563eb] hover:from-[#1d4ed8] hover:to-[#1e40af] text-white font-semibold px-6">
+            //               <ShoppingCart className="h-4 w-4 mr-2" />
+            //               Buy Lead
+            //             </Button> */}
+            //           </div>
+            //         </CardContent>
+            //       </Card>
+            //     ))}
+            //   </div>
+            // </div>
           )}
 
           {activeTab === 'My Leads' && (
