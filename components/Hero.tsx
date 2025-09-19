@@ -1,10 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Users, DollarSign, Clock, Shield, CheckCircle } from 'lucide-react';
+import { Users, DollarSign, Clock, CheckCircle } from 'lucide-react';
 import { Element } from 'react-scroll';
 import { ContractorForm } from './ContractorForm';
-import path from 'path';
 
 export function Hero() {
   const stats = [

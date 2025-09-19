@@ -6,33 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  Users,
-  FileText,
-  DollarSign,
-  TrendingUp,
-  Search,
-  Filter,
-  MoreVertical,
-  MapPin,
-  Calendar,
-  CreditCard,
-  Settings,
-  UserCheck,
-  Target,
-  Eye,
-  Edit,
-  Trash2,
-  Plus,
-  Download,
-  Bell,
-  BarChart3,
-  Activity,
-  Menu,
-  X,
-  LogOut,
-  User,
-} from "lucide-react";
+import { Users, FileText, DollarSign, TrendingUp, Search, Filter, MapPin, CreditCard, Settings, UserCheck, Target, Eye, Edit, Plus, Download, Bell, BarChart3, Activity, Menu, X, LogOut, User, } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
@@ -159,6 +133,7 @@ export default function AdminDashboard() {
       status: "Active",
       joinDate: "2023-08-10",
     },
+    
   ];
 
   const leadPricing = [
