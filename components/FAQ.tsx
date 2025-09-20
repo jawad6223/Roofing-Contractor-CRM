@@ -6,7 +6,7 @@ import { Plus, Minus, Shield, Clock, DollarSign, Users, CheckCircle, Star, HelpC
 import { useState } from 'react';
 
 export function FAQ() {
-  const [openItem, setOpenItem] = useState<number | null>(0); // First item open by default
+  const [openItem, setOpenItem] = useState<number | null>(0);
 
   const toggleItem = (index: number) => {
     setOpenItem(prev => prev === index ? null : index);

@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CheckCircle, ArrowLeft, Eye, EyeOff, ChevronDown, X, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 // Google Places API configuration
 const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY || '';
@@ -266,6 +267,7 @@ export function ContractorForm() {
 
         if (validateStep2()) {
           console.log('Form submitted:', formData);
+          toast.success("Form submitted successfully.");
           // Show success modal instead of redirecting
           setShowSuccessModal(true);
         } else {
