@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { User, EyeOff, Eye, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 // 1. Define validation schema
 const schema = yup.object().shape({
@@ -50,6 +51,7 @@ export default function LoginModal() {
   const onSubmit = (data: FormData) => {
 
     if (data.emailAddress === "jawad.dev921@gmail.com" && data.password === "@Test123") {
+      toast.success("Login successful.");
       login(data.emailAddress);
       router.push('/admin');
       reset();
@@ -72,9 +74,10 @@ export default function LoginModal() {
     // );
 
     if (!isValid) {
-      alert("Invalid credentials. Please use the Correct credentials.");
+      toast.error("Invalid credentials. Please use the Correct credentials.");
       return;
     }
+    toast.success("Login successful.");
     login(data.emailAddress);
     reset();
   };

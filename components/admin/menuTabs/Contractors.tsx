@@ -1,0 +1,251 @@
+'use client'
+
+import React from 'react'
+import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { MapPin, Eye, Target, X } from 'lucide-react'
+import { UserCheck } from 'lucide-react'
+import { contractors } from './Data'
+import { Contractor } from '@/types/AdminTypes'
+
+
+export const Contractors = () => {
+  const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
+  const [showModal, setShowModal] = useState(false);
+    
+
+  const handleViewContractor = (contractor: Contractor): void => {
+    setSelectedContractor(contractor);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedContractor(null);
+    setShowModal(false);
+  };
+
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Contractors Management
+            </h2>
+            <p className="text-gray-600">
+              Monitor contractor performance and manage accounts
+            </p>
+          </div>
+        </div>
+
+        {/* Contractors Table */}
+        <Card className="border-0 shadow-lg">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Contractor Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Company
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Location
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Conversion Rate
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Action
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {contractors.map((contractor) => (
+                    <tr key={contractor.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-bold text-[#122E5F]">
+                          {contractor.name}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900">
+                          {contractor.company}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900 flex items-center">
+                          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                          {contractor.location}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-medium text-[#286BBD]">
+                          {contractor.conversionRate}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Badge className='bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20'>
+                          {contractor.status}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                          onClick={() => handleViewContractor(contractor)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* View Contractor Modal */}
+        {showModal && selectedContractor && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300">
+              {/* Close Button */}
+              <button
+                onClick={handleCloseModal}
+                className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+              >
+                <X className="h-3 w-3" />
+              </button>
+
+              <div className="p-6">
+                {/* Header */}
+                <div className="text-center mb-6">
+                  <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <UserCheck className="h-6 w-6 text-[#286BBD]" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">
+                    Contractor Details
+                  </h2>
+                  <p className="text-sm text-gray-600">Complete information for this contractor</p>
+                </div>
+
+                {/* Contractor Information */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Contractor ID
+                    </label>
+                    <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                      {selectedContractor.id}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Full Name
+                    </label>
+                    <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                      {selectedContractor.name}
+                    </p>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Company Name
+                    </label>
+                    <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                      {selectedContractor.company}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Location
+                    </label>
+                    <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                      <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                      {selectedContractor.location}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Join Date
+                    </label>
+                    <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                      {new Date(selectedContractor.joinDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Leads Assigned
+                    </label>
+                    <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                      {selectedContractor.leadsAssigned}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Leads Completed
+                    </label>
+                    <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                      {selectedContractor.leadsCompleted}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Conversion Rate
+                    </label>
+                    <p className="text-[#286BBD] bg-gray-50 p-1.5 rounded-md text-sm font-medium">
+                      {selectedContractor.conversionRate}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Total Earnings
+                    </label>
+                    <p className="text-[#122E5F] bg-gray-50 p-1.5 rounded-md text-sm font-bold">
+                      {selectedContractor.totalEarnings}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Status
+                    </label>
+                    <div className="bg-gray-50 p-1.5 rounded-md">
+                      <Badge className='bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20'>
+                        {selectedContractor.status}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex justify-end space-x-3 mt-4 pt-3 border-t border-gray-200">
+                  <Button
+                    variant="outline"
+                    onClick={handleCloseModal}
+                    className="px-3 py-1.5 text-sm"
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    className="px-3 py-1.5 text-sm bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+                  >
+                    <Target className="h-4 w-4 mr-1" />
+                    Assign Leads
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    )
+}
