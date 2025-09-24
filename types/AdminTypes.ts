@@ -20,6 +20,7 @@ export interface Contractor {
   leadsCompleted: number;
   conversionRate: string;
   totalEarnings: string;
-  status: string;
+  leadsRequest: string;
+  zipCode: string;
   joinDate: string;
 }

@@ -75,7 +75,8 @@ export const allLeads = [
       leadsCompleted: 9,
       conversionRate: "75%",
       totalEarnings: "$252,000",
-      status: "Active",
+      leadsRequest: "10",
+      zipCode: "75201",
       joinDate: "2023-06-15",
     },
     {
@@ -87,7 +88,8 @@ export const allLeads = [
       leadsCompleted: 13,
       conversionRate: "87%",
       totalEarnings: "$364,000",
-      status: "Active",
+      leadsRequest: "10",
+      zipCode: "75202",
       joinDate: "2023-04-22",
     },
     {
@@ -99,7 +101,8 @@ export const allLeads = [
       leadsCompleted: 6,
       conversionRate: "75%",
       totalEarnings: "$168,000",
-      status: "Active",
+      leadsRequest: "-",
+      zipCode: "",
       joinDate: "2023-08-10",
     },
     

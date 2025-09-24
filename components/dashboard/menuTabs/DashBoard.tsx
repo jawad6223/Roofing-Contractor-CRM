@@ -88,7 +88,7 @@ export const DashBoard = ({ onTabChange }: DashBoardProps) => {
               </div>
 
               {/* Stats cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
                 <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-white">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                     <CardTitle className="text-sm font-semibold text-[#286BBD]">Total Leads</CardTitle>
@@ -135,7 +135,7 @@ export const DashBoard = ({ onTabChange }: DashBoardProps) => {
                   </CardContent>
                 </Card>
 
-                <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-purple-50 to-white">
+                {/* <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-purple-50 to-white">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                   <div className="flex flex-col">
                   <span className="text-xs font-medium underline text-gray-500">Last Month</span>
@@ -151,7 +151,7 @@ export const DashBoard = ({ onTabChange }: DashBoardProps) => {
                       +15.3%
                     </p>
                   </CardContent>
-                </Card>
+                </Card> */}
               </div>
 
               {/* Recent Activity */}
@@ -203,11 +203,11 @@ export const DashBoard = ({ onTabChange }: DashBoardProps) => {
                   <CardContent>
                     <div className="grid grid-cols-2 gap-4">
                       <Button 
-                        onClick={() => onTabChange('Leads')}
+                        onClick={() => onTabChange('CRM')}
                         className="h-20 bg-gradient-to-r from-[#286BBD] to-[#2563eb] hover:from-[#1d4ed8] hover:to-[#1e40af] text-white flex flex-col items-center justify-center space-y-2"
                       >
                         <Users className="h-6 w-6" />
-                        <span className="text-sm font-medium">Browse Leads</span>
+                        <span className="text-sm font-medium">CRM</span>
                       </Button>
                       <Button 
                         onClick={() => onTabChange('Teams')}
