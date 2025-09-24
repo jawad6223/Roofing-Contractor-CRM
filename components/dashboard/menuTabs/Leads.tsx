@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { Plus, X, ShoppingCart, Eye, MapPin, Phone, Mail } from 'lucide-react'
+import { Plus, X, ShoppingCart, Eye, MapPin, Phone, Mail, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -18,12 +18,27 @@ export const Leads = () => {
       notes: ''
     });
 
-
-
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 3;
+    const totalPages = Math.ceil(purchasedLeads.length / itemsPerPage);
     
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentData = purchasedLeads.slice(startIndex, endIndex);
+
+    const handlePreviousPage = () => {
+      setCurrentPage(prev => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+      setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    };
 
     const [selectedLead, setSelectedLead] = useState<PurchasedLead | null>(null);
     const [showViewModal, setShowViewModal] = useState(false);
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [purchaseQuantity, setPurchaseQuantity] = useState<string>('');
 
     const handleViewLead = (lead: PurchasedLead): void => {
       setSelectedLead(lead);
@@ -56,7 +71,9 @@ export const Leads = () => {
       e.preventDefault();
       console.log('Purchase form data:', purchaseForm);
       // TODO: Add purchase logic here
+      setPurchaseQuantity(purchaseForm.quantity);
       setShowPurchaseModal(false);
+      setShowSuccessModal(true);
       setPurchaseForm({
         leadType: 'premium',
         quantity: '1',
@@ -75,6 +92,11 @@ export const Leads = () => {
         maxBudget: '',
         notes: ''
       });
+    };
+
+    const handleCloseSuccessModal = () => {
+      setShowSuccessModal(false);
+      setPurchaseQuantity('');
     };
 
   return (
@@ -107,7 +129,7 @@ export const Leads = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {purchasedLeads.map((lead, index) => (
+                      {currentData.map((lead, index) => (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
@@ -159,6 +181,54 @@ export const Leads = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Pagination Controls */}
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-700">
+                Showing {startIndex + 1} to {Math.min(endIndex, purchasedLeads.length)} of {purchasedLeads.length} results
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 1}
+                  className="flex items-center space-x-1"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  <span>Previous</span>
+                </Button>
+                
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-8 h-8 p-0 ${
+                        currentPage === page 
+                          ? 'bg-[#286BBD] text-white' 
+                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className="flex items-center space-x-1"
+                >
+                  <span>Next</span>
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
 
             {/* Summary Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
@@ -461,6 +531,47 @@ export const Leads = () => {
                         </Button>
                       </div>
                     </form>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 relative animate-in zoom-in-95 duration-300">
+                  {/* Close Button */}
+                  <button
+                    onClick={handleCloseSuccessModal}
+                    className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+
+                  <div className="p-6 text-center">
+                    {/* Success Icon */}
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle className="h-8 w-8 text-green-600" />
+                    </div>
+
+                    {/* Success Message */}
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">
+                      Purchase Successful!
+                    </h2>
+                    <p className="text-gray-600 mb-4">
+                      Thank you for purchasing {purchaseQuantity} lead{purchaseQuantity !== '1' ? 's' : ''}!
+                    </p>
+                    <p className="text-sm text-gray-500 mb-6">
+                      Your leads will be available in your dashboard shortly. You will receive an email confirmation with the details.
+                    </p>
+
+                    {/* Action Button */}
+                    <Button
+                      onClick={handleCloseSuccessModal}
+                      className="w-full bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+                    >
+                      Continue
+                    </Button>
                   </div>
                 </div>
               </div>

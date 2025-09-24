@@ -27,7 +27,7 @@ export default function AdminDashboard() {
   console.log("currentUserFullName", currentUserFullName);
 
   const renderDashboardOverview = () => (
-    <Dashboard />
+    <Dashboard onTabChange={setActiveTab} />
   );
 
   const renderLeadsManagement = () => (
@@ -35,7 +35,7 @@ export default function AdminDashboard() {
   );
 
   const renderContractorsManagement = () => (
-    <Contractors />
+    <Contractors onTabChange={setActiveTab} />
   );
 
   const renderPricingSettings = () => (
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "leads", label: "Leads", icon: FileText },
     { id: "contractors", label: "Contractors", icon: Users },
-    { id: "pricing", label: "Lead Price Setting", icon: DollarSign },
+    { id: "pricing", label: "Lead Pricing Hub", icon: DollarSign },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
