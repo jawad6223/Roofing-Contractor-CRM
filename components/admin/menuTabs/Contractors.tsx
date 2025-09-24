@@ -5,15 +5,37 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MapPin, Eye, Target, X } from 'lucide-react'
+import { MapPin, Eye, Target, X, ChevronLeft, ChevronRight } from 'lucide-react'
 import { UserCheck } from 'lucide-react'
 import { contractors } from './Data'
 import { Contractor } from '@/types/AdminTypes'
+import { allLeads } from './Data'
 
 
-export const Contractors = () => {
+interface ContractorsProps {
+  onTabChange?: (tab: string) => void;
+}
+
+export const Contractors = ({ onTabChange }: ContractorsProps) => {
   const [selectedContractor, setSelectedContractor] = useState<Contractor | null>(null);
   const [showModal, setShowModal] = useState(false);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 3;
+  const totalPages = Math.ceil(contractors.length / itemsPerPage);
+  
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = contractors.slice(startIndex, endIndex);
+
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages));
+  };
     
 
   const handleViewContractor = (contractor: Contractor): void => {
@@ -24,6 +46,13 @@ export const Contractors = () => {
   const handleCloseModal = () => {
     setSelectedContractor(null);
     setShowModal(false);
+  };
+
+  const handleAssignLeads = () => {
+    if (onTabChange) {
+      onTabChange('leads');
+    }
+    handleCloseModal();
   };
 
     return (
@@ -68,7 +97,7 @@ export const Contractors = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {contractors.map((contractor) => (
+                  {currentData.map((contractor) => (
                     <tr key={contractor.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm font-bold text-[#122E5F]">
@@ -115,10 +144,58 @@ export const Contractors = () => {
           </CardContent>
         </Card>
 
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-gray-700">
+            Showing {startIndex + 1} to {Math.min(endIndex, contractors.length)} of {contractors.length} results
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className="flex items-center space-x-1"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              <span>Previous</span>
+            </Button>
+            
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <Button
+                  key={page}
+                  variant={currentPage === page ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-8 h-8 p-0 ${
+                    currentPage === page 
+                      ? 'bg-[#286BBD] text-white' 
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {page}
+                </Button>
+              ))}
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className="flex items-center space-x-1"
+            >
+              <span>Next</span>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
         {/* View Contractor Modal */}
         {showModal && selectedContractor && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300">
+            <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
               {/* Close Button */}
               <button
                 onClick={handleCloseModal}
@@ -226,8 +303,50 @@ export const Contractors = () => {
                   </div>
                 </div>
 
+                {/* Leads Section */}
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <Target className="h-5 w-5 mr-2 text-[#286BBD]" />
+                    Assigned Leads
+                  </h3>
+                  
+                  <div className="space-y-3">
+                    {allLeads.slice(0, 2).map((lead) => (
+                      <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <table className="w-full">
+                          <tr>
+                            <td className="w-12">
+                              <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-semibold text-[#286BBD]">
+                                  {lead.firstName.charAt(0).toUpperCase()}{lead.lastName.charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                            </td>
+                            <td>
+                              <h4 className="font-semibold text-gray-900">{lead.firstName} {lead.lastName}</h4>
+                              <p className="text-sm text-gray-600">{lead.company}</p>
+                              <p className="text-xs text-gray-500 flex items-center">
+                                <MapPin className="h-3 w-3 mr-1" />{lead.zipCode}
+                              </p>
+                            </td>
+                            <td className="text-right">
+                              <p className="text-sm font-medium text-[#286BBD]">{lead.policy}</p>
+                              <p className="text-xs text-gray-500">Policy Number</p>
+                            </td>
+                            <td className="text-right">
+                              <p className="text-sm font-medium text-green-600">{lead.phoneno}</p>
+                              <p className="text-xs text-gray-500">Phone Number</p>
+                            </td>
+                          </tr>
+                        </table>
+                      </div>
+                    ))}
+
+                  </div>
+                </div>
+
                 {/* Action Buttons */}
-                <div className="flex justify-end space-x-3 mt-4 pt-3 border-t border-gray-200">
+                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
                   <Button
                     variant="outline"
                     onClick={handleCloseModal}
@@ -236,6 +355,7 @@ export const Contractors = () => {
                     Close
                   </Button>
                   <Button
+                    onClick={handleAssignLeads}
                     className="px-3 py-1.5 text-sm bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
                   >
                     <Target className="h-4 w-4 mr-1" />

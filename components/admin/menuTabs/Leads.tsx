@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Search, MapPin, Plus, Download, Eye, ChevronDown, X, UserPlus } from 'lucide-react'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Search, Target, Plus, Download, Eye, ChevronDown, X, UserPlus, ChevronLeft, ChevronRight, Check, MapPin } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { contractors } from './Data'
 import { Lead } from '@/types/AdminTypes'
 import {allLeads} from './Data'
 import * as XLSX from 'xlsx'
@@ -14,6 +16,9 @@ export const Leads = () => {
     const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showAssignModal, setShowAssignModal] = useState(false);
+    const [leadToAssign, setLeadToAssign] = useState<Lead | null>(null);
+    const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
     const [newLead, setNewLead] = useState({
       firstName: '',
       lastName: '',
@@ -24,6 +29,10 @@ export const Leads = () => {
       policy: '',
       status: 'Available'
     });
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 3;
 
     
 
@@ -44,6 +53,25 @@ export const Leads = () => {
       
       return matchesSearch && matchesStatus;
     });
+
+    // Pagination logic
+    const totalPages = Math.ceil(filteredLeads.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentData = filteredLeads.slice(startIndex, endIndex);
+
+    const handlePreviousPage = () => {
+      setCurrentPage(prev => Math.max(prev - 1, 1));
+    };
+
+    const handleNextPage = () => {
+      setCurrentPage(prev => Math.min(prev + 1, totalPages));
+    };
+
+    // Reset to first page when filters change
+    useEffect(() => {
+      setCurrentPage(1);
+    }, [searchTerm, statusFilter]);
 
     const handleViewLead = (lead: Lead): void => {
       setSelectedLead(lead);
@@ -71,6 +99,33 @@ export const Leads = () => {
         policy: '',
         status: 'Available'
       });
+    };
+
+    const handleAssignLead = (lead: Lead) => {
+      setLeadToAssign(lead);
+      setShowAssignModal(true);
+    };
+
+    const handleCloseAssignModal = () => {
+      setShowAssignModal(false);
+      setLeadToAssign(null);
+      setSelectedContractors([]);
+    };
+
+    const handleContractorCheckbox = (contractorId: string) => {
+      setSelectedContractors(prev => 
+        prev.includes(contractorId) 
+          ? prev.filter(id => id !== contractorId)
+          : [...prev, contractorId]
+      );
+    };
+
+    const handleSelectContractors = () => {
+      if (selectedContractors.length > 0 && leadToAssign) {
+        console.log(`Assigning lead ${leadToAssign.id} to contractors:`, selectedContractors);
+        // TODO: Add assignment logic here
+        handleCloseAssignModal();
+      }
     };
 
     const handleExportToExcel = () => {
@@ -215,8 +270,8 @@ export const Leads = () => {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredLeads.length > 0 ? (
-                        filteredLeads.map((lead, index) => (
+                      {currentData.length > 0 ? (
+                        currentData.map((lead, index) => (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm font-bold text-[#122E5F]">{lead.firstName}</span>
@@ -232,7 +287,7 @@ export const Leads = () => {
                               {lead.status}
                             </Badge>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
                             <Button
                               size="sm"
                               variant="outline"
@@ -241,6 +296,15 @@ export const Leads = () => {
                             >
                               <Eye className="h-4 w-4 mr-1" />
                               View
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                              onClick={() => handleAssignLead(lead)}
+                            >
+                              <Target className="h-4 w-4 mr-1" />
+                              Assign
                             </Button>
                           </td>
                         </tr>
@@ -267,6 +331,56 @@ export const Leads = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Pagination Controls */}
+            {filteredLeads.length > 0 && (
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-700">
+                  Showing {startIndex + 1} to {Math.min(endIndex, filteredLeads.length)} of {filteredLeads.length} results
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 1}
+                    className="flex items-center space-x-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    <span>Previous</span>
+                  </Button>
+                  
+                  <div className="flex items-center space-x-1">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-8 h-8 p-0 ${
+                          currentPage === page 
+                            ? 'bg-[#286BBD] text-white' 
+                            : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center space-x-1"
+                  >
+                    <span>Next</span>
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Results Summary */}
             {(searchTerm || statusFilter !== "All") && (
@@ -597,6 +711,115 @@ export const Leads = () => {
                         </Button>
                       </div>
                     </form>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Assign Lead Modal */}
+            {showAssignModal && leadToAssign && (
+              <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 relative animate-in zoom-in-95 duration-300">
+                  {/* Close Button */}
+                  <button
+                    onClick={handleCloseAssignModal}
+                    className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+
+                  <div className="p-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="text-center flex-1">
+                        <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Target className="h-6 w-6 text-[#286BBD]" />
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-1">
+                          Assign Lead to Contractor
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          Select contractors to assign lead: <span className="font-semibold text-[#286BBD]">{leadToAssign.firstName} {leadToAssign.lastName}</span>
+                        </p>
+                      </div>
+                      <div className="ml-4">
+                        <Button
+                          onClick={handleSelectContractors}
+                          disabled={selectedContractors.length === 0}
+                          className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        >
+                          <Check className="h-4 w-4 mr-2" />
+                          Select ({selectedContractors.length})
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Contractors List */}
+                    <div className="max-h-96 overflow-y-auto">
+                      <div className="space-y-3">
+                        {contractors.map((contractor) => (
+                          <div
+                            key={contractor.id}
+                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 hover:border-[#286BBD]/50"
+                          >
+                            <div className="flex items-center space-x-4">
+                              <Checkbox
+                                checked={selectedContractors.includes(contractor.id)}
+                                onCheckedChange={() => handleContractorCheckbox(contractor.id)}
+                                className="data-[state=checked]:bg-[#286BBD] data-[state=checked]:border-[#286BBD]"
+                              />
+                              <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
+                                <UserPlus className="h-5 w-5 text-[#286BBD]" />
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-gray-900">{contractor.name}</h3>
+                                <p className="text-sm text-gray-600">{contractor.company}</p>
+                                <p className="text-xs text-gray-500 flex items-center">
+                                  <MapPin className="h-3 w-3 mr-1" />
+                                  {contractor.location}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="flex items-center space-x-4">
+                                <div className="text-right">
+                                  <p className="text-sm font-medium text-[#286BBD]">{contractor.conversionRate}</p>
+                                  <p className="text-xs text-gray-500">Conversion Rate</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm font-medium text-green-600">{contractor.leadsCompleted}</p>
+                                  <p className="text-xs text-gray-500">Completed</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-sm font-medium text-gray-900">{contractor.totalEarnings}</p>
+                                  <p className="text-xs text-gray-500">Total Earnings</p>
+                                </div>
+                                <div className="flex items-center">
+                                  <Badge className={`${
+                                    contractor.status === 'Active' ? 'bg-green-100 text-green-800' :
+                                    contractor.status === 'Inactive' ? 'bg-red-100 text-red-800' :
+                                    'bg-yellow-100 text-yellow-800'
+                                  }`}>
+                                    {contractor.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+                      <Button
+                        variant="outline"
+                        onClick={handleCloseAssignModal}
+                        className="px-4 py-2 text-sm"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>

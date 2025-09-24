@@ -1,11 +1,28 @@
-import React from 'react'
-import { BarChart3, MapPin } from 'lucide-react'
+import React, { useState } from 'react'
+import { BarChart3, MapPin, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { crmData } from './Data'
 
 
 export const CRM = () => {
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 3
+  const totalPages = Math.ceil(crmData.length / itemsPerPage)
+  
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentData = crmData.slice(startIndex, endIndex)
+
+  const handlePreviousPage = () => {
+    setCurrentPage(prev => Math.max(prev - 1, 1))
+  }
+
+  const handleNextPage = () => {
+    setCurrentPage(prev => Math.min(prev + 1, totalPages))
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -37,7 +54,7 @@ export const CRM = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {crmData.map((lead, index) => (
+                {currentData.map((lead, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-medium text-gray-900">{lead.id}</span>
@@ -68,6 +85,54 @@ export const CRM = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between">
+        <div className="text-sm text-gray-700">
+          Showing {startIndex + 1} to {Math.min(endIndex, crmData.length)} of {crmData.length} results
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className="flex items-center space-x-1"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span>Previous</span>
+          </Button>
+          
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <Button
+                key={page}
+                variant={currentPage === page ? "default" : "outline"}
+                size="sm"
+                onClick={() => setCurrentPage(page)}
+                className={`w-8 h-8 p-0 ${
+                  currentPage === page 
+                    ? 'bg-[#286BBD] text-white' 
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                {page}
+              </Button>
+            ))}
+          </div>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className="flex items-center space-x-1"
+          >
+            <span>Next</span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
