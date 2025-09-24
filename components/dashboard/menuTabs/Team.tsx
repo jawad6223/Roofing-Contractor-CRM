@@ -96,18 +96,6 @@ export const Team = () => {
                 ))}
               </div>
               
-              {/* Team Permissions */}
-              <Card className="border-0 shadow-lg bg-gradient-to-r from-purple-50 to-blue-50">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">👥 Team Permissions</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <p className="text-gray-700">• <strong>Sales Manager:</strong> Full access to leads and CRM</p>
-                    <p className="text-gray-700">• <strong>Lead Coordinator:</strong> View and manage leads only</p>
-                    <p className="text-gray-700">• <strong>Project Manager:</strong> Access to purchased leads</p>
-                    <p className="text-gray-700">• <strong>Admin:</strong> Full system access and settings</p>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
 
       {/* Add Team Member Modal */}
@@ -166,24 +154,7 @@ export const Team = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Role *
-                      </label>
-                      <select
-                        name="role"
-                        value={newMember.role}
-                        onChange={handleInputChange}
-                        className="w-full h-10 px-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#286BBD] focus:border-transparent"
-                        required
-                      >
-                        <option value="Sales Manager">Sales Manager</option>
-                        <option value="Lead Coordinator">Lead Coordinator</option>
-                        <option value="Project Manager">Project Manager</option>
-                        <option value="Admin">Admin</option>
-                      </select>
-                    </div>
+                  <div className="grid grid-cols-1 gap-3">
                     
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -200,18 +171,6 @@ export const Team = () => {
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Department
-                    </label>
-                    <Input
-                      name="department"
-                      value={newMember.department}
-                      onChange={handleInputChange}
-                      placeholder="Sales, Operations, Admin"
-                      className="h-10 text-sm"
-                    />
-                  </div>
                 </div>
 
 

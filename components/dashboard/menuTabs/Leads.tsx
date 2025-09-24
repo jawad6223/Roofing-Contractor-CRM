@@ -1,9 +1,15 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
-import { Plus, X, ShoppingCart, Eye, MapPin, Phone, Mail, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react'
+import { Plus, X, ShoppingCart, Eye, MapPin, Phone, Mail, ChevronLeft, ChevronRight, CheckCircle, MoreHorizontal, Search } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useState } from 'react'
 import { PurchasedLead, PurchaseForm } from '@/types/DashboardTypes'
 import { purchasedLeads } from './Data'
@@ -15,17 +21,32 @@ export const Leads = () => {
       quantity: '1',
       zipCode: '',
       maxBudget: '',
+      leadAmount: '50',
       notes: ''
     });
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 3;
-    const totalPages = Math.ceil(purchasedLeads.length / itemsPerPage);
-    
+    const [searchTerm, setSearchTerm] = useState("");
+    const itemsPerPage = 10;
+
+    // Filter data based on search term
+    const filteredData = purchasedLeads.filter((lead) =>
+      lead.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.phoneno.includes(searchTerm) ||
+      lead.zipCode.includes(searchTerm) ||
+      lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.policy.includes(searchTerm) ||
+      lead.claimAmount.includes(searchTerm) ||
+      lead.damageType.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentData = purchasedLeads.slice(startIndex, endIndex);
+    const currentData = filteredData.slice(startIndex, endIndex);
 
     const handlePreviousPage = () => {
       setCurrentPage(prev => Math.max(prev - 1, 1));
@@ -39,6 +60,7 @@ export const Leads = () => {
     const [showViewModal, setShowViewModal] = useState(false);
     const [showSuccessModal, setShowSuccessModal] = useState(false);
     const [purchaseQuantity, setPurchaseQuantity] = useState<string>('');
+    const [leadStatuses, setLeadStatuses] = useState<{[key: string]: string}>({});
 
     const handleViewLead = (lead: PurchasedLead): void => {
       setSelectedLead(lead);
@@ -50,6 +72,19 @@ export const Leads = () => {
       setShowViewModal(false);
     };
 
+    const handleOpenLead = (lead: PurchasedLead) => {
+      console.log(`Opening lead: ${lead.firstName} ${lead.lastName}`);
+      // TODO: Add open lead logic here
+    };
+
+    const handleCloseLead = (lead: PurchasedLead) => {
+      console.log(`Closing lead: ${lead.firstName} ${lead.lastName}`);
+      setLeadStatuses(prev => ({
+        ...prev,
+        [lead.id]: 'Close'
+      }));
+    };
+
     const getLeadTypeColor = (type: string): string => {
       switch (type) {
         case 'Basic': return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
@@ -57,6 +92,19 @@ export const Leads = () => {
         case 'Exclusive': return 'bg-green-100 text-green-800 hover:bg-green-200';
         default: return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
       }
+    };
+
+    const getStatusBadgeColor = (leadId: string): string => {
+      const status = leadStatuses[leadId] || 'Open';
+      switch (status) {
+        case 'Open': return 'bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20';
+        case 'Close': return 'bg-red-100 text-red-800 hover:bg-red-200';
+        default: return 'bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20';
+      }
+    };
+
+    const getLeadStatus = (leadId: string): string => {
+      return leadStatuses[leadId] || 'Open';
     };
 
     const handlePurchaseInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -79,6 +127,7 @@ export const Leads = () => {
         quantity: '1',
         zipCode: '',
         maxBudget: '',
+        leadAmount: '50',
         notes: ''
       });
     };
@@ -90,6 +139,7 @@ export const Leads = () => {
         quantity: '1',
         zipCode: '',
         maxBudget: '',
+        leadAmount: '50',
         notes: ''
       });
     };
@@ -99,8 +149,16 @@ export const Leads = () => {
       setPurchaseQuantity('');
     };
 
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(e.target.value);
+      setCurrentPage(1); // Reset to first page when searching
+    };
+
   return (
     <div className="space-y-6">
+
+      
+            
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
@@ -112,6 +170,20 @@ export const Leads = () => {
                 <span onClick={() => setShowPurchaseModal(true)}>Add Purchase Leads</span>
               </Button>
             </div>
+
+            {/* Search Bar */}
+            <div className="w-full">
+              <div className="relative w-full">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search leads..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#286BBD] focus:border-transparent"
+                />
+              </div>
+            </div>
       
             {/* Leads Table */}
             <Card className="border-0 shadow-lg">
@@ -120,17 +192,22 @@ export const Leads = () => {
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zip Code</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Homeowner</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Claim Amount</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lead Type</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone no</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {currentData.map((lead, index) => (
+                      {currentData.length > 0 ? (
+                        currentData.map((lead, index) => (
                         <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-black">
+                            <span className="text-sm font-medium text-gray-900">{lead.id}</span>
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
@@ -140,42 +217,73 @@ export const Leads = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div>
                               <div className="text-sm font-bold text-[#122E5F]">{lead.firstName} {lead.lastName}</div>
-                              <div className="text-xs text-gray-500">{lead.damageType}</div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="space-y-1">
-                              <div className="flex items-center text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-black">
+                            <div className="space-y-1 flex items-center">
                                 <Phone className="h-3 w-3 text-gray-400 mr-1" />
                                 {lead.phoneno}
-                              </div>
-                              <div className="flex items-center text-xs text-gray-600">
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-black">
+                            <div className="space-y-1 flex items-center">
                                 <Mail className="h-3 w-3 text-gray-400 mr-1" />
                                 {lead.email}
+                            </div>
+                          </td>
+                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                             <Badge className={getStatusBadgeColor(lead.id)}>
+                               {getLeadStatus(lead.id)}
+                             </Badge>
+                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white cursor-pointer"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem 
+                                  onClick={() => handleViewLead(lead as PurchasedLead)}
+                                  className="cursor-pointer hover:bg-gray-50"
+                                >
+                                  <Eye className="h-4 w-4 mr-2 text-[#286BBD]" />
+                                  <span className="text-gray-700">View</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handleCloseLead(lead as PurchasedLead)}
+                                  className="cursor-pointer hover:bg-red-50 focus:bg-red-50"
+                                >
+                                  <X className="h-4 w-4 mr-2 text-red-600" />
+                                  <span className="text-red-700 font-medium">Close</span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </td>
+                        </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={7} className="px-6 py-8 text-center">
+                            <div className="flex flex-col items-center justify-center space-y-3">
+                              <Search className="h-12 w-12 text-gray-300" />
+                              <div>
+                                <p className="text-lg font-medium text-gray-900">No leads found</p>
+                                <p className="text-sm text-gray-500">
+                                  {searchTerm 
+                                    ? `No results for "${searchTerm}". Try adjusting your search terms.`
+                                    : 'No leads available.'}
+                                </p>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-bold text-[#286BBD]">{lead.claimAmount}</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <Badge className={`${getLeadTypeColor(lead.leadType)}`}>
-                              {lead.leadType}
-                            </Badge>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
-                              onClick={() => handleViewLead(lead)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
-                          </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -185,7 +293,12 @@ export const Leads = () => {
             {/* Pagination Controls */}
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-700">
-                Showing {startIndex + 1} to {Math.min(endIndex, purchasedLeads.length)} of {purchasedLeads.length} results
+                Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} results
+                {searchTerm && (
+                  <span className="text-[#286BBD] ml-2">
+                    (filtered from {purchasedLeads.length} total)
+                  </span>
+                )}
               </div>
               <div className="flex items-center space-x-2">
                 <Button
@@ -230,40 +343,6 @@ export const Leads = () => {
               </div>
             </div>
 
-            {/* Summary Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-[#286BBD] mb-2">{purchasedLeads.length}</div>
-                  <div className="text-sm text-gray-600">Total Leads</div>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-green-600 mb-2">
-                    ${purchasedLeads.reduce((sum, lead) => sum + parseInt(lead.claimAmount.replace(/[$,]/g, '')), 0).toLocaleString()}
-                  </div>
-                  <div className="text-sm text-gray-600">Total Value</div>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-yellow-600 mb-2">
-                    {purchasedLeads.filter(lead => lead.status === 'New').length}
-                  </div>
-                  <div className="text-sm text-gray-600">New Leads</div>
-                </CardContent>
-              </Card>
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6 text-center">
-                  <div className="text-2xl font-bold text-orange-600 mb-2">
-                    {purchasedLeads.filter(lead => lead.status === 'In Progress').length}
-                  </div>
-                  <div className="text-sm text-gray-600">In Progress</div>
-                </CardContent>
-              </Card>
-            </div>
-
             {/* View Lead Modal */}
             {showViewModal && selectedLead && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -292,7 +371,7 @@ export const Leads = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Lead ID
+                        ID
                       </label>
                       <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
                         {selectedLead.id}
@@ -300,17 +379,15 @@ export const Leads = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Lead Type
+                        Zip Code
                       </label>
-                      <div className="bg-gray-50 p-2 rounded-md">
-                        <Badge className={getLeadTypeColor(selectedLead.leadType)}>
-                          {selectedLead.leadType}
-                        </Badge>
-                      </div>
+                      <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                        {selectedLead.zipCode}
+                      </p>
                     </div>
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Homeowner Name
+                         Name
                       </label>
                       <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
                         {selectedLead.firstName} {selectedLead.lastName}
@@ -337,7 +414,7 @@ export const Leads = () => {
                         Location
                       </label>
                       <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                        {selectedLead.zipCode}
+                        {selectedLead.location}
                       </p>
                     </div>
                     <div>
@@ -354,22 +431,6 @@ export const Leads = () => {
                       </label>
                       <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
                         {selectedLead.policy}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Damage Type
-                      </label>
-                      <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                        {selectedLead.damageType}
-                      </p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1">
-                        Claim Amount
-                      </label>
-                      <p className="text-[#286BBD] bg-gray-50 p-2 rounded-md text-sm font-bold">
-                        {selectedLead.claimAmount}
                       </p>
                     </div>
                     <div>
@@ -418,7 +479,6 @@ export const Leads = () => {
                       <h2 className="text-xl font-bold text-gray-900 mb-1">
                         Purchase Premium Leads
                       </h2>
-                      <p className="text-sm text-gray-600">Select your lead preferences and purchase high-quality leads</p>
                     </div>
 
                     {/* Purchase Form */}
@@ -426,19 +486,16 @@ export const Leads = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Lead Type *
+                            Lead Amount *
                           </label>
-                          <select
+                          <Input
                             name="leadType"
-                            value={purchaseForm.leadType}
-                            onChange={handlePurchaseInputChange}
-                            className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#286BBD] focus:border-transparent"
+                            value={50}
+                            // onChange={handlePurchaseInputChange}
+                            placeholder="Basic, Premium, Exclusive"
                             required
-                          >
-                            <option value="basic">Basic - $45/lead</option>
-                            <option value="premium">Premium - $89/lead</option>
-                            <option value="exclusive">Exclusive - $149/lead</option>
-                          </select>
+                            className="h-9 text-sm"
+                          />
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -469,46 +526,17 @@ export const Leads = () => {
                             className="h-9 text-sm"
                           />
                         </div>
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Max Budget per Lead
-                          </label>
-                          <Input
-                            name="maxBudget"
-                            value={purchaseForm.maxBudget}
-                            onChange={handlePurchaseInputChange}
-                            placeholder="$50,000"
-                            className="h-9 text-sm"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">
-                          Special Requirements
-                        </label>
-                        <textarea
-                          name="notes"
-                          value={purchaseForm.notes}
-                          onChange={handlePurchaseInputChange}
-                          placeholder="Any specific requirements or preferences..."
-                          rows={3}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#286BBD] focus:border-transparent resize-none"
-                        />
                       </div>
 
                       {/* Pricing Summary */}
                       <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                        <h4 className="font-semibold text-gray-900 mb-2 text-sm">Order Summary</h4>
-                        <div className="flex justify-between items-center text-sm">
-                          <span className="text-gray-700">
-                            {purchaseForm.quantity} {purchaseForm.leadType} lead{parseInt(purchaseForm.quantity) > 1 ? 's' : ''}
-                          </span>
-                          <span className="font-bold text-[#286BBD]">
-                            ${(parseInt(purchaseForm.quantity || '1') * 
-                              (purchaseForm.leadType === 'basic' ? 45 : 
-                               purchaseForm.leadType === 'premium' ? 89 : 149)).toLocaleString()}
-                          </span>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between items-center">
+                            <span className="font-semibold text-gray-900">Total Price:</span>
+                            <span className="font-bold text-[#286BBD] text-lg">
+                              ${((parseInt(purchaseForm.quantity || '1')) * 50).toLocaleString()}
+                            </span>
+                          </div>
                         </div>
                       </div>
 

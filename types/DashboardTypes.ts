@@ -1,4 +1,7 @@
+import { ReactNode } from 'react';
+
 export interface PurchasedLead {
+  location: ReactNode;
   id: string;
   zipCode: string;
   firstName: string;
@@ -19,6 +22,7 @@ export interface PurchaseForm {
   quantity: string;
   zipCode: string;
   maxBudget: string;
+  leadAmount: string;
   notes: string;
 }
 

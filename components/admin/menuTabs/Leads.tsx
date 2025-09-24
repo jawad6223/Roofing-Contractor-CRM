@@ -3,8 +3,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Search, Target, Plus, Download, Eye, ChevronDown, X, UserPlus, ChevronLeft, ChevronRight, Check, MapPin } from 'lucide-react'
+import { Search, Target, Plus, Download, Eye, ChevronDown, X, UserPlus, ChevronLeft, ChevronRight, Check, MapPin, MoreHorizontal } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { contractors } from './Data'
 import { Lead } from '@/types/AdminTypes'
 import {allLeads} from './Data'
@@ -18,7 +24,9 @@ export const Leads = () => {
     const [showAddModal, setShowAddModal] = useState(false);
     const [showAssignModal, setShowAssignModal] = useState(false);
     const [leadToAssign, setLeadToAssign] = useState<Lead | null>(null);
-    const [selectedContractors, setSelectedContractors] = useState<string[]>([]);
+    const [selectedContractor, setSelectedContractor] = useState<string>("");
+  const [contractorSearchTerm, setContractorSearchTerm] = useState("");
+  const [leadStatuses, setLeadStatuses] = useState<{[key: string]: string}>({});
     const [newLead, setNewLead] = useState({
       firstName: '',
       lastName: '',
@@ -32,7 +40,7 @@ export const Leads = () => {
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 3;
+    const itemsPerPage = 10;
 
     
 
@@ -104,29 +112,58 @@ export const Leads = () => {
     const handleAssignLead = (lead: Lead) => {
       setLeadToAssign(lead);
       setShowAssignModal(true);
+      setSelectedContractor("");
+      setContractorSearchTerm("");
     };
 
     const handleCloseAssignModal = () => {
       setShowAssignModal(false);
       setLeadToAssign(null);
-      setSelectedContractors([]);
+      setSelectedContractor("");
+      setContractorSearchTerm("");
     };
 
-    const handleContractorCheckbox = (contractorId: string) => {
-      setSelectedContractors(prev => 
-        prev.includes(contractorId) 
-          ? prev.filter(id => id !== contractorId)
-          : [...prev, contractorId]
-      );
+    const handleContractorSelect = (contractorId: string) => {
+      setSelectedContractor(contractorId);
     };
 
-    const handleSelectContractors = () => {
-      if (selectedContractors.length > 0 && leadToAssign) {
-        console.log(`Assigning lead ${leadToAssign.id} to contractors:`, selectedContractors);
+    const handleSelectContractor = () => {
+      if (selectedContractor && leadToAssign) {
+        console.log(`Assigning lead ${leadToAssign.id} to contractor:`, selectedContractor);
         // TODO: Add assignment logic here
         handleCloseAssignModal();
       }
     };
+
+    const handleCloseLead = (leadId: string) => {
+      setLeadStatuses(prev => ({
+        ...prev,
+        [leadId]: 'Close'
+      }));
+    };
+
+    const getLeadStatus = (leadId: string) => {
+      return leadStatuses[leadId] || 'Open';
+    };
+
+    const getStatusBadgeColor = (leadId: string) => {
+      const status = getLeadStatus(leadId);
+      return status === 'Close' 
+        ? 'bg-red-100 text-red-800 hover:bg-red-200' 
+        : 'bg-green-100 text-green-800 hover:bg-green-200';
+    };
+
+    const handleContractorSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setContractorSearchTerm(e.target.value);
+    };
+
+    const filteredContractors = contractors.filter(contractor => 
+      contractor.name.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.company.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.location.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.conversionRate.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.leadsRequest.toLowerCase().includes(contractorSearchTerm.toLowerCase())
+    );
 
     const handleExportToExcel = () => {
       try {
@@ -255,6 +292,30 @@ export const Leads = () => {
         </CardContent>
       </Card>
 
+      {/* <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-4">
+              {["All", "Available", "Assigned", "In Progress", "Closed"].map((status) => {
+                const count = status === "All" 
+                  ? allLeads.length 
+                  : allLeads.filter(lead => lead.status === status).length;
+                return (
+                  <div
+                    key={status}
+                    onClick={() => setStatusFilter(status)}
+                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                      statusFilter === status 
+                        ? 'border-[#286BBD] bg-[#286BBD]/5' 
+                        : 'border-gray-200 hover:border-[#286BBD]/50'
+                    }`}
+                  >
+                    <div className="text-center">
+                      <div className="text-lg font-bold text-gray-900">{count}</div>
+                      <div className="text-xs text-gray-600">{status}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div> */}
+
       {/* Leads Table */}
       <Card className="border-0 shadow-lg">
               <CardContent className="p-0">
@@ -262,9 +323,11 @@ export const Leads = () => {
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">First Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zip Code</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone No</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Policy Number</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                       </tr>
@@ -274,29 +337,53 @@ export const Leads = () => {
                         currentData.map((lead, index) => (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-bold text-[#122E5F]">{lead.firstName}</span>
+                            <span className="text-sm font-bold text-[#122E5F]">{lead.id}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-bold text-[#122E5F]">{lead.zipCode}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-bold text-[#122E5F]">{lead.firstName} {lead.lastName}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm text-gray-900">{lead.phoneno}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <span className="text-sm text-gray-900">{lead.policy}</span>
+                            <span className="text-sm text-gray-900">{lead.email}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <Badge className='bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20'>
-                              {lead.status}
+                            <Badge className={getStatusBadgeColor(lead.id.toString())}>
+                              {getLeadStatus(lead.id.toString())}
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
-                              onClick={() => handleViewLead(lead)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => handleViewLead(lead)}
+                                  className="cursor-pointer"
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleCloseLead(lead.id.toString())}
+                                  className="cursor-pointer text-red-600 hover:text-red-700"
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Close
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             <Button
                               size="sm"
                               variant="outline"
@@ -383,7 +470,7 @@ export const Leads = () => {
             )}
 
             {/* Results Summary */}
-            {(searchTerm || statusFilter !== "All") && (
+            {/* {(searchTerm || statusFilter !== "All") && (
               <div className="flex items-center justify-between text-sm text-gray-600">
                 <span>
                   Showing {filteredLeads.length} of {allLeads.length} leads
@@ -411,32 +498,10 @@ export const Leads = () => {
                   </div>
                 )}
               </div>
-            )}
+            )} */}
 
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-4">
-              {["All", "Available", "Assigned", "In Progress", "Closed"].map((status) => {
-                const count = status === "All" 
-                  ? allLeads.length 
-                  : allLeads.filter(lead => lead.status === status).length;
-                return (
-                  <div
-                    key={status}
-                    onClick={() => setStatusFilter(status)}
-                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                      statusFilter === status 
-                        ? 'border-[#286BBD] bg-[#286BBD]/5' 
-                        : 'border-gray-200 hover:border-[#286BBD]/50'
-                    }`}
-                  >
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-gray-900">{count}</div>
-                      <div className="text-xs text-gray-600">{status}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            
 
             {/* View Lead Modal */}
             {showModal && selectedLead && (
@@ -464,6 +529,14 @@ export const Leads = () => {
 
                     {/* Lead Information */}
                     <div className="grid grid-cols-2 gap-3">
+                    <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-1">
+                            ID
+                          </label>
+                          <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                            {selectedLead.firstName}
+                          </p>
+                        </div>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
                             First Name
@@ -744,28 +817,43 @@ export const Leads = () => {
                       </div>
                       <div className="ml-4">
                         <Button
-                          onClick={handleSelectContractors}
-                          disabled={selectedContractors.length === 0}
+                          onClick={handleSelectContractor}
+                          disabled={!selectedContractor}
                           className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
                         >
                           <Check className="h-4 w-4 mr-2" />
-                          Select ({selectedContractors.length})
+                          Select Contractor
                         </Button>
+                      </div>
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="mb-4">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                        <Input
+                          type="text"
+                          placeholder="Search contractors..."
+                          value={contractorSearchTerm}
+                          onChange={handleContractorSearchChange}
+                          className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:ring-2 focus:ring-[#286BBD] focus:border-transparent"
+                        />
                       </div>
                     </div>
 
                     {/* Contractors List */}
                     <div className="max-h-96 overflow-y-auto">
                       <div className="space-y-3">
-                        {contractors.map((contractor) => (
+                        {filteredContractors.length > 0 ? (
+                          filteredContractors.map((contractor) => (
                           <div
                             key={contractor.id}
                             className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 hover:border-[#286BBD]/50"
                           >
                             <div className="flex items-center space-x-4">
                               <Checkbox
-                                checked={selectedContractors.includes(contractor.id)}
-                                onCheckedChange={() => handleContractorCheckbox(contractor.id)}
+                                checked={selectedContractor === contractor.id}
+                                onCheckedChange={() => handleContractorSelect(contractor.id)}
                                 className="data-[state=checked]:bg-[#286BBD] data-[state=checked]:border-[#286BBD]"
                               />
                               <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
@@ -796,17 +884,28 @@ export const Leads = () => {
                                 </div>
                                 <div className="flex items-center">
                                   <Badge className={`${
-                                    contractor.status === 'Active' ? 'bg-green-100 text-green-800' :
-                                    contractor.status === 'Inactive' ? 'bg-red-100 text-red-800' :
+                                    contractor.leadsRequest === 'Active' ? 'bg-green-100 text-green-800' :
+                                    contractor.leadsRequest === 'Inactive' ? 'bg-red-100 text-red-800' :
                                     'bg-yellow-100 text-yellow-800'
                                   }`}>
-                                    {contractor.status}
+                                    {contractor.leadsRequest}
                                   </Badge>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        ))}
+                          ))
+                        ) : (
+                          <div className="text-center py-8">
+                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <Search className="h-8 w-8 text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">No contractors found</h3>
+                            <p className="text-sm text-gray-500">
+                              {contractorSearchTerm ? `No contractors match "${contractorSearchTerm}"` : "No contractors available"}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     </div>
 

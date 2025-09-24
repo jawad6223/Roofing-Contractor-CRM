@@ -50,7 +50,7 @@ export default function AdminDashboard() {
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "leads", label: "Leads", icon: FileText },
     { id: "contractors", label: "Contractors", icon: Users },
-    { id: "pricing", label: "Lead Pricing Hub", icon: DollarSign },
+    // { id: "pricing", label: "Lead Pricing Hub", icon: DollarSign },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -151,9 +151,6 @@ export default function AdminDashboard() {
                   <h1 className="text-2xl font-bold text-gray-900">
                     Admin Dashboard
                   </h1>
-                  <p className="text-sm text-gray-600">
-                    Manage leads, contractors, and system settings
-                  </p>
                 </div>
               </div>
             </div>

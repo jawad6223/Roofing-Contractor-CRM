@@ -1,53 +1,48 @@
  export const crmData = [
     {
-      id: 'L001',
-      homeowner: 'Michael Johnson',
+      id: '01',
+      name: 'Michael Johnson',
       location: 'Houston, TX',
-      damageType: 'Hail Damage',
-      claimAmount: '$32,500',
-      status: 'Closed',
-      dateAdded: '2024-01-10',
-      closedDate: '2024-01-15'
+      phoneno: '1234567890',
+      email: 'michael.johnson@example.com',
+      insuranceCompany: 'State Farm',
+      policy: '1234567890',
     },
     {
-      id: 'L002',
-      homeowner: 'Jennifer Martinez',
+      id: '02',
+      name: 'Jennifer Martinez',
       location: 'Dallas, TX',
-      damageType: 'Storm Damage',
-      claimAmount: '$45,800',
-      status: 'Closed',
-      dateAdded: '2024-01-08',
-      closedDate: '2024-01-14'
+      phoneno: '1234567890',
+      email: 'jennifer.martinez@example.com',
+      insuranceCompany: 'Allstate',
+      policy: '1234567890',
     },
     {
-      id: 'L003',
-      homeowner: 'Robert Wilson',
+      id: '03',
+      name: 'Robert Wilson',
       location: 'Austin, TX',
-      damageType: 'Wind Damage',
-      claimAmount: '$28,900',
-      status: 'Closed',
-      dateAdded: '2024-01-05',
-      closedDate: '2024-01-12'
+      phoneno: '1234567890',
+      email: 'robert.wilson@example.com',
+      insuranceCompany: 'USAA',
+      policy: '1234567890',
     },
     {
-      id: 'L004',
-      homeowner: 'Sarah Thompson',
+      id: '04',
+      name: 'Sarah Thompson',
       location: 'San Antonio, TX',
-      damageType: 'Hail Damage',
-      claimAmount: '$38,200',
-      status: 'Closed',
-      dateAdded: '2024-01-03',
-      closedDate: '2024-01-11'
+      phoneno: '1234567890',
+      email: 'sarah.thompson@example.com',
+      insuranceCompany: 'Farmers',
+      policy: '1234567890',
     },
     {
-      id: 'L005',
-      homeowner: 'David Chen',
+      id: '05',
+      name: 'David Chen',
       location: 'Fort Worth, TX',
-      damageType: 'Water Damage',
-      claimAmount: '$41,600',
-      status: 'Closed',
-      dateAdded: '2024-01-01',
-      closedDate: '2024-01-09'
+      phoneno: '1234567890',
+      email: 'david.chen@example.com',
+      insuranceCompany: 'State Farm',
+      policy: '1234567890',
     }
   ];
 
@@ -84,7 +79,7 @@
 
   export const purchasedLeads = [
     {
-      id: 'PL001',
+      id: '01',
       zipCode: '75201',
       firstName: 'John',
       lastName: 'Smith',
@@ -92,14 +87,14 @@
       email: 'john.smith@email.com',
       company: 'State Farm',
       policy: 'SF123456789',
+      location: 'Houston, TX',
       claimAmount: '$32,500',
       damageType: 'Hail Damage',
       status: 'New',
       purchaseDate: '2024-01-15',
-      leadType: 'Premium'
     },
     {
-      id: 'PL002',
+      id: '02',
       zipCode: '75202',
       firstName: 'Sarah',
       lastName: 'Johnson',
@@ -107,6 +102,7 @@
       email: 'sarah.johnson@email.com',
       company: 'Allstate',
       policy: 'AL987654321',
+      location: 'Dallas, TX',
       claimAmount: '$45,800',
       damageType: 'Storm Damage',
       status: 'Contacted',
@@ -114,10 +110,11 @@
       leadType: 'Exclusive'
     },
     {
-      id: 'PL003',
+      id: '03',
       zipCode: '75203',
       firstName: 'Michael',
       lastName: 'Davis',
+      location: 'Austin, TX',
       phoneno: '(214) 555-0789',
       email: 'michael.davis@email.com',
       company: 'USAA',
@@ -129,11 +126,12 @@
       leadType: 'Premium'
     },
     {
-      id: 'PL004',
+      id: '04',
       zipCode: '75204',
       firstName: 'Jennifer',
       lastName: 'Wilson',
       phoneno: '(214) 555-0321',
+      location: 'San Antonio, TX',
       email: 'jennifer.wilson@email.com',
       company: 'Farmers',
       policy: 'FM789123456',

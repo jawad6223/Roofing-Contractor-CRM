@@ -122,9 +122,6 @@ const CrmDashboard = () => {
                   <h1 className="text-2xl font-bold text-gray-900">
                     Contractor Dashboard
                   </h1>
-                  <p className="text-sm text-gray-600">
-                    Manage leads, contractors, and system settings
-                  </p>
                 </div>
               </div>
             </div>
