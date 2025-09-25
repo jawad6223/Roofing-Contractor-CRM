@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, FileText, TrendingUp, DollarSign, BarChart3, Users, UserPlus, User, Settings, Package, CheckCircle, Phone, Mail, MapPin, Calendar, ExternalLink } from 'lucide-react'
+import { Home, FileText, TrendingUp, DollarSign, BarChart3, Users, UserPlus, User, Settings, Package, CheckCircle, Phone, Mail, MapPin, Calendar, ExternalLink, X, Eye } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -275,100 +275,95 @@ export const DashBoard = () => {
                   </DialogHeader>
                   
                   {selectedLead && (
-                    <div className="space-y-4">
-                      <div className="bg-gradient-to-r from-[#286BBD]/5 to-[#2563eb]/5 rounded-lg p-4 border border-[#286BBD]/20">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
-                            <Users className="h-6 w-6 text-[#286BBD]" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-bold text-xl text-gray-900">{selectedLead.firstName} {selectedLead.lastName}</h3>
-                            <p className="text-[#286BBD] font-medium">Purchased Lead</p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                                selectedLead.status === 'New' ? 'bg-green-100 text-green-800' :
-                                selectedLead.status === 'Contacted' ? 'bg-blue-100 text-blue-800' :
-                                'bg-gray-100 text-gray-800'
-                              }`}>
-                                {selectedLead.status}
-                              </span>
-                              <span className="text-xs font-medium px-2 py-1 rounded-full bg-[#286BBD]/10 text-[#286BBD]">
-                                {selectedLead.damageType}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                    <div className="p-5">
+      
+                    {/* Lead Information */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                          ID
+                        </label>
+                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                          {selectedLead.id}
+                        </p>
                       </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-3">
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                              <Phone className="h-4 w-4 mr-2 text-[#286BBD]" />
-                              Contact Information
-                            </h4>
-                            <div className="space-y-2">
-                              <div className="flex items-center space-x-2">
-                                <Phone className="h-3 w-3 text-gray-500" />
-                                <span className="text-sm text-gray-700">{selectedLead.phoneno}</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Mail className="h-3 w-3 text-gray-500" />
-                                <span className="text-sm text-gray-700">{selectedLead.email}</span>
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <MapPin className="h-3 w-3 text-gray-500" />
-                                <span className="text-sm text-gray-700">{selectedLead.location}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                              <Package className="h-4 w-4 mr-2 text-[#286BBD]" />
-                              Project Details
-                            </h4>
-                            <div className="space-y-1">
-                              <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Damage Type:</span>
-                                <span className="text-sm font-medium text-gray-900">{selectedLead.damageType}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Claim Amount:</span>
-                                <span className="text-sm font-bold text-green-600">{selectedLead.claimAmount}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Purchase Date:</span>
-                                <span className="text-sm text-gray-700">{new Date(selectedLead.purchaseDate).toLocaleDateString()}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div className="bg-gray-50 rounded-lg p-3">
-                            <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                              <FileText className="h-4 w-4 mr-2 text-[#286BBD]" />
-                              Insurance Information
-                            </h4>
-                            <div className="space-y-1">
-                              <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Company:</span>
-                                <span className="text-sm font-medium text-gray-900">{selectedLead.company}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Policy:</span>
-                                <span className="text-sm font-medium text-gray-900">{selectedLead.policy}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-sm text-gray-600">Zip Code:</span>
-                                <span className="text-sm font-medium text-gray-900">{selectedLead.zipCode}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                          Zip Code
+                        </label>
+                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                          {selectedLead.zipCode}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                          Name
+                        </label>
+                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                          {selectedLead.firstName} {selectedLead.lastName}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                          Phone Number
+                        </label>
+                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                          {selectedLead.phoneno}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                          Email Address
+                        </label>
+                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                          {selectedLead.email}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                          Location
+                        </label>
+                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                          {selectedLead.location}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                          Insurance Company
+                        </label>
+                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                          {selectedLead.company}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                          Policy Number
+                        </label>
+                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                          {selectedLead.policy}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">
+                          Purchase Date
+                        </label>
+                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                          {new Date(selectedLead.purchaseDate).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
+      
+                    {/* Action Buttons */}
+                    <div className="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsLeadModalOpen(false)}
+                        className="px-4 py-2 text-sm"
+                      >
+                        Close
+                      </Button>
+                    </div>
+                  </div>
                   )}
                   
                 </DialogContent>
