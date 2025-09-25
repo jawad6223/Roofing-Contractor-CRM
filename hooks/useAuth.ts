@@ -9,38 +9,65 @@ export const useAuth = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const loggedInUser = localStorage.getItem("loggedInUser");
-    if (loggedInUser) {
-      setUser(loggedInUser);
+    if (typeof window !== 'undefined') {
+      try {
+        const loggedInUser = localStorage.getItem("loggedInUser");
+        if (loggedInUser) {
+          setUser(loggedInUser);
+        }
+      } catch (error) {
+        console.error('Error accessing localStorage:', error);
+      }
     }
     setLoading(false);
   }, []);
 
   const login = (emailAddress: string) => {
-    localStorage.setItem("loggedInUser", emailAddress);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("loggedInUser", emailAddress);
+    }
     setUser(emailAddress);
     router.push("/dashboard");
   };
 
   const logout = () => {
-    localStorage.removeItem("loggedInUser");
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("loggedInUser");
+    }
     setUser(null);
     router.push("/");
   };
 
   const checkAuth = () => {
-    const loggedInUser = localStorage.getItem("loggedInUser");
-    return loggedInUser;
+    if (typeof window === 'undefined') {
+      return null;
+    }
+    
+    try {
+      const loggedInUser = localStorage.getItem("loggedInUser");
+      return loggedInUser;
+    } catch (error) {
+      return null;
+    }
   };
 
+  // Get the full name of the current user
   const getCurrentUserFullName = () => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo") || "[]");
-    const currentUserInfo = userInfo.find(
-      (info: { emailAddress: string; fullName: string }) =>
-        info.emailAddress === user
-    );
-    const currentUserFullName = currentUserInfo?.fullName || user;
-    return currentUserFullName;
+    if (typeof window === 'undefined') {
+      return user || 'User';
+    }
+    
+    try {
+      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "[]");
+      const currentUserInfo = userInfo.find(
+        (info: { emailAddress: string; fullName: string }) =>
+          info.emailAddress === user
+      );
+      const currentUserFullName = currentUserInfo?.fullName || user;
+      return currentUserFullName;
+    } catch (error) {
+      return user || 'User';
+    }
   };
 
   return {
