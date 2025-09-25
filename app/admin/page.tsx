@@ -1,10 +1,12 @@
-import AdminDashboard from '@/components/admin/AdminDashboard';
+"use client";
+
 import { ProtectedRoute } from '@/components/Auth/ProtectedRoute';
+import { Dashboard } from '@/components/admin/menuTabs/Index';
 
 export default function Admin() {
   return (
     <ProtectedRoute requireAuth={true}>
-      <AdminDashboard />
+      <Dashboard />
     </ProtectedRoute>
   );
 }
