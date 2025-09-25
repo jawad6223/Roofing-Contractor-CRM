@@ -1,26 +1,39 @@
-export interface Lead {
+export interface LeadType {
   id: number;
-  zipCode: string;
   firstName: string;
   lastName: string;
   phoneno: string;
   email: string;
+  zipCode: string;
   company: string;
   policy: string;
-  status: string;
   assignedTo: string | null;
+  purchaseDate: string;
 }
 
-export interface Contractor {
+export interface ContractorType {
   id: string;
-  name: string;
-  company: string;
+  fullName: string;
+  title: string;
+  phoneno: string;
+  email: string;
   location: string;
-  leadsAssigned: number;
-  leadsCompleted: number;
-  conversionRate: string;
-  totalEarnings: string;
-  leadsRequest: string;
-  zipCode: string;
-  joinDate: string;
+  serviceRadius: string;
+}
+
+export interface dashboardCardType {
+  title: string;
+  value: string;
+  change: string;
+  icon: React.ComponentType<any>;
+  color: string;
+  time?: string;
+}
+
+export interface settingType {
+  fullName: string;
+  email: string;
+  serviceRadius: string;
+  businessAddress: string;
+  leads: string;
 }

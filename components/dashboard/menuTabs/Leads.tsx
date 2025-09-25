@@ -11,8 +11,11 @@ import {
   ChevronLeft,
   ChevronRight,
   CheckCircle,
+  Calendar,
+  DollarSign,
   MoreHorizontal,
   Search,
+  Info,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,13 +27,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { PurchasedLead, PurchaseForm } from "@/types/DashboardTypes";
-import { purchasedLeads } from "./Data";
+import { purchasedLeadType, purchaseFormType, leadsInfoType } from "@/types/DashboardTypes";
+import { purchasedLeads, LeadsInfo } from "./Data";
 
 export const Leads = () => {
   const [showPurchaseModal, setShowPurchaseModal] = useState(false);
+  const [showLeadPurchaseInfoModal, setShowLeadPurchaseInfoModal] = useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [purchaseForm, setPurchaseForm] = useState<PurchaseForm>({
+  const [purchaseForm, setPurchaseForm] = useState<purchaseFormType>({
     quantity: "1",
     zipCode: "",
   });
@@ -49,14 +53,17 @@ export const Leads = () => {
       lead.zipCode.includes(searchTerm) ||
       lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead.policy.includes(searchTerm) ||
-      lead.claimAmount.includes(searchTerm) ||
-      lead.damageType.toLowerCase().includes(searchTerm.toLowerCase())
+      lead.location.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredData.slice(startIndex, endIndex);
+
+  // Calculate total leads and total price
+  const totalLeads = purchasedLeads.length;
+  const totalPrice = purchasedLeads.length * 150; // Assuming $150 per lead
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -66,7 +73,7 @@ export const Leads = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const [selectedLead, setSelectedLead] = useState<PurchasedLead | null>(null);
+  const [selectedLead, setSelectedLead] = useState<purchasedLeadType | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [purchaseQuantity, setPurchaseQuantity] = useState<string>("");
@@ -74,7 +81,7 @@ export const Leads = () => {
     {}
   );
 
-  const handleViewLead = (lead: PurchasedLead): void => {
+  const handleViewLead = (lead: purchasedLeadType): void => {
     setSelectedLead(lead);
     setShowViewModal(true);
   };
@@ -84,12 +91,12 @@ export const Leads = () => {
     setShowViewModal(false);
   };
 
-  const handleOpenLead = (lead: PurchasedLead) => {
+  const handleOpenLead = (lead: purchasedLeadType) => {
     console.log(`Opening lead: ${lead.firstName} ${lead.lastName}`);
     // TODO: Add open lead logic here
   };
 
-  const handleCloseLead = (lead: PurchasedLead) => {
+  const handleCloseLead = (lead: purchasedLeadType) => {
     console.log(`Closing lead: ${lead.firstName} ${lead.lastName}`);
     setLeadStatuses((prev) => ({
       ...prev,
@@ -209,12 +216,23 @@ export const Leads = () => {
             Manage and track your purchased leads and their progress
           </p>
         </div>
+        <div className="flex gap-3">
         <Button className="bg-[#122E5F] hover:bg-[#0f2347] text-white">
           <Plus className="h-4 w-4 mr-2" />
           <span onClick={() => setShowPurchaseModal(true)}>
             Add Purchase Leads
           </span>
         </Button>
+        <Button 
+          onClick={() => setShowLeadPurchaseInfoModal(true)}
+          className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+        >
+          <Info className="h-4 w-4 mr-2" />
+          <span>
+            Lead Purchase Info
+          </span>
+        </Button>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -238,14 +256,12 @@ export const Leads = () => {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
+                  
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
+                    Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Zip Code
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Phone no
@@ -265,10 +281,13 @@ export const Leads = () => {
                 {currentData.length > 0 ? (
                   currentData.map((lead, index) => (
                     <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-black">
-                        <span className="text-sm font-medium text-gray-900">
-                          {lead.id}
-                        </span>
+                      
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div>
+                          <div className="text-sm font-bold text-[#122E5F]">
+                            {lead.firstName} {lead.lastName}
+                          </div>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
@@ -276,13 +295,6 @@ export const Leads = () => {
                           <span className="text-sm font-medium text-gray-900">
                             {lead.zipCode}
                           </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div>
-                          <div className="text-sm font-bold text-[#122E5F]">
-                            {lead.firstName} {lead.lastName}
-                          </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-black">
@@ -316,7 +328,7 @@ export const Leads = () => {
                           <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuItem
                               onClick={() =>
-                                handleViewLead(lead as PurchasedLead)
+                                handleViewLead(lead)
                               }
                               className="cursor-pointer hover:bg-gray-50"
                             >
@@ -325,7 +337,7 @@ export const Leads = () => {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
-                                handleCloseLead(lead as PurchasedLead)
+                                handleCloseLead(lead)
                               }
                               className="cursor-pointer hover:bg-red-50 focus:bg-red-50"
                             >
@@ -446,12 +458,13 @@ export const Leads = () => {
 
               {/* Lead Information */}
               <div className="grid grid-cols-2 gap-3">
+                
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    ID
+                    Name
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedLead.id}
+                    {selectedLead.firstName} {selectedLead.lastName}
                   </p>
                 </div>
                 <div>
@@ -460,14 +473,6 @@ export const Leads = () => {
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
                     {selectedLead.zipCode}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Name
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedLead.firstName} {selectedLead.lastName}
                   </p>
                 </div>
                 <div>
@@ -561,7 +566,7 @@ export const Leads = () => {
               {/* Purchase Form */}
               <form onSubmit={handlePurchaseSubmit} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Lead Amount *
                     </label>
@@ -571,7 +576,7 @@ export const Leads = () => {
                       readOnly
                       className="h-9 text-sm"
                     />
-                  </div>
+                  </div> */}
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-1">
                       Quantity *
@@ -690,6 +695,146 @@ export const Leads = () => {
               >
                 Continue
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lead Purchase Info Modal */}
+      {showLeadPurchaseInfoModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden">
+            <button
+              onClick={() => setShowLeadPurchaseInfoModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="p-6">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Info className="h-6 w-6 text-[#286BBD]" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Lead Purchase Information
+                </h2>
+                <p className="text-sm text-gray-600">Overview of your purchased leads and total investment</p>
+              </div>
+
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <Card className="border-0 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <ShoppingCart className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900">{totalLeads}</h3>
+                        <p className="text-sm text-gray-600">Total Leads Purchased</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="border-0 shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <CheckCircle className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900">${totalPrice.toLocaleString()}</h3>
+                        <p className="text-sm text-gray-600">Total Investment</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Leads Table */}
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-0">
+                  <div className="overflow-auto max-h-64">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Zip Code
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Price
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            No. of Leads
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Received Leads
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Pending Leads
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {LeadsInfo.map((lead, index) => (
+                          <tr key={lead.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {lead.zipCode}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-black">
+                              <div className="flex items-center">
+                                <Calendar className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.date}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-black">
+                              <div className="flex items-center">
+                                <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.price}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.noOfLeads}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <span className="text-sm font-bold text-[#286BBD]">
+                                {lead.receivedLeads}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <span className="text-sm text-red-500">
+                                {lead.pendingLeads}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Close Button */}
+              <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+                <Button
+                  onClick={() => setShowLeadPurchaseInfoModal(false)}
+                  className="px-6 py-2 bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+                >
+                  Close
+                </Button>
+              </div>
             </div>
           </div>
         </div>
