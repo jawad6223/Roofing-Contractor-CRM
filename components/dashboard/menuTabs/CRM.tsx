@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  BarChart3,
   MapPin,
   ChevronLeft,
   ChevronRight,
@@ -8,7 +7,6 @@ import {
   X,
   Phone,
   Mail,
-  Calendar,
   User,
   Building,
   Search,

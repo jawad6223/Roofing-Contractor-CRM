@@ -4,54 +4,41 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Users, FileText, DollarSign, Bell, Settings, BarChart3, Menu, X, LogOut, User, } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Dashboard, Leads, Contractors, LeadPrice, Setting } from "./menuTabs/Index";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 
-export default function AdminDashboard() {
-  const { user, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState("dashboard");
+interface AdminDashboardProps {
+  children: React.ReactNode;
+}
+
+export default function AdminDashboard({ children }: AdminDashboardProps) {
+  const { logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const router = useRouter();
+  const pathname = usePathname();
 
   const handleLogout = () => {
     logout()
   };
 
-  const userInfo = JSON.parse(localStorage.getItem("userInfo") || "[]");
-  const currentUserInfo = userInfo.find(
-    (info: { emailAddress: string; fullName: string }) =>
-      info.emailAddress === user
-  );
-  const currentUserFullName = currentUserInfo?.fullName || user;
-  console.log("currentUserFullName", currentUserFullName);
+  const getActiveTab = () => {
+    const pathSegments = pathname.split('/');
+    const section = pathSegments[pathSegments.length - 1];
+    
+    if (pathname === '/admin' || section === 'admin') {
+      return 'dashboard';
+    }
+    
+    return section || 'dashboard';
+  };
 
-  const renderDashboardOverview = () => (
-    <Dashboard onTabChange={setActiveTab} />
-  );
-
-  const renderLeadsManagement = () => (
-    <Leads />
-  );
-
-  const renderContractorsManagement = () => (
-    <Contractors onTabChange={setActiveTab} />
-  );
-
-  const renderPricingSettings = () => (
-    <LeadPrice />
-  );
-
-  const renderSettings = () => (
-    <Setting />
-  );
+  const activeTab = getActiveTab();
 
   const sidebarItems = [
-    { id: "dashboard", label: "Dashboard", icon: BarChart3 },
-    { id: "leads", label: "Leads", icon: FileText },
-    { id: "contractors", label: "Contractors", icon: Users },
-    // { id: "pricing", label: "Lead Pricing Hub", icon: DollarSign },
-    { id: "settings", label: "Settings", icon: Settings },
+    { id: "dashboard", label: "Dashboard", icon: BarChart3, path: "/admin" },
+    { id: "leads", label: "Leads", icon: FileText, path: "/admin/leads" },
+    { id: "contractors", label: "Contractors", icon: Users, path: "/admin/contractors" },
+    { id: "settings", label: "Settings", icon: Settings, path: "/admin/settings" },
   ];
 
   return (
@@ -84,12 +71,10 @@ export default function AdminDashboard() {
           <nav className="flex-1 overflow-y-auto px-4 py-4">
             <div className="space-y-2">
               {sidebarItems.map((item) => (
-                <button
+                <Link
                   key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id);
-                    setSidebarOpen(false);
-                  }}
+                  href={item.path}
+                  onClick={() => setSidebarOpen(false)}
                   className={`w-full flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors duration-200 ${
                     activeTab === item.id
                       ? "bg-[#122E5F] text-white shadow-md"
@@ -102,7 +87,7 @@ export default function AdminDashboard() {
                     }`}
                   />
                   {item.label}
-                </button>
+                </Link>
               ))}
             </div>
           </nav>
@@ -160,11 +145,7 @@ export default function AdminDashboard() {
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8">
-            {activeTab === "dashboard" && renderDashboardOverview()}
-            {activeTab === "leads" && renderLeadsManagement()}
-            {activeTab === "contractors" && renderContractorsManagement()}
-            {activeTab === "pricing" && renderPricingSettings()}
-            {activeTab === "settings" && renderSettings()}
+            {children}
           </div>
         </div>
       </div>

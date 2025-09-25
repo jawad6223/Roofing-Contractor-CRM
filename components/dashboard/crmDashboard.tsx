@@ -1,29 +1,53 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Home, Users, Settings, BarChart3, Menu, X, User, LogOut, UserPlus } from "lucide-react";
+import { Home, Users, Settings, BarChart3, Menu, X, User, LogOut, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { DashBoard, CRM, Leads, Setting, Team } from "./menuTabs/index";
 
-const CrmDashboard = () => {
+interface CrmDashboardProps {
+  children: React.ReactNode;
+}
+
+const CrmDashboard = ({ children }: CrmDashboardProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState("Dashboard");
+  const pathname = usePathname();
   const { user, getCurrentUserFullName, logout } = useAuth();
   const currentUserFullName = getCurrentUserFullName();
 
-  const handleTabChange = (tabName: string) => {
-    setActiveTab(tabName);
+  const getActiveTab = () => {
+    const pathSegments = pathname.split('/');
+    const section = pathSegments[pathSegments.length - 1];
+    
+    if (pathname === '/dashboard' || section === 'dashboard') {
+      return 'Dashboard';
+    }
+    
+    switch (section) {
+      case 'crm':
+        return 'CRM';
+      case 'leads':
+        return 'Leads';
+      case 'settings':
+        return 'Settings';
+      case 'teams':
+        return 'Teams';
+      default:
+        return 'Dashboard';
+    }
   };
 
+  const activeTab = getActiveTab();
+
   const menuItems = [
-    { icon: Home, label: "Dashboard" },
-    { icon: BarChart3, label: "CRM" },
-    { icon: Users, label: "Leads" },
-    { icon: Settings, label: "Settings" },
-    { icon: UserPlus, label: "Teams" },
+    { icon: Home, label: "Dashboard", path: "/dashboard" },
+    { icon: BarChart3, label: "CRM", path: "/dashboard/crm" },
+    { icon: Users, label: "Leads", path: "/dashboard/leads" },
+    { icon: Settings, label: "Settings", path: "/dashboard/settings" },
+    { icon: UserPlus, label: "Teams", path: "/dashboard/teams" },
   ];
 
   const handleLogout = () => {
@@ -65,9 +89,9 @@ const CrmDashboard = () => {
         <div className="flex flex-col flex-1 min-h-0">
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
             {menuItems.map((item, index) => (
-              <button
+              <Link
                 key={index}
-                onClick={() => setActiveTab(item.label)}
+                href={item.path}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
                   activeTab === item.label
                     ? "bg-blue-50 text-[#286BBD] border-r-2 border-[#286BBD]"
@@ -76,7 +100,7 @@ const CrmDashboard = () => {
               >
                 <item.icon className="h-5 w-5" />
                 <span className="font-medium">{item.label}</span>
-              </button>
+              </Link>
             ))}
           </nav>
 
@@ -130,17 +154,7 @@ const CrmDashboard = () => {
 
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          {activeTab === "Dashboard" && (
-            <DashBoard onTabChange={handleTabChange} />
-          )}
-
-          {activeTab === "CRM" && <CRM />}
-
-          {activeTab === "Leads" && <Leads />}
-
-          {activeTab === "Settings" && <Setting />}
-
-          {activeTab === "Teams" && <Team />}
+          {children}
         </main>
       </div>
     </div>

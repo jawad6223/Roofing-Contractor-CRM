@@ -18,14 +18,6 @@ export interface PurchasedLead {
 }
 
 export interface PurchaseForm {
-  leadType: string;
-  quantity: string;
   zipCode: string;
-  maxBudget: string;
-  leadAmount: string;
-  notes: string;
+  quantity: string;
 }
-
-export interface DashBoardProps {
-    onTabChange: (tabName: string) => void;
-  }

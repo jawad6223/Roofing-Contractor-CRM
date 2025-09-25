@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react'
 import { BarChart3, Activity, X, Phone, Mail, MapPin, Calendar, ExternalLink, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,12 +7,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { adminStats, recentLeads, contractors } from './Data';
+import Link from 'next/link';
 
 interface DashboardProps {
   onTabChange?: (tab: string) => void;
 }
 
-export const Dashboard = ({ onTabChange }: DashboardProps) => {
+export const Dashboard = () => {
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
 
@@ -62,17 +65,16 @@ export const Dashboard = ({ onTabChange }: DashboardProps) => {
                 <Activity className="h-5 w-5 text-[#122E5F] mr-2" />
                 Recent Leads
               </CardTitle>
-              {onTabChange && (
+              <Link href="/admin/leads">
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => onTabChange('leads')}
                   className="text-[#286BBD] hover:text-[#1d4ed8] hover:bg-[#286BBD]/10 flex items-center space-x-1"
                 >
                   <span className="text-sm">View All Leads</span>
                   <ExternalLink className="h-4 w-4" />
                 </Button>
-              )}
+              </Link>
             </div>
           </CardHeader>
           <CardContent>
@@ -141,20 +143,17 @@ export const Dashboard = ({ onTabChange }: DashboardProps) => {
               <DialogTitle className="text-xl font-bold text-[#286BBD]">
                 Lead Details
               </DialogTitle>
-              {onTabChange && (
+              <Link href="/admin/leads">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    setIsLeadModalOpen(false);
-                    onTabChange('leads');
-                  }}
+                  onClick={() => setIsLeadModalOpen(false)}
                   className="text-[#286BBD] mr-6 border-[#286BBD] hover:bg-[#286BBD] hover:text-white flex items-center space-x-1"
                 >
                   <span className="text-sm">View All Leads</span>
                   <ExternalLink className="h-4 w-4" />
                 </Button>
-              )}
+              </Link>
             </div>
           </DialogHeader>
           

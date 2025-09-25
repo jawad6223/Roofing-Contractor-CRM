@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import {
   MapPin,
   Eye,
@@ -30,7 +31,7 @@ interface ContractorsProps {
   onTabChange?: (tab: string) => void;
 }
 
-export const Contractors = ({ onTabChange }: ContractorsProps) => {
+export const Contractors = () => {
   const [selectedContractor, setSelectedContractor] =
     useState<Contractor | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -77,9 +78,6 @@ export const Contractors = ({ onTabChange }: ContractorsProps) => {
   };
 
   const handleAssignLeads = () => {
-    if (onTabChange) {
-      onTabChange("leads");
-    }
     handleCloseModal();
   };
 
@@ -486,13 +484,6 @@ export const Contractors = ({ onTabChange }: ContractorsProps) => {
                   className="px-3 py-1.5 text-sm"
                 >
                   Close
-                </Button>
-                <Button
-                  onClick={handleAssignLeads}
-                  className="px-3 py-1.5 text-sm bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
-                >
-                  <Target className="h-4 w-4 mr-1" />
-                  Assign Leads
                 </Button>
               </div>
             </div>

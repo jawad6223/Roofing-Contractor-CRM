@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -747,22 +749,6 @@ export const Leads = () => {
                             required
                             className="h-9 text-sm"
                           />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Status
-                          </label>
-                          <select
-                            name="status"
-                            value={newLead.status}
-                            onChange={handleInputChange}
-                            className="w-full h-9 px-3 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#286BBD] focus:border-transparent"
-                          >
-                            <option value="Available">Available</option>
-                            <option value="Assigned">Assigned</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Closed">Closed</option>
-                          </select>
                         </div>
                       </div>
 
