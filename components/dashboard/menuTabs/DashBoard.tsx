@@ -172,7 +172,7 @@ export const DashBoard = () => {
                             <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#286BBD]/10 to-[#2563eb]/10 flex items-center justify-center group-hover:from-[#286BBD]/20 group-hover:to-[#2563eb]/20 transition-all duration-200">
                               <User className="h-6 w-6 text-[#286BBD]" />
                             </div>
-                            <div className="flex-1">
+                          <div className="flex-1">
                               <div className="flex items-center space-x-2 mb-1">
                                 <h4 className="font-semibold text-gray-900 text-base">{activity.firstName} {activity.lastName}</h4>
 
@@ -275,16 +275,17 @@ export const DashBoard = () => {
                   </DialogHeader>
                   
                   {selectedLead && (
+                    
                     <div className="p-5">
       
                     {/* Lead Information */}
                     <div className="grid grid-cols-2 gap-3">
-                      <div>
+                    <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-1">
-                          ID
+                          Name
                         </label>
                         <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                          {selectedLead.id}
+                          {selectedLead.firstName} {selectedLead.lastName}
                         </p>
                       </div>
                       <div>
@@ -293,14 +294,6 @@ export const DashBoard = () => {
                         </label>
                         <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
                           {selectedLead.zipCode}
-                        </p>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">
-                          Name
-                        </label>
-                        <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                          {selectedLead.firstName} {selectedLead.lastName}
                         </p>
                       </div>
                       <div>

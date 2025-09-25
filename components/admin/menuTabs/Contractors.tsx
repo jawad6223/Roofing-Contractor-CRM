@@ -4,10 +4,8 @@ import React from "react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import {
   MapPin,
   Eye,
@@ -17,23 +15,17 @@ import {
   ChevronRight,
   Phone,
   Mail,
-  Calendar,
   User,
-  Building,
   Search,
 } from "lucide-react";
 import { UserCheck } from "lucide-react";
 import { contractors } from "./Data";
-import { Contractor } from "@/types/AdminTypes";
+import { ContractorType } from "@/types/AdminTypes";
 import { allLeads } from "./Data";
 
-interface ContractorsProps {
-  onTabChange?: (tab: string) => void;
-}
 
 export const Contractors = () => {
-  const [selectedContractor, setSelectedContractor] =
-    useState<Contractor | null>(null);
+  const [selectedContractor, setSelectedContractor] =useState<ContractorType>();
   const [showModal, setShowModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<any>(null);
@@ -43,14 +35,11 @@ export const Contractors = () => {
 
   // Filter contractors based on search term
   const filteredContractors = contractors.filter(contractor => 
-    contractor.name.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-    contractor.company.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-    contractor.location.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-    contractor.conversionRate.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-    contractor.leadsRequest.toLowerCase().includes(contractorSearchTerm.toLowerCase())
+    contractor.fullName.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
+    contractor.phoneno.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
+    contractor.location.toLowerCase().includes(contractorSearchTerm.toLowerCase())
   );
 
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 3;
   const totalPages = Math.ceil(filteredContractors.length / itemsPerPage);
@@ -67,13 +56,12 @@ export const Contractors = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const handleViewContractor = (contractor: Contractor): void => {
+  const handleViewContractor = (contractor: ContractorType): void => {
     setSelectedContractor(contractor);
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
-    setSelectedContractor(null);
     setShowModal(false);
   };
 
@@ -162,19 +150,16 @@ export const Contractors = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contractor Name
+                    Full Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Company
+                    Phone Number
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Email Address
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Location
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Conversion Rate
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Leads Request
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
@@ -186,12 +171,17 @@ export const Contractors = () => {
                   <tr key={contractor.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-bold text-[#122E5F]">
-                        {contractor.name}
+                        {contractor.fullName}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900">
-                        {contractor.company}
+                        {contractor.phoneno}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="text-sm font-medium text-[#286BBD]">
+                        {contractor.email}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -200,23 +190,12 @@ export const Contractors = () => {
                         {contractor.location}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-[#286BBD]">
-                        {contractor.conversionRate}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-col items-center">
-                          <span className="text-sm font-medium text-[#286BBD]">{contractor.leadsRequest}</span>
-                          <span className="text-sm text-gray-600">{contractor.zipCode}</span>
-                        </div>
-                    </td>
                     <td className="px-6 py-4 flex items-center gap-2 whitespace-nowrap">
                       <Button
                         size="sm"
                         variant="outline"
                         className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
-                        onClick={() => handleViewContractor(contractor)}
+                        onClick={() => handleViewContractor(contractor as ContractorType)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         View
@@ -338,29 +317,39 @@ export const Contractors = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Contractor ID
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
-                    {selectedContractor.id}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Full Name
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
-                    {selectedContractor.name}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Company Name
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
-                    {selectedContractor.company}
+                    {selectedContractor.fullName}
                   </p>
                 </div>
                 <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Title
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                    {selectedContractor.title}
+                  </p>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedContractor.phoneno}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Email Address
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                    {selectedContractor.email}
+                  </p>
+                </div>
+                <div className="col-span-2">
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Location
                   </label>
@@ -368,56 +357,6 @@ export const Contractors = () => {
                     <MapPin className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedContractor.location}
                   </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Join Date
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
-                    {new Date(selectedContractor.joinDate).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Leads Assigned
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
-                    {selectedContractor.leadsAssigned}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Leads Completed
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
-                    {selectedContractor.leadsCompleted}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Conversion Rate
-                  </label>
-                  <p className="text-[#286BBD] bg-gray-50 p-1.5 rounded-md text-sm font-medium">
-                    {selectedContractor.conversionRate}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Total Earnings
-                  </label>
-                  <p className="text-[#122E5F] bg-gray-50 p-1.5 rounded-md text-sm font-bold">
-                    {selectedContractor.totalEarnings}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Lead Requests
-                  </label>
-                  <div className="bg-gray-50 p-1.5 rounded-md">
-                    <Badge className="bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20">
-                      {selectedContractor.leadsRequest}
-                    </Badge>
-                  </div>
                 </div>
               </div>
 
@@ -429,50 +368,67 @@ export const Contractors = () => {
                 </h3>
 
                 <div className="space-y-3">
-                  {allLeads.slice(0, 2).map((lead) => (
-                    <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                      <table className="w-full">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
                         <tr>
-                          <td className="w-12">
-                            <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
-                              <span className="text-sm font-semibold text-[#286BBD]">
-                                {lead.firstName.charAt(0).toUpperCase()}
-                                {lead.lastName.charAt(0).toUpperCase()}
-                              </span>
-                            </div>
-                          </td>
-                          <td>
-                            <h4 className="font-semibold text-gray-900">
-                              {lead.firstName} {lead.lastName}
-                            </h4>
-                            <p className="text-sm text-gray-600">
-                              {lead.company}
-                            </p>
-                            <p className="text-xs text-gray-500 flex items-center">
-                              <MapPin className="h-3 w-3 mr-1" />
-                              {lead.zipCode}
-                            </p>
-                          </td>
-                          <td className="text-right">
-                            <p className="text-sm font-medium text-[#286BBD]">
-                              {lead.policy}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Policy Number
-                            </p>
-                          </td>
-                          <td className="text-right">
-                            <p className="text-sm font-medium text-green-600">
-                              {lead.phoneno}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Phone Number
-                            </p>
-                          </td>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Zip Code
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Phone no
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Company
+                          </th>
                         </tr>
-                      </table>
-                    </div>
-                  ))}
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {allLeads.slice(0, 3).map((lead, index) => (
+                          <tr key={lead.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm font-bold text-[#122E5F]">
+                                  {lead.firstName} {lead.lastName}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                                <span className="text-sm font-medium text-gray-900">
+                                  {lead.zipCode}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-black">
+                              <div className="space-y-1 flex items-center">
+                                <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.phoneno}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-black">
+                              <div className="space-y-1 flex items-center">
+                                <Mail className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.email}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.company}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 

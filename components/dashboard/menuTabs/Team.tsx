@@ -1,21 +1,25 @@
 import React from 'react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { UserPlus, User, X } from 'lucide-react'
+import { UserPlus, User, X, Save, Trash2, Pencil } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { teamMembers } from './Data'
+import { teamMemberType } from '@/types/DashboardTypes'
 
 
 export const Team = () => {
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newMember, setNewMember] = useState({
+  const [newMember, setNewMember] = useState<teamMemberType>({
     name: '',
     email: '',
-    role: 'Lead Coordinator',
-    phone: '',
-    department: ''
+    phoneno: '',
+  });
+  const [editingMember, setEditingMember] = useState<number | null>(null);
+  const [editedMember, setEditedMember] = useState<teamMemberType>({
+    name: '',
+    email: '',
+    phoneno: ''
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -38,10 +42,44 @@ export const Team = () => {
     setNewMember({
       name: '',
       email: '',
-      role: 'Lead Coordinator',
-      phone: '',
-      department: ''
+      phoneno: '',
     });
+  };
+
+  const handleEditClick = (index: number, member: any) => {
+    setEditingMember(index);
+    setEditedMember({
+      name: member.name,
+      email: member.email,
+      phoneno: member.phoneno
+    });
+  };
+
+  const handleSaveClick = (index: number) => {
+    console.log('Saving member data:', editedMember);
+    // TODO: Add save logic here
+    setEditingMember(null);
+    setEditedMember({
+      name: '',
+      email: '',
+      phoneno: ''
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMember(null);
+    setEditedMember({
+      name: '',
+      email: '',
+      phoneno: ''
+    });
+  };
+
+  const handleEditInputChange = (field: string, value: string) => {
+    setEditedMember(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   return (
@@ -71,24 +109,70 @@ export const Team = () => {
                           <div className="w-12 h-12 bg-[#286BBD] rounded-full flex items-center justify-center">
                             <User className="h-6 w-6 text-white" />
                           </div>
-                          <div>
-                            <h3 className="font-bold text-gray-900">{member.name}</h3>
-                            <p className="text-sm text-gray-600">{member.email}</p>
-                            <p className="text-sm font-medium text-[#286BBD]">{member.role}</p>
+                          <div className="flex-1">
+                            {editingMember === index ? (
+                              <div className="space-y-2">
+                                <Input
+                                  value={editedMember.name}
+                                  onChange={(e) => handleEditInputChange('name', e.target.value)}
+                                  className="h-8 text-sm font-bold"
+                                  placeholder="Full Name"
+                                />
+                                <Input
+                                  value={editedMember.email}
+                                  onChange={(e) => handleEditInputChange('email', e.target.value)}
+                                  className="h-8 text-sm"
+                                  placeholder="Email Address"
+                                />
+                                <Input
+                                  value={editedMember.phoneno}
+                                  onChange={(e) => handleEditInputChange('phoneno', e.target.value)}
+                                  className="h-8 text-sm font-medium"
+                                  placeholder="Phone Number"
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex flex-col space-y-2">
+                                <input type="text" value={member.name} onChange={(e) => handleEditInputChange('name', e.target.value)} className="text-sm" placeholder="Full Name" />
+                                <input type="email" value={member.email} onChange={(e) => handleEditInputChange('email', e.target.value)} className="text-sm" placeholder="Email Address" />
+                                <input type="text" value={member.phoneno} onChange={(e) => handleEditInputChange('phoneno', e.target.value)} className="text-sm font-medium" placeholder="Phone Number" />
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <Badge 
-                            className={member.status === 'Active' 
-                              ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                              : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                            }
-                          >
-                            {member.status}
-                          </Badge>
-                          <Button variant="outline" size="sm" className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white">
-                            Edit
+                          <Button variant="outline" size="sm" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
+                            <Trash2 className="h-4 w-4" />
                           </Button>
+                          {editingMember === index ? (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={handleCancelEdit}
+                                className="border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                onClick={() => handleSaveClick(index)}
+                                className="border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
+                              >
+                                <Save className="h-4 w-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleEditClick(index, member)}
+                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -163,7 +247,7 @@ export const Team = () => {
                       <Input
                         name="phone"
                         type="tel"
-                        value={newMember.phone}
+                        value={newMember.phoneno}
                         onChange={handleInputChange}
                         placeholder="(555) 123-4567"
                         className="h-10 text-sm"

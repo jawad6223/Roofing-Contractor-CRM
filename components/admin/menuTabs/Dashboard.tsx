@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useState } from 'react'
-import { BarChart3, Activity, X, Phone, Mail, MapPin, Calendar, ExternalLink, Users } from "lucide-react";
+import { BarChart3, Activity, X, Phone, Mail, MapPin, User, ExternalLink, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { adminStats, recentLeads, contractors } from './Data';
+import { dashboardCardType } from '@/types/AdminTypes';
+import { dashboardCard, allLeads, contractors } from './Data';
 import Link from 'next/link';
 
 interface DashboardProps {
@@ -24,9 +24,8 @@ export const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {adminStats.map((stat, index) => (
+        {dashboardCard.map((stat: dashboardCardType, index) => (
           <Card
             key={index}
             className="border-0 shadow-lg hover:shadow-xl transition-all duration-300"
@@ -79,24 +78,43 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentLeads.slice(0, 4).map((lead) => (
-                <div
-                  key={lead.id}
-                  onClick={() => handleLeadClick(lead)}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-                >
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      {lead.homeowner}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {lead.location} • {lead.claimAmount}
-                    </p>
+              {allLeads.slice(0, 3).map((lead, index) => (
+                <div 
+                key={index} 
+                onClick={() => handleLeadClick(lead)}
+                className="flex items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
+              >
+                <div className="flex items-center space-x-4">
+                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#286BBD]/10 to-[#2563eb]/10 flex items-center justify-center group-hover:from-[#286BBD]/20 group-hover:to-[#2563eb]/20 transition-all duration-200">
+                    <User className="h-6 w-6 text-[#286BBD]" />
                   </div>
-                  <Badge className="bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20">
-                    {lead.status}
-                  </Badge>
+                <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h4 className="font-semibold text-gray-900 text-base">{lead.firstName} {lead.lastName}</h4>
+
+                    </div>
+                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                      <div className="flex items-center space-x-1">
+                        <MapPin className="h-3 w-3" />
+                        <span>{lead.company}</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
+                
+                <div className="flex flex-col items-end space-y-2">
+                  <div className="flex flex-col items-end space-y-1">
+                    <div className="text-sm text-[#286BBD] flex items-center hover:text-[#1d4ed8] transition-colors">
+                      <Phone className="h-4 w-4 mr-1" />
+                      <span className="font-medium">{lead.phoneno}</span>
+                    </div>
+                    <div className="text-sm text-gray-600 flex items-center hover:text-gray-800 transition-colors">
+                      <Mail className="h-4 w-4 mr-1" />
+                      <span className="font-medium">{lead.email}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
               ))}
             </div>
           </CardContent>
@@ -118,16 +136,24 @@ export const Dashboard = () => {
                 >
                   <div>
                     <p className="font-semibold text-gray-900">
-                      {contractor.name}
+                      {contractor.fullName}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {contractor.conversionRate} conversion •{" "}
-                      {contractor.totalEarnings}
+                      {contractor.location}
                     </p>
                   </div>
-                  <Badge className="bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20">
-                    {contractor.leadsCompleted} closed
-                  </Badge>
+                  <div className="flex flex-col items-end space-y-2">
+                  <div className="flex flex-col items-end space-y-1">
+                    <div className="text-sm text-[#286BBD] flex items-center hover:text-[#1d4ed8] transition-colors">
+                      <Phone className="h-4 w-4 mr-1" />
+                      <span className="font-medium">{contractor.phoneno}</span>
+                    </div>
+                    <div className="text-sm text-gray-600 flex items-center hover:text-gray-800 transition-colors">
+                      <Mail className="h-4 w-4 mr-1" />
+                      <span className="font-medium">{contractor.email}</span>
+                    </div>
+                  </div>
+                </div>
                 </div>
               ))}
             </div>
@@ -158,71 +184,87 @@ export const Dashboard = () => {
           </DialogHeader>
           
           {selectedLead && (
-            <div className="space-y-4">
-              <div className="bg-gradient-to-r from-[#286BBD]/5 to-[#2563eb]/5 rounded-lg p-4 border border-[#286BBD]/20">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
-                    <Users className="h-6 w-6 text-[#286BBD]" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold text-xl text-gray-900">{selectedLead.homeowner}</h3>
-                    <p className="text-[#286BBD] font-medium">Lead ID: {selectedLead.id}</p>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                        selectedLead.status === 'Available' ? 'bg-green-100 text-green-800' :
-                        selectedLead.status === 'Assigned' ? 'bg-blue-100 text-blue-800' :
-                        selectedLead.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
-                        {selectedLead.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+            <div className="p-5">
+      
+            {/* Lead Information */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Name
+                </label>
+                <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  {selectedLead.firstName} {selectedLead.lastName}
+                </p>
               </div>
-
-              <div className="grid grid-cols-1 gap-4">
-                <div className="space-y-3">
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                      <MapPin className="h-4 w-4 mr-2 text-[#286BBD]" />
-                      Location
-                    </h4>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="h-3 w-3 text-gray-500" />
-                        <span className="text-sm text-gray-700">{selectedLead.location}</span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="h-3 w-3 text-gray-500" />
-                        <span className="text-sm text-gray-700">Added: {new Date(selectedLead.dateAdded).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gray-50 rounded-lg p-3">
-                    <h4 className="font-semibold text-gray-900 mb-2 flex items-center">
-                      <BarChart3 className="h-4 w-4 mr-2 text-[#286BBD]" />
-                      Project Details
-                    </h4>
-                    <div className="space-y-1">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Damage Type:</span>
-                        <span className="text-sm font-medium text-gray-900">{selectedLead.damageType}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Claim Amount:</span>
-                        <span className="text-sm font-bold text-green-600">{selectedLead.claimAmount}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Assigned To:</span>
-                        <span className="text-sm font-medium text-[#286BBD]">{selectedLead.assignedTo || 'Unassigned'}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Zip Code
+                </label>
+                <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  {selectedLead.zipCode}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Phone Number
+                </label>
+                <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  {selectedLead.phoneno}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  {selectedLead.email}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                Insurance Company
+                </label>
+                <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  {selectedLead.company}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Insurance Company
+                </label>
+                <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  {selectedLead.company}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Policy Number
+                </label>
+                <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  {selectedLead.policy}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Purchase Date
+                </label>
+                <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  {new Date(selectedLead.purchaseDate).toLocaleDateString()}
+                </p>
               </div>
             </div>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200">
+              <Button
+                variant="outline"
+                onClick={() => setIsLeadModalOpen(false)}
+                className="px-4 py-2 text-sm"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
           )}
         </DialogContent>
       </Dialog>

@@ -14,11 +14,12 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { crmDataType } from "@/types/DashboardTypes";
 import { crmData } from "./Data";
 
 export const CRM = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [selectedLead, setSelectedLead] = useState<crmDataType>();
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 10;
@@ -53,7 +54,6 @@ export const CRM = () => {
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setSelectedLead(null);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,9 +95,6 @@ export const CRM = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ID
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -118,11 +115,6 @@ export const CRM = () => {
                 {currentData.length > 0 ? (
                   currentData.map((lead, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-gray-900">
-                        {lead.id}
-                      </span>
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-bold text-[#122E5F]">
                         {lead.name}
@@ -286,14 +278,6 @@ export const CRM = () => {
 
               {/* Lead Information */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    ID
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedLead.id}
-                  </p>
-                </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Full Name

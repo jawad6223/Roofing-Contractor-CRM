@@ -14,18 +14,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { contractors } from './Data'
-import { Lead } from '@/types/AdminTypes'
+import { LeadType } from '@/types/AdminTypes'
 import {allLeads} from './Data'
 import * as XLSX from 'xlsx'
 
 export const Leads = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
-    const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+    const [selectedLead, setSelectedLead] = useState<LeadType | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
     const [showAssignModal, setShowAssignModal] = useState(false);
-    const [leadToAssign, setLeadToAssign] = useState<Lead | null>(null);
+    const [leadToAssign, setLeadToAssign] = useState<LeadType | null>(null);
     const [selectedContractor, setSelectedContractor] = useState<string>("");
   const [contractorSearchTerm, setContractorSearchTerm] = useState("");
   const [leadStatuses, setLeadStatuses] = useState<{[key: string]: string}>({});
@@ -59,7 +59,7 @@ export const Leads = () => {
         lead.policy.includes(searchTerm)
       );
       
-      const matchesStatus = statusFilter === "All" || lead.status === statusFilter;
+      const matchesStatus = statusFilter === "All";
       
       return matchesSearch && matchesStatus;
     });
@@ -83,7 +83,7 @@ export const Leads = () => {
       setCurrentPage(1);
     }, [searchTerm, statusFilter]);
 
-    const handleViewLead = (lead: Lead): void => {
+    const handleViewLead = (lead: LeadType): void => {
       setSelectedLead(lead);
       setShowModal(true);
     };
@@ -111,7 +111,7 @@ export const Leads = () => {
       });
     };
 
-    const handleAssignLead = (lead: Lead) => {
+    const handleAssignLead = (lead: LeadType) => {
       setLeadToAssign(lead);
       setShowAssignModal(true);
       setSelectedContractor("");
@@ -160,16 +160,13 @@ export const Leads = () => {
     };
 
     const filteredContractors = contractors.filter(contractor => 
-      contractor.name.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.company.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.location.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.conversionRate.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.leadsRequest.toLowerCase().includes(contractorSearchTerm.toLowerCase())
+      contractor.fullName.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.phoneno.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.location.toLowerCase().includes(contractorSearchTerm.toLowerCase())
     );
 
     const handleExportToExcel = () => {
       try {
-        // Prepare data for Excel export
         const exportData = filteredLeads.map(lead => ({
           'First Name': lead.firstName,
           'Last Name': lead.lastName,
@@ -178,7 +175,6 @@ export const Leads = () => {
           'Zip Code': lead.zipCode,
           'Insurance Company': lead.company,
           'Policy Number': lead.policy,
-          'Status': lead.status,
           'Assigned To': lead.assignedTo || 'Unassigned'
         }));
 
@@ -325,9 +321,8 @@ export const Leads = () => {
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zip Code</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zip Code</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone No</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
@@ -338,14 +333,12 @@ export const Leads = () => {
                       {currentData.length > 0 ? (
                         currentData.map((lead, index) => (
                         <tr key={index} className="hover:bg-gray-50">
+                          
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-bold text-[#122E5F]">{lead.id}</span>
+                            <span className="text-sm font-bold text-[#122E5F]">{lead.firstName} {lead.lastName}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm font-bold text-[#122E5F]">{lead.zipCode}</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-bold text-[#122E5F]">{lead.firstName} {lead.lastName}</span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm text-gray-900">{lead.phoneno}</span>
@@ -531,14 +524,6 @@ export const Leads = () => {
 
                     {/* Lead Information */}
                     <div className="grid grid-cols-2 gap-3">
-                    <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            ID
-                          </label>
-                          <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
-                            {selectedLead.firstName}
-                          </p>
-                        </div>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
                             First Name
@@ -595,16 +580,6 @@ export const Leads = () => {
                           <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
                             {selectedLead.policy}
                           </p>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold text-gray-700 mb-1">
-                            Status
-                          </label>
-                          <div className="bg-gray-50 p-1.5 rounded-md">
-                            <Badge className='bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20'>
-                              {selectedLead.status}
-                            </Badge>
-                          </div>
                         </div>
                         <div>
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
@@ -846,36 +821,19 @@ export const Leads = () => {
                                 <UserPlus className="h-5 w-5 text-[#286BBD]" />
                               </div>
                               <div>
-                                <h3 className="font-semibold text-gray-900">{contractor.name}</h3>
-                                <p className="text-sm text-gray-600">{contractor.company}</p>
-                                <p className="text-xs text-gray-500 flex items-center">
-                                  <MapPin className="h-3 w-3 mr-1" />
-                                  {contractor.location}
-                                </p>
+                                <h3 className="font-semibold text-gray-900">{contractor.fullName}</h3>
+                                <p className="text-sm text-gray-600">{contractor.phoneno}</p>
                               </div>
                             </div>
                             <div className="text-right">
                               <div className="flex items-center space-x-4">
                                 <div className="text-right">
-                                  <p className="text-sm font-medium text-[#286BBD]">{contractor.conversionRate}</p>
-                                  <p className="text-xs text-gray-500">Conversion Rate</p>
+                                  <p className="text-sm font-medium text-[#286BBD]">{contractor.location}</p>
+                                  <p className="text-xs text-gray-500">Location</p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-sm font-medium text-green-600">{contractor.leadsCompleted}</p>
-                                  <p className="text-xs text-gray-500">Completed</p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="text-sm font-medium text-gray-900">{contractor.totalEarnings}</p>
-                                  <p className="text-xs text-gray-500">Total Earnings</p>
-                                </div>
-                                <div className="flex items-center">
-                                  <Badge className={`${
-                                    contractor.leadsRequest === 'Active' ? 'bg-green-100 text-green-800' :
-                                    contractor.leadsRequest === 'Inactive' ? 'bg-red-100 text-red-800' :
-                                    'bg-yellow-100 text-yellow-800'
-                                  }`}>
-                                    {contractor.leadsRequest}
-                                  </Badge>
+                                  <p className="text-sm font-medium text-green-600">{contractor.serviceRadius}</p>
+                                  <p className="text-xs text-gray-500">Service Radius</p>
                                 </div>
                               </div>
                             </div>

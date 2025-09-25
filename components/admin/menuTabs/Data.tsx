@@ -4,27 +4,27 @@ import { FileText, Users, DollarSign } from 'lucide-react';
 export const allLeads = [
     {
       id: 1,
-      zipCode: '75201',
       firstName:'John',
       lastName:'Doe',
       phoneno:'1234567890',
       email:'john.doe@example.com',
+      zipCode: '75201',
       company:'ABC Inc',
       policy:'1234567890',
-      status: "Available",
       assignedTo: null,
+      purchaseDate: '2024-01-15',
     },
     {
       id: 2,
       zipCode: '75202',
       firstName:'Jane',
-      lastName:'Doe',
+      lastName:'Smith',
       phoneno:'1234567890',
       email:'jane.doe@example.com',
       company:'ABC Inc',
       policy:'1234567890',
-      status: "Assigned",
       assignedTo: "Mike Rodriguez",
+      purchaseDate: '2024-01-14',
     },
     {
       id: 3,
@@ -35,8 +35,8 @@ export const allLeads = [
       email:'jim.beam@example.com',
       company:'XYZ Corp',
       policy:'1234567890',
-      status: "Closed",
       assignedTo: "Jennifer Martinez",
+      purchaseDate: '2024-01-13',
     },
     {
       id: 4,
@@ -47,8 +47,8 @@ export const allLeads = [
       email:'sarah.johnson@example.com',
       company:'DEF Ltd',
       policy:'0987654321',
-      status: "In Progress",
       assignedTo: "Robert Wilson",
+      purchaseDate: '2024-01-12',
     },
     {
       id: 5,
@@ -59,57 +59,45 @@ export const allLeads = [
       email:'mike.wilson@example.com',
       company:'GHI Inc',
       policy:'5555555555',
-      status: "Available",
       assignedTo: null,
+      purchaseDate: '2024-01-11',
     }
   ];
 
   // contractors Data
   export const contractors = [
     {
-      id: "C001",
-      name: "Mike Rodriguez",
-      company: "Elite Roofing Solutions",
+      id: "01",
+      fullName: "Mike Rodriguez",
+      title: "manager",
+      phoneno: "1234567890",
+      email: "mike.rodriguez@example.com",
       location: "Houston, TX",
-      leadsAssigned: 12,
-      leadsCompleted: 9,
-      conversionRate: "75%",
-      totalEarnings: "$252,000",
-      leadsRequest: "10",
-      zipCode: "75201",
-      joinDate: "2023-06-15",
+      serviceRadius: "100 miles",
     },
     {
-      id: "C002",
-      name: "Jennifer Martinez",
-      company: "Premier Roofing Co",
+      id: "02",
+      fullName: "Jennifer Martinez",
+      title: "manager",
+      phoneno: "1234567890",
+      email: "jennifer.martinez@example.com",
       location: "Dallas, TX",
-      leadsAssigned: 15,
-      leadsCompleted: 13,
-      conversionRate: "87%",
-      totalEarnings: "$364,000",
-      leadsRequest: "10",
-      zipCode: "75202",
-      joinDate: "2023-04-22",
+      serviceRadius: "26 miles",
     },
     {
-      id: "C003",
-      name: "Robert Wilson",
-      company: "Reliable Storm Solutions",
+      id: "03",
+      fullName: "Robert Wilson",
+      title: "Contractor",
+      phoneno: "1234567890",
+      email: "robert.wilson@example.com",
       location: "Austin, TX",
-      leadsAssigned: 8,
-      leadsCompleted: 6,
-      conversionRate: "75%",
-      totalEarnings: "$168,000",
-      leadsRequest: "-",
-      zipCode: "",
-      joinDate: "2023-08-10",
+      serviceRadius: "90 miles",
     },
     
   ];
 
   // adminStats Data
-  export const adminStats = [
+  export const dashboardCard = [
     {
       title: "Total Leads",
       value: "2,847",
@@ -131,81 +119,6 @@ export const allLeads = [
       change: "+15.3%",
       icon: DollarSign,
       color: "bg-[#122E5F]",
-    },
-  ];
-
-  // recentLeads Data
-  export const recentLeads = [
-    {
-      id: "L001",
-      homeowner: "John Smith",
-      location: "Houston, TX",
-      damageType: "Hail Damage",
-      claimAmount: "$28,500",
-      status: "Available",
-      dateAdded: "2024-01-15",
-      assignedTo: null,
-    },
-    {
-      id: "L002",
-      homeowner: "Sarah Johnson",
-      location: "Dallas, TX",
-      damageType: "Wind Damage",
-      claimAmount: "$35,200",
-      status: "Available",
-      dateAdded: "2024-01-14",
-      assignedTo: "Mike Rodriguez",
-    },
-    {
-      id: "L003",
-      homeowner: "David Chen",
-      location: "Austin, TX",
-      damageType: "Storm Damage",
-      claimAmount: "$42,100",
-      status: "Available",
-      dateAdded: "2024-01-13",
-      assignedTo: "Jennifer Martinez",
-    },
-    {
-      id: "L004",
-      homeowner: "Lisa Wilson",
-      location: "San Antonio, TX",
-      damageType: "Hail Damage",
-      claimAmount: "$31,800",
-      status: "Available",
-      dateAdded: "2024-01-12",
-      assignedTo: "Robert Wilson",
-    },
-  ];
-
-  // leadPrice Data
-  export const leadPricing = [
-    {
-      zipCode: "75201",
-      firstName: "John",
-      lastName: "Doe",
-      phoneno: "1234567890",
-      email: "john.doe@example.com",
-      company: "ABC Inc",
-      policy: "1234567890",
-    },
-    {
-      zipCode: "75202",
-      firstName: "Jane",
-      lastName: "Doe",
-      phoneno: "1234567890",
-      email: "jane.doe@example.com",
-      company: "ABC Inc",
-      policy: "1234567890",
-    },
-    {
-      zipCode: "75203",
-      firstName: "Jim",
-      lastName: "Beam",
-      phoneno: "1234567890",
-      email: "jim.beam@example.com",
-      company: "ABC Inc",
-      policy: "1234567890",
     },
   ];
 

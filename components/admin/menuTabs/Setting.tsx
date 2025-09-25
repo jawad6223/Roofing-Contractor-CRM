@@ -5,13 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Edit3, Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Bell } from "lucide-react";
-import { CreditCard } from "lucide-react";
+import { settingType } from "@/types/AdminTypes";
 import { useAuth } from "@/hooks/useAuth";
 
 export const Setting = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const userInfo = JSON.parse(localStorage.getItem("userInfo") || "[]");
   const currentUserInfo = userInfo.find(
     (info: { emailAddress: string; fullName: string }) =>
@@ -19,8 +17,8 @@ export const Setting = () => {
   );
   const currentUserFullName = currentUserInfo?.fullName || user;
 
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [formData, setFormData] = useState<settingType>({
     fullName: "",
     email: "",
     serviceRadius: "25",

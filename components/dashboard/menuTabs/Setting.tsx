@@ -3,15 +3,15 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { User, Bell, CreditCard, Edit3, Save, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { settingType } from '@/types/DashboardTypes'
 import { useAuth } from '@/hooks/useAuth'
 
 export const Setting = () => {
     const { user, getCurrentUserFullName } = useAuth()
     const currentUserFullName = getCurrentUserFullName()
     
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [formData, setFormData] = useState<settingType>({
       fullName: "",
       email: "",
       serviceRadius: "25",
