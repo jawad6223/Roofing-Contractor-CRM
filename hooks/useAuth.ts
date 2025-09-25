@@ -51,6 +51,7 @@ export const useAuth = () => {
     }
   };
 
+  // Get the full name of the current user
   const getCurrentUserFullName = () => {
     if (typeof window === 'undefined') {
       return user || 'User';
