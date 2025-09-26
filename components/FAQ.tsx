@@ -4,7 +4,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Minus, Shield, Clock, Users, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
-import { faqs } from './utils/data';
+import { faqs } from '@/lib/componentData';
 
 export function FAQ() {
   const [openItem, setOpenItem] = useState<number | null>(0);

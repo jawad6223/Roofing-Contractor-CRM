@@ -4,7 +4,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { scroller } from 'react-scroll';
 import { ArrowRight, CheckCircle, Clock, Shield, Star } from 'lucide-react';
-import { steps } from './utils/data';
+import { steps } from '@/lib/componentData';
 
 export function HowItWorks() {
   
