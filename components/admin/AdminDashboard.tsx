@@ -272,7 +272,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
                                 {lead.receivedLeads}
                               </span>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
                               <span className="text-sm font-medium text-gray-900">
                                 {lead.pendingLeads}
                               </span>
