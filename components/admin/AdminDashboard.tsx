@@ -2,40 +2,49 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { requestLeads } from "./menuTabs/Data";
-import { requestLeadType } from "@/types/AdminTypes";
+import { requestLeadType, sidebarItemsType } from "@/types/AdminTypes";
+import { sidebarItems } from "./menuTabs/Data";
 import {
   Users,
-  FileText,
-  DollarSign,
-  Bell,
-  Settings,
-  BarChart3,
   Menu,
   X,
   LogOut,
   User,
   MapPin,
   Phone,
+  Search,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { AdminDashboardProps } from "@/types/AdminTypes";
 
-
-
 export default function AdminDashboard({ children }: AdminDashboardProps) {
-  const { logout } = useAuth();
+  const { logoutAdmin, admin, getCurrentAdminName, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLeadsRequestModal, setShowLeadsRequestModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
   const pathname = usePathname();
 
   const handleLogout = () => {
-    logout();
+    logoutAdmin();
   };
+
+  const filteredLeads = requestLeads.filter((lead) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      lead.firstName.toLowerCase().includes(searchLower) ||
+      lead.lastName.toLowerCase().includes(searchLower) ||
+      lead.phoneno.includes(searchTerm) ||
+      lead.zipCode.includes(searchTerm) ||
+      lead.status.toLowerCase().includes(searchLower)
+    );
+  });
 
   const getActiveTab = () => {
     const pathSegments = pathname.split("/");
@@ -49,23 +58,6 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
   };
 
   const activeTab = getActiveTab();
-
-  const sidebarItems = [
-    { id: "dashboard", label: "Dashboard", icon: BarChart3, path: "/admin" },
-    { id: "leads", label: "Leads", icon: FileText, path: "/admin/leads" },
-    {
-      id: "contractors",
-      label: "Contractors",
-      icon: Users,
-      path: "/admin/contractors",
-    },
-    {
-      id: "settings",
-      label: "Settings",
-      icon: Settings,
-      path: "/admin/settings",
-    },
-  ];
 
   return (
     <div className="h-screen bg-gray-50 flex overflow-hidden">
@@ -102,7 +94,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
         <div className="flex flex-col flex-1 min-h-0">
           <nav className="flex-1 overflow-y-auto px-4 py-4">
             <div className="space-y-2">
-              {sidebarItems.map((item) => (
+              {sidebarItems.map((item: sidebarItemsType) => (
                 <Link
                   key={item.id}
                   href={item.path}
@@ -131,10 +123,10 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  Admin User
+                  {loading ? 'Loading...' : getCurrentAdminName()}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  admin@roofingcrm.com
+                  {loading ? 'Loading...' : admin}
                 </p>
               </div>
             </div>
@@ -171,11 +163,11 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
                 </div>
               </div>
               <Button
-                  onClick={() => setShowLeadsRequestModal(true)}
-                  className="bg-[#122E5F] hover:bg-[#0f2347] text-white"
-                >
-                  <span>Leads Request</span>
-                </Button>
+                onClick={() => setShowLeadsRequestModal(true)}
+                className="bg-[#122E5F] hover:bg-[#0f2347] text-white"
+              >
+                <span>Leads Request</span>
+              </Button>
             </div>
           </div>
         </div>
@@ -205,91 +197,202 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
                 <h2 className="text-xl font-bold text-gray-900 mb-1">
                   Requested Leads
                 </h2>
-                <p className="text-sm text-gray-600">Browse and request leads for your business</p>
+                <p className="text-sm text-gray-600">
+                  Browse and manage lead requests
+                </p>
               </div>
 
-              {/* Leads Table */}
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-0">
-                  <div className="overflow-auto max-h-64">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Zip Code
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Phone
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            No. of Leads
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Send Leads
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Pending Leads
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {requestLeads.map((lead: requestLeadType) => (
-                          <tr key={lead.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div>
-                                <div className="text-sm font-bold text-[#122E5F]">
-                                  {lead.firstName} {lead.lastName}
-                                </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                                <span className="text-sm font-medium text-gray-900">
-                                  {lead.zipCode}
-                                </span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">
-                              <div className="flex items-center">
-                                <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                {lead.phoneno}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm font-medium text-gray-900">
-                                {lead.noOfLeads}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm font-medium text-gray-900">
-                                {lead.receivedLeads}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm font-medium text-gray-900">
-                                {lead.pendingLeads}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`text-sm font-bold ${lead.status === 'Assign' ? 'text-green-500' : 'text-yellow-500'}`}
-                              >
-                                {lead.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Search Bar */}
+              <div className="mb-6">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    type="text"
+                    placeholder="Search Leads..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#122E5F] focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Tabs */}
+              <Tabs defaultValue="assign" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
+                  <TabsTrigger value="assign" className="text-sm font-medium">
+                    Assign (
+                    {
+                      filteredLeads.filter((lead) => lead.status === "Assign")
+                        .length
+                    }
+                    )
+                  </TabsTrigger>
+                  <TabsTrigger value="pending" className="text-sm font-medium">
+                    Pending (
+                    {
+                      filteredLeads.filter((lead) => lead.status === "Pending")
+                        .length
+                    }
+                    )
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Assign Tab */}
+                <TabsContent value="assign">
+                  <Card className="border-0 shadow-lg">
+                    <CardContent className="p-0">
+                      <div className="overflow-auto max-h-64">
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Name
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Zip Code
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Phone
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                No. of Leads
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Send Leads
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {filteredLeads
+                              .filter((lead) => lead.status === "Assign")
+                              .map((lead: requestLeadType) => (
+                                <tr key={lead.id} className="hover:bg-gray-50">
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div>
+                                      <div className="text-sm font-bold text-[#122E5F]">
+                                        {lead.firstName} {lead.lastName}
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                      <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span className="text-sm font-medium text-gray-900">
+                                        {lead.zipCode}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-black">
+                                    <div className="flex items-center">
+                                      <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                      {lead.phoneno}
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                                    <span className="text-sm font-medium text-gray-900">
+                                      {lead.noOfLeads}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                                    <span className="text-sm font-medium text-gray-900">
+                                      {lead.receivedLeads}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className="text-sm font-bold text-green-500">
+                                      {lead.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                {/* Pending Tab */}
+                <TabsContent value="pending">
+                  <Card className="border-0 shadow-lg">
+                    <CardContent className="p-0">
+                      <div className="overflow-auto max-h-64">
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Name
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Zip Code
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Phone
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                No. of Leads
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Pending Leads
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {filteredLeads
+                              .filter((lead) => lead.status === "Pending")
+                              .map((lead: requestLeadType) => (
+                                <tr key={lead.id} className="hover:bg-gray-50">
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div>
+                                      <div className="text-sm font-bold text-[#122E5F]">
+                                        {lead.firstName} {lead.lastName}
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center">
+                                      <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                                      <span className="text-sm font-medium text-gray-900">
+                                        {lead.zipCode}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-black">
+                                    <div className="flex items-center">
+                                      <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                      {lead.phoneno}
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                                    <span className="text-sm font-medium text-gray-900">
+                                      {lead.noOfLeads}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                                    <span className="text-sm font-medium text-gray-900">
+                                      {lead.pendingLeads}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap">
+                                    <span className="text-sm font-bold text-yellow-500">
+                                      {lead.status}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
 
               {/* Close Button */}
               <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">

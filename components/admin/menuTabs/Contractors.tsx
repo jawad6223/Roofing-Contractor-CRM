@@ -11,12 +11,13 @@ import {
   Eye,
   Target,
   X,
+  Globe,
   ChevronLeft,
   ChevronRight,
   Phone,
   Mail,
-  User,
   Search,
+  FileText,
 } from "lucide-react";
 import { UserCheck } from "lucide-react";
 import { contractors } from "./Data";
@@ -37,7 +38,7 @@ export const Contractors = () => {
   const filteredContractors = contractors.filter(contractor => 
     contractor.fullName.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
     contractor.phoneno.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-    contractor.location.toLowerCase().includes(contractorSearchTerm.toLowerCase())
+    contractor.businessAddress.toLowerCase().includes(contractorSearchTerm.toLowerCase())
   );
 
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -158,7 +159,7 @@ export const Contractors = () => {
                     Email Address
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
+                    Business Address
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
@@ -186,7 +187,7 @@ export const Contractors = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900 flex items-center">
                         <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                        {contractor.location}
+                        {contractor.businessAddress}
                       </span>
                     </td>
                     <td className="px-6 py-4 flex items-center gap-2 whitespace-nowrap">
@@ -348,13 +349,22 @@ export const Contractors = () => {
                     {selectedContractor.email}
                   </p>
                 </div>
-                <div className="col-span-2">
+                <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Location
+                    Business Address
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
                     <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedContractor.location}
+                    {selectedContractor.businessAddress}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Service Radius
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <Globe className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedContractor.serviceRadius}
                   </p>
                 </div>
               </div>
@@ -449,7 +459,7 @@ export const Contractors = () => {
       {/* Assign Lead Modal */}
       {showAssignModal && selectedLead && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 relative animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[100vh] overflow-hidden">
             {/* Close Button */}
             <button
               onClick={handleCloseAssignModal}
@@ -462,7 +472,7 @@ export const Contractors = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <User className="h-6 w-6 text-[#286BBD]" />
+                  <FileText className="h-6 w-6 text-[#286BBD]" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">
                   Available Leads
@@ -485,7 +495,7 @@ export const Contractors = () => {
               </div>
 
               {/* Leads List */}
-              <div className="max-h-96 overflow-y-auto">
+              <div className="max-h-64 overflow-y-auto">
                 <div className="space-y-3">
                   {filteredLeads.length > 0 ? (
                     filteredLeads.map((lead: LeadType) => (

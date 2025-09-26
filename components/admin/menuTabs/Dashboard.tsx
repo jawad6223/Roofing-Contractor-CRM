@@ -137,7 +137,7 @@ export const Dashboard = () => {
                       {contractor.fullName}
                     </p>
                     <p className="text-sm text-gray-600">
-                      {contractor.location}
+                      {contractor.businessAddress}
                     </p>
                   </div>
                   <div className="flex flex-col items-end space-y-2">

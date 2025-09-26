@@ -11,6 +11,7 @@ import { ProtectedRoute } from '@/components/Auth/ProtectedRoute';
 export default function Home() {
   return (
     <ProtectedRoute requireAuth={false}>
+    <>
       <Header />
       <Hero />
       <HowItWorks />
@@ -19,6 +20,7 @@ export default function Home() {
       <SuccessStories />
       <FAQ />
       <Footer />
+      </>
     </ProtectedRoute>
   );
 }

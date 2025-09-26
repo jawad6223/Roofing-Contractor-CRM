@@ -8,6 +8,13 @@ export interface AdminSectionPageProps {
   };
 }
 
+export interface sidebarItemsType {
+  id: string;
+  label: string;
+  icon: React.ComponentType<any>;
+  path: string;
+}
+
 export interface LeadType {
   id: number;
   firstName: string;
@@ -27,7 +34,7 @@ export interface ContractorType {
   title: string;
   phoneno: string;
   email: string;
-  location: string;
+  businessAddress: string;
   serviceRadius: string;
 }
 

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Search, Target, Plus, Download, Eye, ChevronDown, X, UserPlus, ChevronLeft, ChevronRight, Check, MapPin, MoreHorizontal } from 'lucide-react'
+import { Search, Target, Plus, Download, Eye, ChevronDown, X, UserPlus, ChevronLeft, ChevronRight, Check, FileText, MoreHorizontal } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
   DropdownMenu,
@@ -162,7 +162,7 @@ export const Leads = () => {
     const filteredContractors = contractors.filter(contractor => 
       contractor.fullName.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
       contractor.phoneno.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.location.toLowerCase().includes(contractorSearchTerm.toLowerCase())
+      contractor.businessAddress.toLowerCase().includes(contractorSearchTerm.toLowerCase())
     );
 
     const handleExportToExcel = () => {
@@ -514,7 +514,7 @@ export const Leads = () => {
                     {/* Header */}
                     <div className="text-center mb-6">
                       <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <Eye className="h-6 w-6 text-[#286BBD]" />
+                        <FileText className="h-6 w-6 text-[#286BBD]" />
                       </div>
                       <h2 className="text-xl font-bold text-gray-900 mb-1">
                         Lead Details
@@ -767,7 +767,7 @@ export const Leads = () => {
                     <div className="flex items-center justify-between mb-6">
                       <div className="text-center flex-1">
                         <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Target className="h-6 w-6 text-[#286BBD]" />
+                          <FileText className="h-6 w-6 text-[#286BBD]" />
                         </div>
                         <h2 className="text-xl font-bold text-gray-900 mb-1">
                           Assign Lead to Contractor
@@ -775,16 +775,6 @@ export const Leads = () => {
                         <p className="text-sm text-gray-600">
                           Select contractors to assign lead: <span className="font-semibold text-[#286BBD]">{leadToAssign.firstName} {leadToAssign.lastName}</span>
                         </p>
-                      </div>
-                      <div className="ml-4">
-                        <Button
-                          onClick={handleSelectContractor}
-                          disabled={!selectedContractor}
-                          className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
-                        >
-                          <Check className="h-4 w-4 mr-2" />
-                          Select Contractor
-                        </Button>
                       </div>
                     </div>
 
@@ -828,7 +818,7 @@ export const Leads = () => {
                             <div className="text-right">
                               <div className="flex items-center space-x-4">
                                 <div className="text-right">
-                                  <p className="text-sm font-medium text-[#286BBD]">{contractor.location}</p>
+                                  <p className="text-sm font-medium text-[#286BBD]">{contractor.businessAddress}</p>
                                   <p className="text-xs text-gray-500">Location</p>
                                 </div>
                                 <div className="text-right">
@@ -862,6 +852,14 @@ export const Leads = () => {
                       >
                         Cancel
                       </Button>
+                        <Button
+                          onClick={handleSelectContractor}
+                          disabled={!selectedContractor}
+                          className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        >
+                          <Check className="h-4 w-4 mr-2" />
+                          Select Contractor
+                        </Button>
                     </div>
                   </div>
                 </div>

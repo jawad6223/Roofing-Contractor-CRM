@@ -17,3 +17,9 @@ export interface FormDataType {
       secondary_text: string;
     };
   }
+
+  export interface AdminProtectedRouteProps {
+    children: React.ReactNode;
+    requireAuth?: boolean;
+    redirectTo?: string;
+  }
