@@ -2,28 +2,24 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ProtectedRouteProps } from '@/types/AuthType'
+import { AdminProtectedRouteProps } from '@/types/AuthType'
 
 
-export const ProtectedRoute = ({ 
+export const AdminProtectedRoute = ({ 
   children, 
   requireAuth = true, 
-  redirectTo = '/login' 
-}: ProtectedRouteProps) => {
+  redirectTo = '/adminLogin' 
+}: AdminProtectedRouteProps) => {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [shouldRender, setShouldRender] = useState(false)
 
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('loggedInUser')
+    const loggedInAdmin = localStorage.getItem('adminLoggedInUser')
     
-    if (requireAuth && !loggedInUser) {
+    if (requireAuth && !loggedInAdmin) {
       router.push(redirectTo)
-    }
-     else if (!requireAuth && loggedInUser) {
-      router.push('/dashboard')
-    }
-     else {
+    } else {
       setShouldRender(true)
     }
     

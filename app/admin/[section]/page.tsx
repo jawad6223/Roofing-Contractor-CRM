@@ -31,8 +31,10 @@ export default function AdminSectionPage({ params }: AdminSectionPageProps) {
   };
 
   return (
-    <ProtectedRoute requireAuth={true}>
+    // <ProtectedRoute requireAuth={true}>
+  <>
       {renderSection()}
-    </ProtectedRoute>
+      </>
+    // </ProtectedRoute>
   );
 }
