@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { User, EyeOff, Eye, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { FormDataType } from "@/types/AuthType";
 import { toast } from "react-toastify";
 
 // 1. Define validation schema
@@ -26,10 +27,7 @@ const schema = yup.object().shape({
 });
 
 // 2. Form data type
-type FormData = {
-  emailAddress: string;
-  password: string;
-};
+
 
 export default function LoginModal() {
 
@@ -43,12 +41,12 @@ export default function LoginModal() {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormData>({
+  } = useForm<FormDataType>({
     resolver: yupResolver(schema),
   });
 
   // 4. On form submit
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: FormDataType) => {
 
     if (data.emailAddress === "jawad.dev921@gmail.com" && data.password === "@Test123") {
       toast.success("Login successful.");
@@ -65,7 +63,7 @@ export default function LoginModal() {
 
     const existingUsers = JSON.parse(localStorage.getItem("userInfo") || "[]");
     const isValid = existingUsers.some(
-      (user: { emailAddress: string; password: string }) =>
+      (user: FormDataType) =>
         user.emailAddress === data.emailAddress && user.password === data.password
     );
 

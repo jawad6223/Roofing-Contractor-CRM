@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { UserCheck } from "lucide-react";
 import { contractors } from "./Data";
-import { ContractorType } from "@/types/AdminTypes";
+import { ContractorType, LeadType } from "@/types/AdminTypes";
 import { allLeads } from "./Data";
 
 
@@ -28,7 +28,7 @@ export const Contractors = () => {
   const [selectedContractor, setSelectedContractor] =useState<ContractorType>();
   const [showModal, setShowModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [selectedLead, setSelectedLead] = useState<LeadType>();
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [contractorSearchTerm, setContractorSearchTerm] = useState("");
@@ -40,7 +40,7 @@ export const Contractors = () => {
     contractor.location.toLowerCase().includes(contractorSearchTerm.toLowerCase())
   );
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 3;
   const totalPages = Math.ceil(filteredContractors.length / itemsPerPage);
 
@@ -69,7 +69,7 @@ export const Contractors = () => {
     handleCloseModal();
   };
 
-  const handleAssignLead = (lead: any) => {
+  const handleAssignLead = (lead: LeadType) => {
     setSelectedLead(lead);
     setShowAssignModal(true);
     setSelectedLeads([]);
@@ -78,7 +78,6 @@ export const Contractors = () => {
 
   const handleCloseAssignModal = () => {
     setShowAssignModal(false);
-    setSelectedLead(null);
     setSelectedLeads([]);
     setSearchTerm("");
   };
@@ -167,7 +166,7 @@ export const Contractors = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentData.map((contractor) => (
+                {currentData.map((contractor: ContractorType) => (
                   <tr key={contractor.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-bold text-[#122E5F]">
@@ -195,7 +194,7 @@ export const Contractors = () => {
                         size="sm"
                         variant="outline"
                         className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
-                        onClick={() => handleViewContractor(contractor as ContractorType)}
+                        onClick={() => handleViewContractor(contractor)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
                         View
@@ -204,7 +203,7 @@ export const Contractors = () => {
                         size="sm"
                         variant="outline"
                         className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
-                        onClick={() => handleAssignLead(contractor)}
+                        onClick={() => handleAssignLead(contractor as unknown as LeadType)}
                       >
                         <Target className="h-4 w-4 mr-1" />
                         Assign
@@ -390,7 +389,7 @@ export const Contractors = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {allLeads.slice(0, 3).map((lead, index) => (
+                        {allLeads.slice(0, 3).map((lead: LeadType, index: number) => (
                           <tr key={lead.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div>
@@ -489,7 +488,7 @@ export const Contractors = () => {
               <div className="max-h-96 overflow-y-auto">
                 <div className="space-y-3">
                   {filteredLeads.length > 0 ? (
-                    filteredLeads.map((lead) => (
+                    filteredLeads.map((lead: LeadType) => (
                     <div
                       key={lead.id}
                       className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors"

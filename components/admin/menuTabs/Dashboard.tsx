@@ -8,16 +8,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { dashboardCardType } from '@/types/AdminTypes';
 import { dashboardCard, allLeads, contractors } from './Data';
 import Link from 'next/link';
+import { LeadType, ContractorType } from '@/types/AdminTypes';
 
-interface DashboardProps {
-  onTabChange?: (tab: string) => void;
-}
 
 export const Dashboard = () => {
-  const [selectedLead, setSelectedLead] = useState<any>(null);
-  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState<LeadType>();
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
 
-  const handleLeadClick = (lead: any) => {
+  const handleLeadClick = (lead: LeadType) => {
     setSelectedLead(lead);
     setIsLeadModalOpen(true);
   };
@@ -78,7 +76,7 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {allLeads.slice(0, 3).map((lead, index) => (
+              {allLeads.slice(0, 3).map((lead: LeadType, index: number) => (
                 <div 
                 key={index} 
                 onClick={() => handleLeadClick(lead)}
@@ -129,7 +127,7 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {contractors.slice(0, 3).map((contractor) => (
+              {contractors.slice(0, 3).map((contractor: ContractorType) => (
                 <div
                   key={contractor.id}
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"

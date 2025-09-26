@@ -3,33 +3,49 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Users, FileText, DollarSign, Bell, Settings, BarChart3, Menu, X, LogOut, User, } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { requestLeads } from "./menuTabs/Data";
+import { requestLeadType } from "@/types/AdminTypes";
+import {
+  Users,
+  FileText,
+  DollarSign,
+  Bell,
+  Settings,
+  BarChart3,
+  Menu,
+  X,
+  LogOut,
+  User,
+  MapPin,
+  Phone,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { AdminDashboardProps } from "@/types/AdminTypes";
 
-interface AdminDashboardProps {
-  children: React.ReactNode;
-}
+
 
 export default function AdminDashboard({ children }: AdminDashboardProps) {
   const { logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLeadsRequestModal, setShowLeadsRequestModal] = useState(false);
   const pathname = usePathname();
 
   const handleLogout = () => {
-    logout()
+    logout();
   };
 
   const getActiveTab = () => {
-    const pathSegments = pathname.split('/');
+    const pathSegments = pathname.split("/");
     const section = pathSegments[pathSegments.length - 1];
-    
-    if (pathname === '/admin' || section === 'admin') {
-      return 'dashboard';
+
+    if (pathname === "/admin" || section === "admin") {
+      return "dashboard";
     }
-    
-    return section || 'dashboard';
+
+    return section || "dashboard";
   };
 
   const activeTab = getActiveTab();
@@ -37,8 +53,18 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
   const sidebarItems = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3, path: "/admin" },
     { id: "leads", label: "Leads", icon: FileText, path: "/admin/leads" },
-    { id: "contractors", label: "Contractors", icon: Users, path: "/admin/contractors" },
-    { id: "settings", label: "Settings", icon: Settings, path: "/admin/settings" },
+    {
+      id: "contractors",
+      label: "Contractors",
+      icon: Users,
+      path: "/admin/contractors",
+    },
+    {
+      id: "settings",
+      label: "Settings",
+      icon: Settings,
+      path: "/admin/settings",
+    },
   ];
 
   return (
@@ -58,7 +84,13 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
         } transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 lg:flex lg:flex-col lg:h-full`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 flex-shrink-0">
-          <Image src="/roofing-logo.png" alt="logo" width={160} height={160} className="object-contain cursor-pointer mt-2" />
+          <Image
+            src="/roofing-logo.png"
+            alt="logo"
+            width={160}
+            height={160}
+            className="object-contain cursor-pointer mt-2"
+          />
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
@@ -138,17 +170,124 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
                   </h1>
                 </div>
               </div>
+              <Button
+                  onClick={() => setShowLeadsRequestModal(true)}
+                  className="bg-[#122E5F] hover:bg-[#0f2347] text-white"
+                >
+                  <span>Leads Request</span>
+                </Button>
             </div>
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 lg:p-8">
-            {children}
-          </div>
+          <div className="p-4 sm:p-6 lg:p-8">{children}</div>
         </div>
       </div>
+      {/* Leads Request Modal */}
+      {showLeadsRequestModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden">
+            <button
+              onClick={() => setShowLeadsRequestModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="p-6">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-[#122E5F]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Users className="h-6 w-6 text-[#122E5F]" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Requested Leads
+                </h2>
+                <p className="text-sm text-gray-600">Browse and request leads for your business</p>
+              </div>
+
+              {/* Leads Table */}
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-0">
+                  <div className="overflow-auto max-h-64">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Zip Code
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Phone
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            No. of Leads
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {requestLeads.map((lead: requestLeadType) => (
+                          <tr key={lead.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm font-bold text-[#122E5F]">
+                                  {lead.firstName} {lead.lastName}
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                                <span className="text-sm font-medium text-gray-900">
+                                  {lead.zipCode}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-black">
+                              <div className="flex items-center">
+                                <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.phoneno}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.noOfLeads}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`text-sm font-bold ${lead.status === 'Assign' ? 'text-green-500' : 'text-yellow-500'}`}
+                              >
+                                {lead.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Close Button */}
+              <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
+                <Button
+                  onClick={() => setShowLeadsRequestModal(false)}
+                  className="px-6 py-2 bg-[#122E5F] hover:bg-[#0f2347] text-white"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

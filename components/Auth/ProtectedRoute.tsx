@@ -2,12 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ProtectedRouteProps } from '@/types/AuthType'
 
-interface ProtectedRouteProps {
-  children: React.ReactNode
-  requireAuth?: boolean
-  redirectTo?: string
-}
 
 export const ProtectedRoute = ({ 
   children, 

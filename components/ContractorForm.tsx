@@ -9,19 +9,13 @@ import { Label } from '@/components/ui/label';
 import { CheckCircle, ArrowLeft, Eye, EyeOff, ChevronDown, X, LogIn } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { PlacePrediction } from '@/types/AuthType';
 
 // Google Places API configuration
 const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY || '';
 
 // Interface for Google Places prediction
-interface PlacePrediction {
-  place_id: string;
-  description: string;
-  structured_formatting: {
-    main_text: string;
-    secondary_text: string;
-  };
-}
+
 
 export function ContractorForm() {
   const router = useRouter();
