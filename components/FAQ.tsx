@@ -2,8 +2,9 @@
 
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Minus, Shield, Clock, DollarSign, Users, CheckCircle, Star, HelpCircle, ArrowRight } from 'lucide-react';
+import { Plus, Minus, Shield, Clock, Users, HelpCircle } from 'lucide-react';
 import { useState } from 'react';
+import { faqs } from './utils/data';
 
 export function FAQ() {
   const [openItem, setOpenItem] = useState<number | null>(0);
@@ -11,49 +12,6 @@ export function FAQ() {
   const toggleItem = (index: number) => {
     setOpenItem(prev => prev === index ? null : index);
   };
-
-  const faqs = [
-    {
-      question: "How quickly will I receive my first leads?",
-      answer: "Your first 5 free leads will be delivered within 24-48 hours of account approval. We verify your license and insurance first to ensure quality for homeowners. After that, you'll receive 2-5 new leads per week based on your service area and capacity.",
-      icon: Clock
-    },
-    {
-      question: "What makes your leads different from other companies?",
-      answer: "Our leads are pre-qualified with confirmed insurance claims and verified storm damage. Unlike other services that sell the same lead to 10+ contractors, we limit each lead to maximum 3 contractors in your area. Every homeowner has already filed their claim and been approved by their insurance company.",
-      icon: Star
-    },
-    {
-      question: "What's your money-back guarantee policy?",
-      answer: "If you're not satisfied with your first 5 leads, we'll refund every penny within 30 days. No questions asked, no fine print. We're confident in our lead quality because 78% of our contractors close at least 3 out of their first 5 leads.",
-      icon: Shield
-    },
-    {
-      question: "How much can I expect to earn per lead?",
-      answer: "Our contractors average $28,000 per closed deal, with most insurance claims ranging from $15,000 to $45,000. With a 78% average conversion rate, contractors typically earn $21,840 for every lead they receive ($28K × 78% conversion rate).",
-      icon: DollarSign
-    },
-    {
-      question: "Do you require contracts or monthly commitments?",
-      answer: "No contracts, no monthly fees, no commitments. You only pay for leads you receive after your free trial. You can pause or cancel anytime, and you keep all the leads you've already received. Most contractors stay because the ROI is exceptional.",
-      icon: CheckCircle
-    },
-    {
-      question: "What areas do you service?",
-      answer: "We currently service all major metropolitan areas in Texas, Oklahoma, Kansas, Nebraska, and Colorado - the primary hail belt regions. We're expanding to additional storm-prone states throughout 2025. Check if your area is covered during signup.",
-      icon: Users
-    },
-    {
-      question: "How do you verify the leads are legitimate?",
-      answer: "Every lead goes through our 4-step verification: (1) Insurance policy verification, (2) Professional damage assessment with photos, (3) Homeowner qualification call, (4) Claim approval confirmation. We reject 60% of potential leads that don't meet our standards.",
-      icon: Shield
-    },
-    {
-      question: "Can I choose my service radius and lead volume?",
-      answer: "Yes! You set your service radius (typically 25-50 miles) and preferred lead volume (2-10 leads per week). You can adjust these settings anytime in your CRM dashboard. We respect your capacity and won't overwhelm you with more leads than you can handle.",
-      icon: Users
-    }
-  ];
 
   return (
     <section className="py-8 lg:py-12 bg-gradient-to-br from-gray-50 via-blue-50/20 to-white relative overflow-hidden">

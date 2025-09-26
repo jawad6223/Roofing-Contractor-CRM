@@ -3,39 +3,11 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { scroller } from 'react-scroll';
-import { UserCheck, FileText, Zap, DollarSign, ArrowRight, CheckCircle, Clock, Shield, Star } from 'lucide-react';
+import { ArrowRight, CheckCircle, Clock, Shield, Star } from 'lucide-react';
+import { steps } from './utils/data';
 
 export function HowItWorks() {
-  const steps = [
-    {
-      icon: UserCheck,
-      number: '01',
-      title: 'Sign Up & Get Verified',
-      description: 'Complete our quick contractor verification process. Licensed, insured contractors only.',
-      details: ['License verification', 'Insurance check', 'Background screening']
-    },
-    {
-      icon: FileText,
-      title: 'Receive Premium Leads',
-      number: '02',
-      description: 'Get pre-qualified homeowners with confirmed hail damage and approved insurance claims.',
-      details: ['Insurance pre-approved', 'Damage confirmed', 'Ready to hire']
-    },
-    {
-      icon: Zap,
-      title: 'Connect & Close',
-      number: '03',
-      description: 'Contact leads through our CRM system and close deals faster with qualified prospects.',
-      details: ['CRM dashboard access', 'Lead management tools', 'Follow-up automation']
-    },
-    {
-      icon: DollarSign,
-      title: 'Get Paid & Grow',
-      number: '04',
-      description: 'Complete projects with guaranteed insurance payments and scale your roofing business.',
-      details: ['Guaranteed payments', 'No collection issues', 'Business growth']
-    }
-  ];
+  
 
   return (
     <section className="py-8 lg:py-12 bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 relative overflow-hidden">

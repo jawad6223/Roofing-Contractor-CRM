@@ -2,28 +2,13 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Shield, Award, Zap, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { reasons } from './utils/data';
 
 export function WhyChooseUs() {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-  const reasons = [
-    {
-      icon: Shield,
-      title: 'Quality Assurance',
-      description: 'We are committed to delivering high-quality leads to our contractors. We have a rigorous quality assurance process in place to ensure that our leads meet the highest standards.'
-    },
-    {
-      icon: Award,
-      title: 'Experience',
-      description: 'Our team has years of experience in the roofing industry, giving us the knowledge and skills needed to deliver exceptional results for contractors.'
-    },
-    {
-      icon: Zap,
-      title: 'Innovation',
-      description: 'We pride ourselves on staying up-to-date with the latest industry trends and technologies, bringing innovation and creativity to every lead we provide.'
-    }
-  ];
+  
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => {

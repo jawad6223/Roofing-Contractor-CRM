@@ -3,47 +3,12 @@ import React, { useState } from 'react';
 import { scroller } from 'react-scroll';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { stories } from './utils/data';
 
 export function SuccessStories() {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
 
-  const stories = [
-    {
-      name: 'Mike Rodriguez',
-      company: 'Elite Roofing Solutions',
-      location: 'Houston, TX',
-      rating: 5.0,
-      testimonial: "These leads are the real deal. Every single one has been pre-qualified with insurance approval. I've closed 85% of the leads I've received and my revenue has tripled in just 6 months."
-    },
-    {
-      name: 'Sarah Johnson',
-      company: 'Apex Storm Restoration',
-      location: 'Dallas, TX',
-      rating: 4.9,
-      testimonial: "Working with Roof Claim Pros on our lead generation was a fantastic experience. Their team was professional, responsive, and delivered qualified prospects that exceeded our expectations."
-    },
-    {
-      name: 'David Chen',
-      company: 'Storm Guard Roofing',
-      location: 'Austin, TX',
-      rating: 5.0,
-      testimonial: "Best investment I've made for my business. The CRM system keeps me organized, and the leads keep coming. I've hired 3 new crews just to keep up with demand from these quality leads."
-    },
-    {
-      name: 'Jennifer Martinez',
-      company: 'Premier Roofing Co',
-      location: 'San Antonio, TX',
-      rating: 4.8,
-      testimonial: "The quality of leads from Roof Claim Pros is unmatched. Homeowners are ready to sign contracts, not just getting quotes. My conversion rate has never been higher."
-    },
-    {
-      name: 'Robert Wilson',
-      company: 'Reliable Storm Solutions',
-      location: 'Fort Worth, TX',
-      rating: 5.0,
-      testimonial: "I was skeptical at first, but these insurance-backed leads have transformed my business. Every lead comes with verified damage and approved claims. It's a game changer."
-    }
-  ];
+  
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) => {

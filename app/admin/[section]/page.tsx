@@ -1,14 +1,10 @@
 "use client";
 
 import { ProtectedRoute } from '@/components/Auth/ProtectedRoute';
-import { Dashboard, Leads, Contractors, LeadPrice, Setting } from '@/components/admin/menuTabs/Index';
+import { Dashboard, Leads, Contractors, Setting } from '@/components/admin/menuTabs/Index';
 import { notFound } from 'next/navigation';
+import { AdminSectionPageProps } from '@/types/AdminTypes';
 
-interface AdminSectionPageProps {
-  params: {
-    section: string;
-  };
-}
 
 const validSections = ['dashboard', 'leads', 'contractors', 'settings'];
 

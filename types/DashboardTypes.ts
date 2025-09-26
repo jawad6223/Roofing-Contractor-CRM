@@ -1,3 +1,9 @@
+export interface DashboardSectionPageProps {
+  params: {
+    section: string;
+  };
+}
+
 export interface CrmDashboardProps {
   children: React.ReactNode;
 }
