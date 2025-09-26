@@ -10,37 +10,37 @@ import { CheckCircle, ArrowLeft, Eye, EyeOff, ChevronDown, X, LogIn } from 'luci
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { PlacePrediction } from '@/types/AuthType';
+import { ContractorType } from '@/types/Types';
 
 // Google Places API configuration
 const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY || '';
 
-// Interface for Google Places prediction
 
 
 export function ContractorForm() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [addressSuggestions, setAddressSuggestions] = useState<PlacePrediction[]>([]);
-  const [showAddressSuggestions, setShowAddressSuggestions] = useState(false);
+  const [showAddressSuggestions, setShowAddressSuggestions] = useState<boolean>(false);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
   const addressInputRef = useRef<HTMLInputElement>(null);
 
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<ContractorType | null>(null);
     useEffect(() => {
         const userInfo = localStorage.getItem('userInfo');
         if (userInfo) {
-            const userInfoObj = JSON.parse(userInfo);
+            const userInfoObj = JSON.parse(userInfo) as ContractorType;
             setUserInfo(userInfoObj);
         }
     }, [])
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContractorType>({
     fullName: '',
     title: '',
     phoneNumber: '',
@@ -63,7 +63,7 @@ export function ContractorForm() {
           console.log(data);
       
           if (data.predictions) {
-            const suggestions: PlacePrediction[] = data.predictions.map((prediction: any) => ({
+            const suggestions: PlacePrediction[] = data.predictions.map((prediction: PlacePrediction) => ({
               place_id: prediction.place_id,
               description: prediction.description,
               structured_formatting: {

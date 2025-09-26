@@ -2,31 +2,10 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Star, Shield, Users } from 'lucide-react';
+import { packages } from './utils/data';
 
 export function PricingPackages() {
-  const packages = [
-    {
-      name: 'Starter',
-      freeLeads: '5',
-      pricePerLead: '$89',
-      features: ['Basic CRM access', 'Email support', 'Lead tracking'],
-      popular: false
-    },
-    {
-      name: 'Professional',
-      freeLeads: '10',
-      pricePerLead: '$69',
-      features: ['Full CRM suite', 'Priority support', 'Territory protection'],
-      popular: true
-    },
-    {
-      name: 'Enterprise',
-      freeLeads: '20',
-      pricePerLead: '$49',
-      features: ['Dedicated manager', 'Custom territory', 'Phone support'],
-      popular: false
-    }
-  ];
+  
 
   return (
     <section className="py-16 lg:py-20 bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50 relative overflow-hidden">

@@ -228,6 +228,12 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
                             No. of Leads
                           </th>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Send Leads
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Pending Leads
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Status
                           </th>
                         </tr>
@@ -256,9 +262,19 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
                                 {lead.phoneno}
                               </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
                               <span className="text-sm font-medium text-gray-900">
                                 {lead.noOfLeads}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.receivedLeads}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-center">
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.pendingLeads}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">

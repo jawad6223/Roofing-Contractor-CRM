@@ -3,12 +3,8 @@
 import { ProtectedRoute } from '@/components/Auth/ProtectedRoute';
 import { DashBoard, CRM, Leads, Setting, Team } from '@/components/dashboard/menuTabs';
 import { notFound } from 'next/navigation';
+import { DashboardSectionPageProps } from '@/types/DashboardTypes';
 
-interface DashboardSectionPageProps {
-  params: {
-    section: string;
-  };
-}
 
 const validSections = ['crm', 'leads', 'settings', 'teams'];
 

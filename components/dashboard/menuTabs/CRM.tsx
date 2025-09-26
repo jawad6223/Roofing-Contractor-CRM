@@ -121,12 +121,12 @@ export const CRM = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-bold text-[#286BBD]">
+                      <span className="text-sm text-gray-900">
                         {lead.phoneno}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-bold text-[#286BBD]">
+                      <span className="text-sm text-gray-900">
                         {lead.email}
                       </span>
                     </td>

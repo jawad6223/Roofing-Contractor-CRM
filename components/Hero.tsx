@@ -1,35 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Users, DollarSign, Clock, CheckCircle } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import { Element } from 'react-scroll';
 import { ContractorForm } from './ContractorForm';
-
+import { stats, benefits } from './utils/data';
 export function Hero() {
-  const stats = [
-    { icon: Users, value: '68%', label: 'Conversion Rate' },
-    { icon: DollarSign, value: '$22K', label: 'Avg. Job Value' },
-    { icon: Clock, value: '24hr', label: 'Response Time' }
-  ];
-
-  const benefits = [
-    {
-      title: 'Pre-Qualified Homeowners',
-      description: 'Every lead has confirmed hail damage and approved insurance claims'
-    },
-    {
-      title: 'Insurance-Backed Projects',
-      description: 'Guaranteed payment through insurance companies - no collection issues'
-    },
-    {
-      title: 'Exclusive Territory Rights',
-      description: 'Limited contractors per area - less competition, higher close rates'
-    },
-    {
-      title: 'Complete CRM System',
-      description: 'Track leads, manage projects, and grow your business efficiently'
-    }
-  ];
 
   return (
     <div className="min-h-screen relative overflow-hidden">

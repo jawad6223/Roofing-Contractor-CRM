@@ -3,37 +3,10 @@ import React from 'react';
 import { scroller } from 'react-scroll';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield, Clock, DollarSign, Star, ArrowRight } from 'lucide-react';
+import { guaranteeStats, verificationProcess } from './utils/data';
 
 export function LeadQualityGuarantee() {
-  const guaranteeStats = [
-    { value: '78%', label: 'Average Conversion Rate', icon: Star },
-    { value: '$28K', label: 'Average Job Value', icon: DollarSign },
-    { value: '24hr', label: 'Lead Freshness', icon: Clock },
-    { value: '100%', label: 'Money Back Guarantee', icon: Shield }
-  ];
-
-  const verificationProcess = [
-    {
-      step: '01',
-      title: 'Insurance Verification',
-      description: 'We verify active insurance policies and confirm claim approval status.'
-    },
-    {
-      step: '02',
-      title: 'Damage Assessment',
-      description: 'Professional evaluation confirms legitimate storm damage requiring repairs.'
-    },
-    {
-      step: '03',
-      title: 'Homeowner Screening',
-      description: 'We qualify homeowners for timeline, budget, and decision-making authority.'
-    },
-    {
-      step: '04',
-      title: 'Lead Delivery',
-      description: 'Qualified leads are delivered to you within 24 hours with full documentation.'
-    }
-  ];
+  
 
   return (
     <section className="py-8 lg:py-12 bg-white relative overflow-hidden">

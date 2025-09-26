@@ -2,6 +2,12 @@ export interface AdminDashboardProps {
   children: React.ReactNode;
 }
 
+export interface AdminSectionPageProps {
+  params: {
+    section: string;
+  };
+}
+
 export interface LeadType {
   id: number;
   firstName: string;
@@ -48,6 +54,8 @@ export interface requestLeadType {
   lastName: string;
   phoneno: string;
   noOfLeads: number;
+  receivedLeads: number;
+  pendingLeads: number;
   zipCode: string;
   status: string;
 }
