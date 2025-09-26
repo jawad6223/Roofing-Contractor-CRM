@@ -3,7 +3,7 @@ import React from 'react';
 import { scroller } from 'react-scroll';
 import { Card, CardContent } from '@/components/ui/card';
 import { Shield, Clock, DollarSign, Star, ArrowRight } from 'lucide-react';
-import { guaranteeStats, verificationProcess } from './utils/data';
+import { guaranteeStats, verificationProcess } from '@/lib/componentData';
 
 export function LeadQualityGuarantee() {
   

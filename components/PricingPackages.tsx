@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, Star, Shield, Users } from 'lucide-react';
-import { packages } from './utils/data';
+import { packages } from '@/lib/componentData';
 
 export function PricingPackages() {
   

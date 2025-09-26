@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { reasons } from './utils/data';
+import { reasons } from '@/lib/componentData';
 
 export function WhyChooseUs() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);

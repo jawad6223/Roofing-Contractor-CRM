@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { scroller } from 'react-scroll';
 import { Card, CardContent } from '@/components/ui/card';
 import { Star, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import { stories } from './utils/data';
+import { stories } from '@/lib/componentData';
 
 export function SuccessStories() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);

@@ -4,7 +4,7 @@ import React from 'react';
 import { CheckCircle } from 'lucide-react';
 import { Element } from 'react-scroll';
 import { ContractorForm } from './ContractorForm';
-import { stats, benefits } from './utils/data';
+import { stats, benefits } from '@/lib/componentData';
 export function Hero() {
 
   return (
