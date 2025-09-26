@@ -1,3 +1,7 @@
+export interface AdminDashboardProps {
+  children: React.ReactNode;
+}
+
 export interface LeadType {
   id: number;
   firstName: string;
@@ -36,4 +40,14 @@ export interface settingType {
   serviceRadius: string;
   businessAddress: string;
   leads: string;
+}
+
+export interface requestLeadType {
+  id: string;
+  firstName: string;
+  lastName: string;
+  phoneno: string;
+  noOfLeads: number;
+  zipCode: string;
+  status: string;
 }

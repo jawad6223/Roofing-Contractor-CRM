@@ -1,4 +1,6 @@
-import { ReactNode } from 'react';
+export interface CrmDashboardProps {
+  children: React.ReactNode;
+}
 
 export interface crmDataType {
   id: string;
@@ -11,7 +13,7 @@ export interface crmDataType {
 }
 
 export interface purchasedLeadType {
-  location: ReactNode;
+  location: string;
   id: string;
   zipCode: string;
   firstName: string;
@@ -26,16 +28,6 @@ export interface purchasedLeadType {
 export interface purchaseFormType {
   zipCode: string;
   quantity: string;
-}
-
-export interface requestLeadType {
-  id: string;
-  firstName: string;
-  lastName: string;
-  phoneno: string;
-  noOfLeads: number;
-  zipCode: string;
-  status: string;
 }
 
 export interface leadsInfoType {

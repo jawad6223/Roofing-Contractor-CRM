@@ -122,6 +122,54 @@ export const allLeads = [
     },
   ];
 
+  export const requestLeads = [
+    {
+      id: '01',
+      firstName: 'John',
+      lastName: 'Smith',
+      phoneno: '(214) 555-0123',
+      noOfLeads: 10,
+      zipCode: '75201',
+      status: 'Pending',
+    },
+    {
+      id: '02',
+      firstName: 'Sarah',
+      lastName: 'Johnson',
+      phoneno: '(214) 555-0456',
+      noOfLeads: 6,
+      zipCode: '75202',
+      status: 'Assign',
+    },
+    {
+      id: '03',
+      firstName: 'Michael',
+      lastName: 'Davis',
+      phoneno: '(214) 555-0789',
+      noOfLeads: 7,
+      zipCode: '75203',
+      status: 'Assign',
+    },
+    {
+      id: '04',
+      firstName: 'Jennifer',
+      lastName: 'Wilson',
+      phoneno: '(214) 555-0321',
+      noOfLeads: 4,
+      zipCode: '75204',
+      status: 'Pending',
+    },
+    {
+      id: '05',
+      firstName: 'David',
+      lastName: 'Chen',
+      phoneno: '(214) 555-0123',
+      noOfLeads: 10,
+      zipCode: '75205',
+      status: 'Assign',
+    },
+  ]
+
   export const pricingTiers = [
     {
       id: 'basic',
