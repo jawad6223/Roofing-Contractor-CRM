@@ -54,8 +54,8 @@ export interface requestLeadType {
   lastName: string;
   phoneno: string;
   noOfLeads: number;
-  receivedLeads: number;
-  pendingLeads: number;
+  receivedLeads: number | string;
+  pendingLeads: number | string;
   zipCode: string;
   status: string;
 }
