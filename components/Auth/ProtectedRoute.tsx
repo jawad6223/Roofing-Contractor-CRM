@@ -20,9 +20,9 @@ export const ProtectedRoute = ({
     if (requireAuth && !loggedInUser) {
       router.push(redirectTo)
     }
-     else if (!requireAuth && loggedInUser) {
-      router.push('/dashboard')
-    }
+    //  else if (!requireAuth && loggedInUser) {
+    //   router.push('/dashboard')
+    // }
      else {
       setShouldRender(true)
     }
