@@ -1,6 +1,17 @@
 import React from 'react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { UserPlus, User, X, Save, Trash2, Pencil } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -82,6 +93,10 @@ export const Team = () => {
     }));
   };
 
+  const handleDeleteMember = (index: number) => {
+    console.log('Deleting team member at index:', index);
+  };
+
   return (
     <>
       <div className="space-y-8">
@@ -141,9 +156,27 @@ export const Team = () => {
                           </div>
                         </div>
                         <div className="flex items-center space-x-3">
-                          <Button variant="outline" size="sm" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Team Member</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this team member? This action cannot be undone and they will lose access to the system.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteMember(index)} className="bg-red-500 hover:bg-red-600">
+                                  Yes, Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                           {editingMember === index ? (
                             <>
                               <Button 

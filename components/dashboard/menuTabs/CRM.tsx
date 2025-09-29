@@ -10,6 +10,7 @@ import {
   User,
   Building,
   Search,
+  UserPlus,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,16 @@ export const CRM = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedLead, setSelectedLead] = useState<crmDataType>();
   const [showModal, setShowModal] = useState(false);
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [newMember, setNewMember] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    location: '',
+    insuranceCompany: '',
+    policyNumber: ''
+  });
   const itemsPerPage = 10;
 
   // Filter data based on search term
@@ -61,16 +71,60 @@ export const CRM = () => {
     setCurrentPage(1); // Reset to first page when searching
   };
 
+  const handleAddMember = () => {
+    setShowAddMemberModal(true);
+  };
+
+  const handleCloseAddMemberModal = () => {
+    setShowAddMemberModal(false);
+    setNewMember({
+      name: '',
+      phone: '',
+      email: '',
+      location: '',
+      insuranceCompany: '',
+      policyNumber: ''
+    });
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewMember(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmitMember = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('New member data:', newMember);
+    handleCloseAddMemberModal();
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">
-        Customer Relationship Management
-        </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          CRM turns customer data into meaningful business insights
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="text-center flex-1">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          Customer Relationship Management
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            CRM turns customer data into meaningful business insights
+          </p>
+        </div>
+        
+        <div className="flex-shrink-0">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="bg-[#122E5F] hover:bg-[#183B7A] text-white hover:text-white"
+            onClick={handleAddMember}
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add Members
+          </Button>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -342,6 +396,144 @@ export const CRM = () => {
                   Close
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Member Modal */}
+      {showAddMemberModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300">
+            <button
+              onClick={handleCloseAddMemberModal}
+              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+            >
+              <X className="h-3 w-3" />
+            </button>
+
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-[#122E5F]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <UserPlus className="h-6 w-6 text-[#122E5F]" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Add Member
+                </h2>
+                <p className="text-sm text-gray-600">Add a new member to your CRM team</p>
+              </div>
+
+              <form onSubmit={handleSubmitMember} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Full Name *
+                    </label>
+                    <Input
+                      name="name"
+                      value={newMember.name}
+                      onChange={handleInputChange}
+                      placeholder="John Smith"
+                      required
+                      className="h-10 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Phone *
+                    </label>
+                    <Input
+                      name="phone"
+                      type="tel"
+                      value={newMember.phone}
+                      onChange={handleInputChange}
+                      placeholder="(555) 123-4567"
+                      required
+                      className="h-10 text-sm"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Email *
+                    </label>
+                    <Input
+                      name="email"
+                      type="email"
+                      value={newMember.email}
+                      onChange={handleInputChange}
+                      placeholder="john@company.com"
+                      required
+                      className="h-10 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Location *
+                    </label>
+                    <Input
+                      name="location"
+                      value={newMember.location}
+                      onChange={handleInputChange}
+                      placeholder="Houston, TX"
+                      required
+                      className="h-10 text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Insurance Company *
+                    </label>
+                    <Input
+                      name="insuranceCompany"
+                      value={newMember.insuranceCompany}
+                      onChange={handleInputChange}
+                      placeholder="State Farm"
+                      required
+                      className="h-10 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Policy Number *
+                    </label>
+                    <Input
+                      name="policyNumber"
+                      value={newMember.policyNumber}
+                      onChange={handleInputChange}
+                      placeholder="SF123456789"
+                      required
+                      className="h-10 text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCloseAddMemberModal}
+                    className="px-4 py-2 text-sm"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="px-4 py-2 text-sm bg-[#122E5F] hover:bg-[#0f2347] text-white"
+                  >
+                    <UserPlus className="h-4 w-4 mr-1" />
+                    Add Member
+                  </Button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

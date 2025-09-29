@@ -144,7 +144,7 @@ export const stats = [
       icon: Zap,
       title: 'Innovation',
       description: 'We pride ourselves on staying up-to-date with the latest industry trends and technologies, bringing innovation and creativity to every lead we provide.'
-    }
+    },
   ];
 
   export const packages = [

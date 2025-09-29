@@ -52,7 +52,7 @@ export function FAQ() {
                   <div className="flex items-center space-x-4 flex-1">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
                       openItem === index 
-                        ? 'bg-gradient-to-br from-[#2563eb] to-[#122E5F] shadow-lg' 
+                        ? 'bg-[#122E5F] shadow-lg' 
                         : 'bg-[#122E5F]/10 group-hover:bg-[#2563eb]/20'
                     }`}>
                       <faq.icon className={`h-6 w-6 transition-colors duration-300 ${
@@ -77,9 +77,9 @@ export function FAQ() {
                 {openItem === index && (
                   <div className="px-6 pb-6 animate-in slide-in-from-top-2 duration-300">
                     <div className="ml-16 pt-4 border-t border-gradient-to-r from-[#2563eb]/20 to-transparent">
-                      <div className="bg-gradient-to-r from-blue-50/50 to-transparent rounded-lg p-4 border-l-4 border-[#2563eb]">
+                      {/* <div className="bg-gradient-to-r from-blue-50/50 to-transparent rounded-lg p-4 border-l-4 border-[#2563eb]"> */}
                         <p className="text-gray-700 leading-relaxed">{faq.answer}</p>
-                      </div>
+                      {/* </div> */}
                     </div>
                   </div>
                 )}

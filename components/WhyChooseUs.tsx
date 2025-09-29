@@ -105,7 +105,7 @@ export function WhyChooseUs() {
                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
                               currentIndex === 0 
                                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' 
-                                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                                : 'bg-[#122E5F] hover:bg-[#183B7A] text-white'
                             }`}
                           >
                             <ChevronLeft className="h-4 w-4" />
@@ -113,9 +113,9 @@ export function WhyChooseUs() {
                         ) : (
                           <button
                             onClick={nextSlide}
-                            disabled={currentIndex + 1 >= reasons.length}
+                            disabled={currentIndex + 2 >= reasons.length}
                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
-                              currentIndex + 1 >= reasons.length
+                              currentIndex + 2 >= reasons.length
                                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                 : 'bg-[#122E5F] hover:bg-[#183B7A] text-white'
                             }`}
