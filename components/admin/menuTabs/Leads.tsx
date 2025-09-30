@@ -231,8 +231,8 @@ export const Leads = () => {
     return (
     <div className="space-y-6">
       {/* Header with Actions */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
+      <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
+        <div className="text-center md:text-start">
           <h2 className="text-2xl font-bold text-gray-900">Leads Management</h2>
           <p className="text-gray-600">
             Manage and assign leads to contractors
@@ -552,7 +552,7 @@ export const Leads = () => {
                           <label className="block text-sm font-semibold text-gray-700 mb-1">
                             Email Address
                           </label>
-                          <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                          <p className="text-gray-900 bg-gray-50 p-1.5 flex break-all rounded-md text-sm">
                             {selectedLead.email}
                           </p>
                         </div>
@@ -753,7 +753,7 @@ export const Leads = () => {
             {/* Assign Lead Modal */}
             {showAssignModal && leadToAssign && (
               <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full mx-4 relative animate-in zoom-in-95 duration-300">
+                <div className="bg-white rounded-xl shadow-2xl max-w-4xl  w-full mx-4 relative animate-in zoom-in-95 duration-300">
                   {/* Close Button */}
                   <button
                     onClick={handleCloseAssignModal}
@@ -799,7 +799,7 @@ export const Leads = () => {
                           filteredContractors.map((contractor) => (
                           <div
                             key={contractor.id}
-                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 hover:border-[#286BBD]/50"
+                            className="flex flex-col md:flex-row justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 hover:border-[#286BBD]/50"
                           >
                             <div className="flex items-center space-x-4">
                               <Checkbox
@@ -807,6 +807,7 @@ export const Leads = () => {
                                 onCheckedChange={() => handleContractorSelect(contractor.id)}
                                 className="data-[state=checked]:bg-[#286BBD] data-[state=checked]:border-[#286BBD]"
                               />
+                              <div className="flex items-center space-x-2">
                               <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
                                 <UserPlus className="h-5 w-5 text-[#286BBD]" />
                               </div>
@@ -814,10 +815,11 @@ export const Leads = () => {
                                 <h3 className="font-semibold text-gray-900">{contractor.fullName}</h3>
                                 <p className="text-sm text-gray-600">{contractor.phoneno}</p>
                               </div>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <div className="flex items-center space-x-4">
-                                <div className="text-right">
+                            <div className="">
+                              <div className="flex justify-between space-x-4 mt-4 md:mt-0">
+                                <div className="text-start md:text-end">
                                   <p className="text-sm font-medium text-[#286BBD]">{contractor.businessAddress}</p>
                                   <p className="text-xs text-gray-500">Location</p>
                                 </div>

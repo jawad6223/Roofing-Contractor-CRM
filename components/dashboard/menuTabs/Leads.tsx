@@ -488,7 +488,7 @@ export const Leads = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Email Address
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 break-all rounded-md text-sm">
                     {selectedLead.email}
                   </p>
                 </div>

@@ -117,12 +117,12 @@ export const Contractors = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col justify-center md:justify-start gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl text-center md:text-start font-bold text-gray-900">
             Contractors Management
           </h2>
-          <p className="text-gray-600">
+          <p className="text-gray-600 text-center md:text-start">
             Monitor contractor performance and manage accounts
           </p>
         </div>
@@ -345,7 +345,7 @@ export const Contractors = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                   Email Address
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-1.5 break-all rounded-md text-sm">
                     {selectedContractor.email}
                   </p>
                 </div>
@@ -503,7 +503,7 @@ export const Contractors = () => {
                       key={lead.id}
                       className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors"
                     >
-                      <div className="flex items-center justify-between">
+                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
                         <div className="flex items-center space-x-4">
                           <Checkbox
                             checked={selectedLeads.includes(lead.id.toString())}
@@ -519,18 +519,16 @@ export const Contractors = () => {
                             <p className="text-sm text-gray-600">{lead.company} • {lead.zipCode}</p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="flex items-center space-x-4">
-                            <div className="text-right">
+                          <div className="flex justify-between space-x-16 md:space-x-4 mt-4 md:mt-0">
+                            <div className="text-end">
                               <p className="text-sm font-medium text-[#286BBD]">{lead.policy}</p>
                               <p className="text-xs text-gray-500">Policy</p>
                             </div>
-                            <div className="text-right">
+                            <div className="text-end">
                               <p className="text-sm font-medium text-green-600">{lead.phoneno}</p>
                               <p className="text-xs text-gray-500">Phone</p>
                             </div>
                           </div>
-                        </div>
                       </div>
                     </div>
                     ))

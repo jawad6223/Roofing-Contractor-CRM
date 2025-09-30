@@ -104,9 +104,9 @@ export const CRM = () => {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-center justify-between">
         <div className="text-center flex-1">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
           Customer Relationship Management
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -114,11 +114,11 @@ export const CRM = () => {
           </p>
         </div>
         
-        <div className="flex-shrink-0">
+        <div className="md:flex-shrink-0 w-full md:w-auto">
           <Button 
             variant="outline" 
             size="sm" 
-            className="bg-[#122E5F] hover:bg-[#183B7A] text-white hover:text-white"
+            className="bg-[#122E5F] hover:bg-[#183B7A] text-white mt-4 md:mt-0 hover:text-white w-full md:w-auto"
             onClick={handleAddMember}
           >
             <UserPlus className="h-4 w-4 mr-2" />
@@ -353,7 +353,7 @@ export const CRM = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Email
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md break-all text-sm flex items-center">
                     <Mail className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.email}
                   </p>
@@ -368,7 +368,7 @@ export const CRM = () => {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  <label className="block text-sm whitespace-nowrap font-semibold text-gray-700 mb-1">
                     Insurance Company
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
