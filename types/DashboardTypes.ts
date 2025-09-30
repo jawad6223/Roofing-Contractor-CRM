@@ -9,7 +9,6 @@ export interface CrmDashboardProps {
 }
 
 export interface crmDataType {
-  id: string;
   name: string;
   phoneno: string;
   email: string;

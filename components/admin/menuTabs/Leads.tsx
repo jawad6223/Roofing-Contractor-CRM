@@ -276,7 +276,7 @@ export const Leads = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none bg-white border border-[#286BBD] text-[#286BBD] px-4 py-2 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-[#286BBD] focus:border-transparent min-w-[140px]"
+                className="appearance-none bg-white border border-[#286BBD] lg:w-auto w-full text-[#286BBD] px-4 py-2 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-[#286BBD] focus:border-transparent min-w-[140px]"
               >
                 <option value="All">All Status</option>
                 <option value="Available">Available</option>

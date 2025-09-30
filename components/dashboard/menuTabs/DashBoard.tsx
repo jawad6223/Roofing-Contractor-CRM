@@ -13,7 +13,7 @@ export const DashBoard = () => {
   const { getCurrentUserFullName } = useAuth()
   const currentUserFullName = getCurrentUserFullName()
   const [selectedLead, setSelectedLead] = useState<any>(null)
-  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false)
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false)
   
   const recentActivity = [
     { 
@@ -140,7 +140,7 @@ export const DashBoard = () => {
               </div>
 
               {/* Recent Activity */}
-              <div className="grid lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <Card className="border-0 shadow-lg">
                   <CardHeader className="pb-4">
                     <div className="flex items-center justify-between">
@@ -166,7 +166,7 @@ export const DashBoard = () => {
                         <div 
                           key={index} 
                           onClick={() => handleLeadClick(activity)}
-                          className="flex items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                          className="flex flex-col lg:flex-row items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
                         >
                           <div className="flex items-center space-x-4">
                             <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#286BBD]/10 to-[#2563eb]/10 flex items-center justify-center group-hover:from-[#286BBD]/20 group-hover:to-[#2563eb]/20 transition-all duration-200">
@@ -192,7 +192,7 @@ export const DashBoard = () => {
                                 <Phone className="h-4 w-4 mr-1" />
                                 <span className="font-medium">{activity.phoneno}</span>
                               </div>
-                              <div className="text-sm text-gray-600 flex items-center hover:text-gray-800 transition-colors">
+                              <div className="text-sm text-gray-600 flex items-center break-all hover:text-gray-800 transition-colors">
                                 <Mail className="h-4 w-4 mr-1" />
                                 <span className="font-medium">{activity.email}</span>
                               </div>
