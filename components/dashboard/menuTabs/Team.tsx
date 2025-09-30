@@ -118,46 +118,46 @@ export const Team = () => {
                 {teamMembers.map((member, index) => (
                   <Card key={index}>
                     <CardContent className="p-6">
-                      <div className="flex justify-between items-center">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-[#286BBD] rounded-full flex items-center justify-center">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex items-center space-x-4 flex-1 min-w-0">
+                          <div className="w-12 h-12 bg-[#286BBD] rounded-full flex items-center justify-center flex-shrink-0">
                             <User className="h-6 w-6 text-white" />
                           </div>
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0 max-w-xs">
                             {editingMember === index ? (
-                              <div className="space-y-2">
+                              <div className="space-y-3">
                                 <Input
                                   value={editedMember.name}
                                   onChange={(e) => handleEditInputChange('name', e.target.value)}
-                                  className="h-8 text-sm font-bold"
+                                  className="h-8 text-sm font-bold w-full"
                                   placeholder="Full Name"
                                 />
                                 <Input
                                   value={editedMember.email}
                                   onChange={(e) => handleEditInputChange('email', e.target.value)}
-                                  className="h-8 text-sm"
+                                  className="h-8 text-sm w-full"
                                   placeholder="Email Address"
                                 />
                                 <Input
                                   value={editedMember.phoneno}
                                   onChange={(e) => handleEditInputChange('phoneno', e.target.value)}
-                                  className="h-8 text-sm font-medium"
+                                  className="h-8 text-sm font-medium w-full"
                                   placeholder="Phone Number"
                                 />
                               </div>
                             ) : (
-                              <div className="flex flex-col space-y-2">
-                                <input type="text" value={member.name} onChange={(e) => handleEditInputChange('name', e.target.value)} className="text-sm" placeholder="Full Name" />
-                                <input type="email" value={member.email} onChange={(e) => handleEditInputChange('email', e.target.value)} className="text-sm" placeholder="Email Address" />
-                                <input type="text" value={member.phoneno} onChange={(e) => handleEditInputChange('phoneno', e.target.value)} className="text-sm font-medium" placeholder="Phone Number" />
+                              <div className="flex flex-col space-y-3">
+                                <input type="text" value={member.name} onChange={(e) => handleEditInputChange('name', e.target.value)} className="text-sm w-full" placeholder="Full Name" />
+                                <input type="email" value={member.email} onChange={(e) => handleEditInputChange('email', e.target.value)} className="text-sm w-full" placeholder="Email Address" />
+                                <input type="text" value={member.phoneno} onChange={(e) => handleEditInputChange('phoneno', e.target.value)} className="text-sm font-medium w-full" placeholder="Phone Number" />
                               </div>
                             )}
                           </div>
                         </div>
-                        <div className="flex flex-col w-full lg:w-auto md:flex-row space-y-3 lg:space-y-0 items-center space-x-3">
+                        <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 flex-shrink-0">
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="border-red-500 ml-3 text-red-500 hover:bg-red-500 hover:text-white">
+                              <Button variant="outline" size="sm" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
