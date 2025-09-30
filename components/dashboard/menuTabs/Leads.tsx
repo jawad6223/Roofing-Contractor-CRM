@@ -32,16 +32,16 @@ import { purchasedLeadType, purchaseFormType, leadsInfoType } from "@/types/Dash
 import { purchasedLeads, LeadsInfo } from "./Data";
 
 export const Leads = () => {
-  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
-  const [showLeadPurchaseInfoModal, setShowLeadPurchaseInfoModal] = useState(false);
+  const [showPurchaseModal, setShowPurchaseModal] = useState<boolean>(false);
+  const [showLeadPurchaseInfoModal, setShowLeadPurchaseInfoModal] = useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [purchaseForm, setPurchaseForm] = useState<purchaseFormType>({
     quantity: "1",
     zipCode: "",
   });
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const itemsPerPage = 10;
 
   // Filter data based on search term
@@ -75,8 +75,8 @@ export const Leads = () => {
   };
 
   const [selectedLead, setSelectedLead] = useState<purchasedLeadType | null>(null);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showViewModal, setShowViewModal] = useState<boolean>(false);
+  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [purchaseQuantity, setPurchaseQuantity] = useState<string>("");
   const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>(
     {}
@@ -217,7 +217,7 @@ export const Leads = () => {
             Manage and track your purchased leads and their progress
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col w-full lg:w-auto md:flex-row gap-3">
         <Button className="bg-[#122E5F] hover:bg-[#0f2347] text-white">
           <Plus className="h-4 w-4 mr-2" />
           <span onClick={() => setShowPurchaseModal(true)}>

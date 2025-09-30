@@ -151,13 +151,13 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                  <AlertDialogTitle className="text-[#286BBD]">Confirm Logout</AlertDialogTitle>
                   <AlertDialogDescription>
                     Are you sure you want to logout? You will need to sign in again to access your account.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className="text-[#286BBD]">Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleLogout}>
                     Yes, Logout
                   </AlertDialogAction>

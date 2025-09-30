@@ -154,13 +154,13 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                  <AlertDialogTitle className="text-[#286BBD]">Confirm Logout</AlertDialogTitle>
                   <AlertDialogDescription>
                     Are you sure you want to logout? You will need to sign in again to access your admin account.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className="text-[#286BBD]">Cancel</AlertDialogCancel>
                   <AlertDialogAction onClick={handleLogout}>
                     Yes, Logout
                   </AlertDialogAction>
@@ -208,7 +208,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
       {/* Leads Request Modal */}
       {showLeadsRequestModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 relative animate-in zoom-in-95 duration-300 md:max-h-[90vh] overflow-hidden">
             <button
               onClick={() => setShowLeadsRequestModal(false)}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"

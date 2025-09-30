@@ -80,7 +80,7 @@ export const Dashboard = () => {
                 <div 
                 key={index} 
                 onClick={() => handleLeadClick(lead)}
-                className="flex items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                className="flex flex-col lg:flex-row items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
               >
                 <div className="flex items-center space-x-4">
                   <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#286BBD]/10 to-[#2563eb]/10 flex items-center justify-center group-hover:from-[#286BBD]/20 group-hover:to-[#2563eb]/20 transition-all duration-200">
@@ -130,7 +130,7 @@ export const Dashboard = () => {
               {contractors.slice(0, 3).map((contractor: ContractorType) => (
                 <div
                   key={contractor.id}
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  className="flex flex-col lg:flex-row items-center justify-between p-3 bg-gray-50 rounded-lg"
                 >
                   <div>
                     <p className="font-semibold text-gray-900">
@@ -141,7 +141,7 @@ export const Dashboard = () => {
                     </p>
                   </div>
                   <div className="flex flex-col items-end space-y-2">
-                  <div className="flex flex-col items-end space-y-1">
+                  <div className="flex flex-col items-center lg:items-end space-y-1">
                     <div className="text-sm text-[#286BBD] flex items-center hover:text-[#1d4ed8] transition-colors">
                       <Phone className="h-4 w-4 mr-1" />
                       <span className="font-medium">{contractor.phoneno}</span>

@@ -19,18 +19,18 @@ import { crmDataType } from "@/types/DashboardTypes";
 import { crmData } from "./Data";
 
 export const CRM = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [selectedLead, setSelectedLead] = useState<crmDataType>();
-  const [showModal, setShowModal] = useState(false);
-  const [showAddMemberModal, setShowAddMemberModal] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [newMember, setNewMember] = useState({
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showAddMemberModal, setShowAddMemberModal] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [newMember, setNewMember] = useState<crmDataType>({
     name: '',
-    phone: '',
+    phoneno: '',
     email: '',
     location: '',
     insuranceCompany: '',
-    policyNumber: ''
+    policy: ''
   });
   const itemsPerPage = 10;
 
@@ -79,11 +79,11 @@ export const CRM = () => {
     setShowAddMemberModal(false);
     setNewMember({
       name: '',
-      phone: '',
+      phoneno: '',
       email: '',
       location: '',
       insuranceCompany: '',
-      policyNumber: ''
+      policy: ''
     });
   };
 
@@ -444,9 +444,9 @@ export const CRM = () => {
                       Phone *
                     </label>
                     <Input
-                      name="phone"
+                      name="phoneno"
                       type="tel"
-                      value={newMember.phone}
+                      value={newMember.phoneno}
                       onChange={handleInputChange}
                       placeholder="(555) 123-4567"
                       required
@@ -506,8 +506,8 @@ export const CRM = () => {
                       Policy Number *
                     </label>
                     <Input
-                      name="policyNumber"
-                      value={newMember.policyNumber}
+                      name="policy"
+                      value={newMember.policy}
                       onChange={handleInputChange}
                       placeholder="SF123456789"
                       required

@@ -103,7 +103,6 @@ export const Team = () => {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
                 Team Management
               </h1>
-              <p className="text-gray-600 mb-8">Add and manage team members who can view and manage leads.</p>
               
               <div className="mb-6">
                 <Button 
@@ -155,22 +154,22 @@ export const Team = () => {
                             )}
                           </div>
                         </div>
-                        <div className="flex items-center space-x-3">
+                        <div className="flex flex-col w-full lg:w-auto md:flex-row space-y-3 lg:space-y-0 items-center space-x-3">
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="outline" size="sm" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
+                              <Button variant="outline" size="sm" className="border-red-500 ml-3 text-red-500 hover:bg-red-500 hover:text-white">
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Team Member</AlertDialogTitle>
+                                <AlertDialogTitle className="text-[#286BBD]">Delete Team Member</AlertDialogTitle>
                                 <AlertDialogDescription>
                                   Are you sure you want to delete this team member? This action cannot be undone and they will lose access to the system.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel className="text-[#286BBD]">Cancel</AlertDialogCancel>
                                 <AlertDialogAction onClick={() => handleDeleteMember(index)} className="bg-red-500 hover:bg-red-600">
                                   Yes, Delete
                                 </AlertDialogAction>
