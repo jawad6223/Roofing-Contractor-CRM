@@ -112,7 +112,8 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
               <Link
                 key={index}
                 href={item.path}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                onClick={() => setSidebarOpen(false)}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                   activeTab === item.label
                     ? "bg-blue-50 text-[#286BBD] border-r-2 border-[#286BBD]"
                     : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
