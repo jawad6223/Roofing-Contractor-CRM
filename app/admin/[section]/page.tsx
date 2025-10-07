@@ -1,31 +1,39 @@
 "use client";
 
-import { ProtectedRoute } from '@/components/Auth/ProtectedRoute';
-import { Dashboard, Leads, Contractors, Setting, LeadRequest } from '@/components/admin/menuTabs/Index';
-import { notFound } from 'next/navigation';
-import { AdminSectionPageProps } from '@/types/AdminTypes';
+import { ProtectedRoute } from "@/components/Auth/ProtectedRoute";
+import { Dashboard, Leads, Contractors, Setting, LeadRequest } from "@/components/admin/menuTabs/Index";
+import { notFound } from "next/navigation";
+import { AdminSectionPageProps } from "@/types/AdminTypes";
+import { useEffect, useState } from "react";
 
+const validSections = ["dashboard", "leads", "contractors", "leads-request", "settings"];
 
-const validSections = ['dashboard', 'leads', 'contractors', 'leads-request', 'settings'];
+export default function AdminSectionPage({ params }: { params: Promise<{ section: string }> }) {
+  const [section, setSection] = useState<string>("");
 
-export default function AdminSectionPage({ params }: AdminSectionPageProps) {
-  const { section } = params;
-  
+  useEffect(() => {
+    params.then(({ section }) => setSection(section));
+  }, [params]);
+
+  if (!section) {
+    return <div>Loading...</div>;
+  }
+
   if (!validSections.includes(section.toLowerCase())) {
     notFound();
   }
 
   const renderSection = () => {
     switch (section.toLowerCase()) {
-      case 'dashboard':
+      case "dashboard":
         return <Dashboard />;
-      case 'leads':
+      case "leads":
         return <Leads />;
-      case 'contractors':
+      case "contractors":
         return <Contractors />;
-      case 'leads-request':
+      case "leads-request":
         return <LeadRequest />;
-      case 'settings':
+      case "settings":
         return <Setting />;
       default:
         return <Dashboard />;
@@ -34,9 +42,7 @@ export default function AdminSectionPage({ params }: AdminSectionPageProps) {
 
   return (
     // <ProtectedRoute requireAuth={true}>
-  <>
-      {renderSection()}
-      </>
+    <>{renderSection()}</>
     // </ProtectedRoute>
   );
 }

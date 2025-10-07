@@ -3,9 +3,9 @@ export interface AdminDashboardProps {
 }
 
 export interface AdminSectionPageProps {
-  params: {
+  params: Promise<{
     section: string;
-  };
+  }>;
 }
 
 export interface sidebarItemsType {
