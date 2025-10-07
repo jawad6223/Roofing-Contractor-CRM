@@ -38,7 +38,6 @@ import { AdminDashboardProps } from "@/types/AdminTypes";
 export default function AdminDashboard({ children }: AdminDashboardProps) {
   const { logoutAdmin, admin, getCurrentAdminName, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showLeadsRequestModal, setShowLeadsRequestModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const pathname = usePathname();
 
@@ -97,6 +96,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            aria-label="Close sidebar"
           >
             <X className="h-5 w-5" />
           </button>
@@ -181,6 +181,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
                 <button
                   onClick={() => setSidebarOpen(true)}
                   className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 mr-2"
+                  aria-label="Open sidebar"
                 >
                   <Menu className="h-5 w-5" />
                 </button>
@@ -190,12 +191,6 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
                   </h1>
                 </div>
               </div>
-              <Button
-                onClick={() => setShowLeadsRequestModal(true)}
-                className="bg-[#122E5F] hover:bg-[#0f2347] text-white"
-              >
-                <span>Leads Request</span>
-              </Button>
             </div>
           </div>
         </div>
@@ -205,236 +200,6 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
           <div className="p-4 sm:p-6 lg:p-8">{children}</div>
         </div>
       </div>
-      {/* Leads Request Modal */}
-      {showLeadsRequestModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 relative animate-in zoom-in-95 duration-300 md:max-h-[90vh] overflow-hidden">
-            <button
-              onClick={() => setShowLeadsRequestModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="p-6">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-[#122E5F]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Users className="h-6 w-6 text-[#122E5F]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Requested Leads
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Browse and manage lead requests
-                </p>
-              </div>
-
-              {/* Search Bar */}
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    type="text"
-                    placeholder="Search Leads..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#122E5F] focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Tabs */}
-              <Tabs defaultValue="assign" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="assign" className="text-sm font-medium">
-                    Assign (
-                    {
-                      filteredLeads.filter((lead) => lead.status === "Assign")
-                        .length
-                    }
-                    )
-                  </TabsTrigger>
-                  <TabsTrigger value="pending" className="text-sm font-medium">
-                    Pending (
-                    {
-                      filteredLeads.filter((lead) => lead.status === "Pending")
-                        .length
-                    }
-                    )
-                  </TabsTrigger>
-                </TabsList>
-
-                {/* Assign Tab */}
-                <TabsContent value="assign">
-                  <Card className="border-0 shadow-lg">
-                    <CardContent className="p-0">
-                      <div className="overflow-auto max-h-64">
-                        <table className="w-full">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Name
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Zip Code
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Phone
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                No. of Leads
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Send Leads
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredLeads
-                              .filter((lead) => lead.status === "Assign")
-                              .map((lead: requestLeadType) => (
-                                <tr key={lead.id} className="hover:bg-gray-50">
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <div>
-                                      <div className="text-sm font-bold text-[#122E5F]">
-                                        {lead.firstName} {lead.lastName}
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                      <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                                      <span className="text-sm font-medium text-gray-900">
-                                        {lead.zipCode}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-black">
-                                    <div className="flex items-center">
-                                      <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                      {lead.phoneno}
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                                    <span className="text-sm font-medium text-gray-900">
-                                      {lead.noOfLeads}
-                                    </span>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                                    <span className="text-sm font-medium text-gray-900">
-                                      {lead.receivedLeads}
-                                    </span>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="text-sm font-bold text-green-500">
-                                      {lead.status}
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-
-                {/* Pending Tab */}
-                <TabsContent value="pending">
-                  <Card className="border-0 shadow-lg">
-                    <CardContent className="p-0">
-                      <div className="overflow-auto max-h-64">
-                        <table className="w-full">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Name
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Zip Code
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Phone
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                No. of Leads
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Pending Leads
-                              </th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {filteredLeads
-                              .filter((lead) => lead.status === "Pending")
-                              .map((lead: requestLeadType) => (
-                                <tr key={lead.id} className="hover:bg-gray-50">
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <div>
-                                      <div className="text-sm font-bold text-[#122E5F]">
-                                        {lead.firstName} {lead.lastName}
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center">
-                                      <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                                      <span className="text-sm font-medium text-gray-900">
-                                        {lead.zipCode}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-black">
-                                    <div className="flex items-center">
-                                      <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                      {lead.phoneno}
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                                    <span className="text-sm font-medium text-gray-900">
-                                      {lead.noOfLeads}
-                                    </span>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                                    <span className="text-sm font-medium text-gray-900">
-                                      {lead.pendingLeads}
-                                    </span>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className="text-sm font-bold text-yellow-500">
-                                      {lead.status}
-                                    </span>
-                                  </td>
-                                </tr>
-                              ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-              </Tabs>
-
-              {/* Close Button */}
-              <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
-                <Button
-                  onClick={() => setShowLeadsRequestModal(false)}
-                  className="px-6 py-2 bg-[#122E5F] hover:bg-[#0f2347] text-white"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

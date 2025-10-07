@@ -1,5 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useRouter } from "next/navigation";
 import {
   Plus,
   X,
@@ -28,18 +30,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { purchasedLeadType, purchaseFormType, leadsInfoType } from "@/types/DashboardTypes";
-import { purchasedLeads, LeadsInfo } from "./Data";
+import { purchasedLeadType, purchaseFormType, leadsInfoType, sampleLeadType } from "@/types/DashboardTypes";
+import { purchasedLeads, LeadsInfo, sampleLeads } from "./Data";
 
 export const Leads = () => {
-  const [showPurchaseModal, setShowPurchaseModal] = useState<boolean>(false);
+  const router = useRouter();
   const [showLeadPurchaseInfoModal, setShowLeadPurchaseInfoModal] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = React.useState(false);
+
   const [purchaseForm, setPurchaseForm] = useState<purchaseFormType>({
     quantity: "1",
     zipCode: "",
   });
-
+  const [loadingLeads, setLoadingLeads] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const itemsPerPage = 10;
@@ -78,9 +80,6 @@ export const Leads = () => {
   const [showViewModal, setShowViewModal] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [purchaseQuantity, setPurchaseQuantity] = useState<string>("");
-  const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>(
-    {}
-  );
 
   const handleViewLead = (lead: purchasedLeadType): void => {
     setSelectedLead(lead);
@@ -97,96 +96,18 @@ export const Leads = () => {
     // TODO: Add open lead logic here
   };
 
-  const handleCloseLead = (lead: purchasedLeadType) => {
-    console.log(`Closing lead: ${lead.firstName} ${lead.lastName}`);
-    setLeadStatuses((prev) => ({
-      ...prev,
-      [lead.id]: "Close",
-    }));
-  };
+  async function handleBuyNow(lead: sampleLeadType) {
+    // Add this lead to loading set
+    setLoadingLeads((prev) => new Set(prev).add(lead.id));
 
-  const getLeadTypeColor = (type: string): string => {
-    switch (type) {
-      case "Basic":
-        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
-      case "Premium":
-        return "bg-[#286BBD]/10 text-[#286BBD] hover:bg-[#286BBD]/20";
-      case "Exclusive":
-        return "bg-green-100 text-green-800 hover:bg-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
-    }
-  };
-
-  const getStatusBadgeColor = (leadId: string): string => {
-    const status = leadStatuses[leadId] || "Open";
-    switch (status) {
-      case "Open":
-        return "bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20";
-      case "Close":
-        return "bg-red-100 text-red-800 hover:bg-red-200";
-      default:
-        return "bg-[#286BBD]/5 text-[#286BBD] hover:bg-[#286BBD]/20";
-    }
-  };
-
-  const getLeadStatus = (leadId: string): string => {
-    return leadStatuses[leadId] || "Open";
-  };
-
-  const handlePurchaseInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setPurchaseForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handlePurchaseSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Purchase form data:", purchaseForm);
-    // TODO: Add purchase logic here
-    setPurchaseQuantity(purchaseForm.quantity);
-    setShowPurchaseModal(false);
-    setShowSuccessModal(true);
-    setPurchaseForm({
-      quantity: "1",
-      zipCode: "",
-    });
-  };
-
-  const handleClosePurchaseModal = () => {
-    setShowPurchaseModal(false);
-    setPurchaseForm({
-      zipCode: "",
-      quantity: "50",
-    });
-  };
-
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
-    setPurchaseQuantity("");
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
-  };
-
-  async function handlePurchaseSubmitStripe(e: React.FormEvent) {
-    e.preventDefault();
-    setIsLoading(true);
     try {
-      const response = await fetch("/api/create-checkout-session", {
+      const response = await fetch("/api/create-single-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          quantity: purchaseForm.quantity,
+          // leadAmount: lead.price,
           leadAmount: 50,
+          leadName: `${lead.firstName} ${lead.lastName}`,
         }),
       });
 
@@ -199,40 +120,60 @@ export const Leads = () => {
       const { url } = await response.json();
       window.location.href = url;
     } catch (error) {
-      console.error("Checkout error:", error);
+      console.error("Stripe checkout error:", error);
     } finally {
-      setIsLoading(false);
+      // Remove this lead from loading set
+      setLoadingLeads((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(lead.id);
+        return newSet;
+      });
     }
   }
+
+  const handlePurchaseInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setPurchaseForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    setPurchaseQuantity("");
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            My Purchased Leads
-          </h2>
-          <p className="text-gray-600">
-            Manage and track your purchased leads and their progress
-          </p>
+          <h2 className="text-2xl font-bold text-gray-900">My Purchased Leads</h2>
+          <p className="text-gray-600">Manage and track your purchased leads and their progress</p>
         </div>
         <div className="flex flex-col w-full lg:w-auto md:flex-row gap-3">
-        <Button className="bg-[#122E5F] hover:bg-[#0f2347] text-white">
-          <Plus className="h-4 w-4 mr-2" />
-          <span onClick={() => setShowPurchaseModal(true)}>
-            Add Purchase Leads
-          </span>
-        </Button>
-        <Button 
-          onClick={() => setShowLeadPurchaseInfoModal(true)}
-          className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
-        >
-          <Info className="h-4 w-4 mr-2" />
-          <span>
-            Lead Purchase Info
-          </span>
-        </Button>
+          <Button
+            onClick={() => router.push("/dashboard/purchase-leads")}
+            className="bg-[#122E5F] hover:bg-[#0f2347] text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            <span>Add Purchase Leads</span>
+          </Button>
+          <Button
+            onClick={() => setShowLeadPurchaseInfoModal(true)}
+            className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+          >
+            <Info className="h-4 w-4 mr-2" />
+            <span>Lead Purchase Info</span>
+          </Button>
         </div>
       </div>
 
@@ -257,7 +198,6 @@ export const Leads = () => {
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Name
                   </th>
@@ -279,10 +219,72 @@ export const Leads = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
+                {/* Sample Leads - Blurred Preview */}
+                {sampleLeads.map((lead: sampleLeadType) => (
+                  <tr key={lead.id} className={`border-l-4`}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-3">
+                        <div className="text-sm font-bold text-gray-400 blur-sm">
+                          {lead.firstName} {lead.lastName}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-400 blur-sm">{lead.zipCode}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                        <span className="text-sm text-gray-400 blur-sm">{lead.phone}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <Mail className="h-3 w-3 text-gray-400 mr-1" />
+                        <span className="text-sm text-gray-400 blur-sm">{lead.email}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap" colSpan={2}>
+                      <div className="flex items-center justify-center space-x-2">
+                        {/* <span className={`text-sm font-bold`}>${lead.price}</span> */}
+                        <Button
+                          disabled={loadingLeads.has(lead.id)}
+                          size="sm"
+                          className={`text-white text-xs px-3 py-1`}
+                          onClick={() => handleBuyNow(lead)}
+                        >
+                          {loadingLeads.has(lead.id) ? (
+                            "Processing..."
+                          ) : (
+                            <>
+                              <ShoppingCart className="h-4 w-4 mr-2" />
+                              Buy Now
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+
+                {/* Divider */}
+                {/* <tr>
+                  <td colSpan={5} className="px-6 py-2">
+                    <div className="border-t border-gray-200"></div>
+                    <div className="text-center py-2">
+                      <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                        Your Purchased Leads
+                      </span>
+                    </div>
+                  </td>
+                </tr> */}
+
                 {currentData.length > 0 ? (
                   currentData.map((lead, index) => (
                     <tr key={index} className="hover:bg-gray-50">
-                      
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-bold text-[#122E5F]">
@@ -293,9 +295,7 @@ export const Leads = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-900">
-                            {lead.zipCode}
-                          </span>
+                          <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-black">
@@ -311,12 +311,30 @@ export const Leads = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Badge className={getStatusBadgeColor(lead.id)}>
-                          {getLeadStatus(lead.id)}
-                        </Badge>
+                        <Select defaultValue="open">
+                          <SelectTrigger className="w-32 h-8 text-xs">
+                            <SelectValue placeholder="Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="open">Open</SelectItem>
+                            <SelectItem value="hot">Hot Lead</SelectItem>
+                            <SelectItem value="warm">Warm Lead</SelectItem>
+                            <SelectItem value="cold">Cold Lead</SelectItem>
+                            <SelectItem value="close">Close</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <DropdownMenu>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                          onClick={() => handleViewLead(lead)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                        {/* <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
                               size="sm"
@@ -328,27 +346,21 @@ export const Leads = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuItem
-                              onClick={() =>
-                                handleViewLead(lead)
-                              }
+                              onClick={() => handleViewLead(lead)}
                               className="cursor-pointer hover:bg-gray-50"
                             >
                               <Eye className="h-4 w-4 mr-2 text-[#286BBD]" />
-                              <span className="text-gray-700">View</span>
+                              <span className="text-gray-700"></span>
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() =>
-                                handleCloseLead(lead)
-                              }
+                              onClick={() => handleCloseLead(lead)}
                               className="cursor-pointer hover:bg-red-50 focus:bg-red-50"
                             >
                               <X className="h-4 w-4 mr-2 text-red-600" />
-                              <span className="text-red-700 font-medium">
-                                Close
-                              </span>
+                              <span className="text-red-700 font-medium">Close</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
-                        </DropdownMenu>
+                        </DropdownMenu> */}
                       </td>
                     </tr>
                   ))
@@ -358,9 +370,7 @@ export const Leads = () => {
                       <div className="flex flex-col items-center justify-center space-y-3">
                         <Search className="h-12 w-12 text-gray-300" />
                         <div>
-                          <p className="text-lg font-medium text-gray-900">
-                            No leads found
-                          </p>
+                          <p className="text-lg font-medium text-gray-900">No leads found</p>
                           <p className="text-sm text-gray-500">
                             {searchTerm
                               ? `No results for "${searchTerm}". Try adjusting your search terms.`
@@ -380,13 +390,8 @@ export const Leads = () => {
       {/* Pagination Controls */}
       <div className="flex items-center justify-between">
         <div className="text-sm text-gray-700">
-          Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)}{" "}
-          of {filteredData.length} results
-          {searchTerm && (
-            <span className="text-[#286BBD] ml-2">
-              (filtered from {purchasedLeads.length} total)
-            </span>
-          )}
+          Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} results
+          {searchTerm && <span className="text-[#286BBD] ml-2">(filtered from {purchasedLeads.length} total)</span>}
         </div>
         <div className="flex items-center space-x-2">
           <Button
@@ -408,9 +413,7 @@ export const Leads = () => {
                 size="sm"
                 onClick={() => setCurrentPage(page)}
                 className={`w-8 h-8 p-0 ${
-                  currentPage === page
-                    ? "bg-[#286BBD] text-white"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  currentPage === page ? "bg-[#286BBD] text-white" : "border-gray-300 text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 {page}
@@ -439,6 +442,7 @@ export const Leads = () => {
             <button
               onClick={handleCloseViewModal}
               className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+              aria-label="Close modal"
             >
               <X className="h-3 w-3" />
             </button>
@@ -449,77 +453,44 @@ export const Leads = () => {
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <FileText className="h-6 w-6 text-[#286BBD]" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">
-                  Lead Details
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Complete information for this purchased lead
-                </p>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">Lead Details</h2>
+                <p className="text-sm text-gray-600">Complete information for this purchased lead</p>
               </div>
 
               {/* Lead Information */}
               <div className="grid grid-cols-2 gap-3">
-                
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Name
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
                     {selectedLead.firstName} {selectedLead.lastName}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Zip Code
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedLead.zipCode}
-                  </p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Zip Code</label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.zipCode}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Phone Number
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedLead.phoneno}
-                  </p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.phoneno}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 break-all rounded-md text-sm">
-                    {selectedLead.email}
-                  </p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+                  <p className="text-gray-900 bg-gray-50 p-2 break-all rounded-md text-sm">{selectedLead.email}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Location
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedLead.location}
-                  </p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Location</label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.location}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Insurance Company
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedLead.company}
-                  </p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Insurance Company</label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.company}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Policy Number
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedLead.policy}
-                  </p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Policy Number</label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.policy}</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Purchase Date
-                  </label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">Purchase Date</label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
                     {new Date(selectedLead.purchaseDate).toLocaleDateString()}
                   </p>
@@ -528,131 +499,10 @@ export const Leads = () => {
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  onClick={handleCloseViewModal}
-                  className="px-4 py-2 text-sm"
-                >
+                <Button variant="outline" onClick={handleCloseViewModal} className="px-4 py-2 text-sm">
                   Close
                 </Button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Purchase Leads Modal */}
-      {showPurchaseModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300">
-            {/* Close Button */}
-            <button
-              onClick={handleClosePurchaseModal}
-              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
-            >
-              <X className="h-3 w-3" />
-            </button>
-
-            <div className="p-6">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <ShoppingCart className="h-6 w-6 text-[#286BBD]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Purchase Premium Leads
-                </h2>
-              </div>
-
-              {/* Purchase Form */}
-              <form onSubmit={handlePurchaseSubmit} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  {/* <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Lead Amount *
-                    </label>
-                    <Input
-                      name="leadType"
-                      value={50}
-                      readOnly
-                      className="h-9 text-sm"
-                    />
-                  </div> */}
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Quantity *
-                    </label>
-                    <Input
-                      name="quantity"
-                      type="number"
-                      min="1"
-                      max="50"
-                      value={purchaseForm.quantity}
-                      onChange={handlePurchaseInputChange}
-                      placeholder="1"
-                      required
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Target Zip Code *
-                    </label>
-                    <Input
-                      name="zipCode"
-                      value={purchaseForm.zipCode}
-                      onChange={handlePurchaseInputChange}
-                      placeholder="75201"
-                      required
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                </div>
-
-                {/* Pricing Summary */}
-                <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold text-gray-900">
-                        Total Price:
-                      </span>
-                      <span className="font-bold text-[#286BBD] text-lg">
-                        $
-                        {(
-                          parseInt(purchaseForm.quantity || "1") * 50
-                        ).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleClosePurchaseModal}
-                    className="px-4 py-2 text-sm"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    disabled={isLoading}
-                    type="submit"
-                    className="px-4 py-2 text-sm bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
-                    onClick={handlePurchaseSubmitStripe}
-                  >
-                    {isLoading ? (
-                      "Processing..."
-                    ) : (
-                      <>
-                        <ShoppingCart className="h-4 w-4 mr-1" />
-                        Purchase Leads
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </form>
             </div>
           </div>
         </div>
@@ -666,6 +516,7 @@ export const Leads = () => {
             <button
               onClick={handleCloseSuccessModal}
               className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+              aria-label="Close modal"
             >
               <X className="h-3 w-3" />
             </button>
@@ -677,23 +528,18 @@ export const Leads = () => {
               </div>
 
               {/* Success Message */}
-              <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Purchase Successful!
-              </h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-2">Purchase Successful!</h2>
               <p className="text-gray-600 mb-4">
                 Thank you for purchasing {purchaseQuantity} lead
                 {purchaseQuantity !== "1" ? "s" : ""}!
               </p>
               <p className="text-sm text-gray-500 mb-6">
-                Your leads will be available in your dashboard shortly. You will
-                receive an email confirmation with the details.
+                Your leads will be available in your dashboard shortly. You will receive an email confirmation with the
+                details.
               </p>
 
               {/* Action Button */}
-              <Button
-                onClick={handleCloseSuccessModal}
-                className="w-full bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
-              >
+              <Button onClick={handleCloseSuccessModal} className="w-full bg-[#286BBD] hover:bg-[#1d4ed8] text-white">
                 Continue
               </Button>
             </div>
@@ -708,6 +554,7 @@ export const Leads = () => {
             <button
               onClick={() => setShowLeadPurchaseInfoModal(false)}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
+              aria-label="Close modal"
             >
               <X className="h-4 w-4" />
             </button>
@@ -718,9 +565,7 @@ export const Leads = () => {
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Info className="h-6 w-6 text-[#286BBD]" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Lead Purchase Information
-                </h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">Lead Purchase Information</h2>
                 <p className="text-sm text-gray-600">Overview of your purchased leads and total investment</p>
               </div>
 
@@ -787,9 +632,7 @@ export const Leads = () => {
                           <tr key={lead.id} className="hover:bg-gray-50">
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
-                                <span className="text-sm font-medium text-gray-900">
-                                  {lead.zipCode}
-                                </span>
+                                <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-black">
@@ -805,19 +648,13 @@ export const Leads = () => {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm font-medium text-gray-900">
-                                {lead.noOfLeads}
-                              </span>
+                              <span className="text-sm font-medium text-gray-900">{lead.noOfLeads}</span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm font-bold text-[#286BBD]">
-                                {lead.receivedLeads}
-                              </span>
+                              <span className="text-sm font-bold text-[#286BBD]">{lead.receivedLeads}</span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm text-red-500">
-                                {lead.pendingLeads}
-                              </span>
+                              <span className="text-sm text-red-500">{lead.pendingLeads}</span>
                             </td>
                           </tr>
                         ))}

@@ -1,12 +1,12 @@
 "use client";
 
 import { ProtectedRoute } from '@/components/Auth/ProtectedRoute';
-import { Dashboard, Leads, Contractors, Setting } from '@/components/admin/menuTabs/Index';
+import { Dashboard, Leads, Contractors, Setting, LeadRequest } from '@/components/admin/menuTabs/Index';
 import { notFound } from 'next/navigation';
 import { AdminSectionPageProps } from '@/types/AdminTypes';
 
 
-const validSections = ['dashboard', 'leads', 'contractors', 'settings'];
+const validSections = ['dashboard', 'leads', 'contractors', 'leads-request', 'settings'];
 
 export default function AdminSectionPage({ params }: AdminSectionPageProps) {
   const { section } = params;
@@ -23,6 +23,8 @@ export default function AdminSectionPage({ params }: AdminSectionPageProps) {
         return <Leads />;
       case 'contractors':
         return <Contractors />;
+      case 'leads-request':
+        return <LeadRequest />;
       case 'settings':
         return <Setting />;
       default:

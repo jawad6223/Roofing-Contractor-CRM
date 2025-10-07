@@ -274,6 +274,7 @@ export const Leads = () => {
             </div>
             <div className="relative">
               <select
+                aria-label="Select status"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="appearance-none bg-white border border-[#286BBD] lg:w-auto w-full text-[#286BBD] px-4 py-2 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-[#286BBD] focus:border-transparent min-w-[140px]"
@@ -506,6 +507,7 @@ export const Leads = () => {
                   <button
                     onClick={handleCloseModal}
                     className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+                    aria-label="Close modal"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -614,6 +616,7 @@ export const Leads = () => {
                   <button
                     onClick={handleCloseAddModal}
                     className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+                    aria-label="Close modal"
                   >
                     <X className="h-3 w-3" />
                   </button>
@@ -758,6 +761,7 @@ export const Leads = () => {
                   <button
                     onClick={handleCloseAssignModal}
                     className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+                    aria-label="Close modal"
                   >
                     <X className="h-3 w-3" />
                   </button>

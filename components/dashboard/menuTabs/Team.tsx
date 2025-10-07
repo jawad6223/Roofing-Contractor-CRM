@@ -222,6 +222,7 @@ export const Team = () => {
             <button
               onClick={handleCloseModal}
               className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+              aria-label="Close modal"
             >
               <X className="h-3 w-3" />
             </button>

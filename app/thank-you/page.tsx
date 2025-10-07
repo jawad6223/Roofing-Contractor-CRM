@@ -46,7 +46,7 @@ export default function ThankYouPage() {
                         Your account has been created successfully.
                     </p>
                     <p className="text-gray-500 mb-2">
-                        We're excited to have you join <span className="font-semibold text-[#286BBD]">Roof Claim Pros</span>.<br />
+                        We&apos;re excited to have you join <span className="font-semibold text-[#286BBD]">Roof Claim Pros</span>.<br />
                         Get ready to access premium leads and grow your business!
                     </p>
                 </div>

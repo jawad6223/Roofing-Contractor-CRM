@@ -1,17 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Home,
-  Users,
-  Settings,
-  BarChart3,
-  Menu,
-  X,
-  User,
-  LogOut,
-  UserPlus,
-} from "lucide-react";
+import { Home, Users, Settings, BarChart3, Menu, X, User, LogOut, UserPlus, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,8 +19,6 @@ import { CrmDashboardProps } from "@/types/DashboardTypes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-
-
 
 const CrmDashboard = ({ children }: CrmDashboardProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -51,6 +39,8 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
         return "CRM";
       case "leads":
         return "Leads";
+      case "purchase-leads":
+        return "Purchase Leads";
       case "settings":
         return "Settings";
       case "teams":
@@ -66,9 +56,13 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: BarChart3, label: "CRM", path: "/dashboard/crm" },
     { icon: Users, label: "Leads", path: "/dashboard/leads" },
+    { icon: ShoppingCart, label: "Purchase Leads", path: "/dashboard/purchase-leads" },
     { icon: Settings, label: "Settings", path: "/dashboard/settings" },
     { icon: UserPlus, label: "Teams", path: "/dashboard/teams" },
   ];
+
+  // Debug: Log menu items to console
+  console.log("Menu items:", menuItems);
 
   const handleLogout = () => {
     logout();
@@ -78,10 +72,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
     <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
@@ -101,6 +92,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
           <button
             onClick={() => setSidebarOpen(false)}
             className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+            aria-label="Close sidebar"
           >
             <X className="h-5 w-5" />
           </button>
@@ -131,21 +123,13 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
                 <User className="h-4 w-4 text-white" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate capitalize">
-                  {currentUserFullName}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {loading ? 'Loading...' : user}
-                </p>
+                <p className="text-sm font-medium text-gray-900 truncate capitalize">{currentUserFullName}</p>
+                <p className="text-xs text-gray-500 truncate">{loading ? "Loading..." : user}</p>
               </div>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-[#286BBD]"
-                >
+                <Button variant="outline" size="sm" className="w-full text-[#286BBD]">
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
                 </Button>
@@ -159,9 +143,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel className="text-[#286BBD]">Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleLogout}>
-                    Yes, Logout
-                  </AlertDialogAction>
+                  <AlertDialogAction onClick={handleLogout}>Yes, Logout</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -179,12 +161,11 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
                 <button
                   onClick={() => setSidebarOpen(true)}
                   className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 mr-2"
+                  aria-label="Open sidebar"
                 >
                   <Menu className="h-5 w-5" />
                 </button>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  Contractor Dashboard
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900">Contractor Dashboard</h1>
               </div>
             </div>
           </div>
@@ -193,7 +174,6 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       </div>
-
     </div>
   );
 };

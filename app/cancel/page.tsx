@@ -16,7 +16,7 @@ export default function CancelPage() {
           </div>
           
           <h1 className="text-3xl font-bold text-gray-800 mb-4 animate-fade-in">Payment Cancelled</h1>
-          <p className="text-gray-600 mb-8 animate-fade-in">Your payment was not completed. Please try again when you're ready.</p>
+          <p className="text-gray-600 mb-8 animate-fade-in">Your payment was not completed. Please try again when you&apos;re ready.</p>
           
           <button
             onClick={() => router.push('/')}

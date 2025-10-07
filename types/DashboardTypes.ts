@@ -30,6 +30,16 @@ export interface purchasedLeadType {
   purchaseDate: string;
 }
 
+export interface sampleLeadType {
+  id: number;
+  firstName: string;
+  lastName: string;
+  zipCode: string;
+  phone: string;
+  email: string;
+  price: number;
+}
+
 export interface purchaseFormType {
   zipCode: string;
   quantity: string;
@@ -56,4 +66,12 @@ export interface settingType {
   email: string;
   serviceRadius: string;
   businessAddress: string;
+}
+
+export interface paymentMethodType {
+  cardNumber: string;
+  expiryDate: string;
+  cvv: string;
+  cardholderName: string;
+  cardType: string;
 }

@@ -128,6 +128,26 @@
     },
   ];
 
+  export const sampleLeads = [
+    {
+      id: 1,
+      firstName: "John",
+      lastName: "Smith",
+      zipCode: "75201",
+      phone: "(555) 123-****",
+      email: "john.sm***@email.com",
+      price: 75,
+    },
+    {
+      id: 2,
+      firstName: "Sarah",
+      lastName: "Johnson",
+      zipCode: "75202",
+      phone: "(555) 987-****",
+      email: "sarah.jo***@email.com",
+      price: 100,
+    },
+  ];
 
   export const LeadsInfo = [
     {

@@ -171,7 +171,7 @@ export default function LoginModal() {
           {/* Switch to Register */}
           <div className="text-center pt-4 border-t border-gray-200">
             <span className="text-sm text-gray-600">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <button
                 onClick={() => router.push("/")}
                 className="text-[#286BBD] hover:text-[#1d4ed8] font-semibold transition-colors duration-200"
