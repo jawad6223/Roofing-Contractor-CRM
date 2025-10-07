@@ -8,23 +8,18 @@ import { useEffect, useState } from "react";
 
 const validSections = ["dashboard", "leads", "contractors", "leads-request", "settings"];
 
-export default function AdminSectionPage({ params }: { params: Promise<{ section: string }> }) {
-  const [section, setSection] = useState<string>("");
 
-  useEffect(() => {
-    params.then(({ section }) => setSection(section));
-  }, [params]);
+export default function AdminSectionPage({ params }: { params: { section: string } }) {
+  const section = params.section.toLowerCase();
 
-  if (!section) {
-    return <div>Loading...</div>;
-  }
+  const validSections = ["dashboard", "leads", "contractors", "leads-request", "settings"];
 
-  if (!validSections.includes(section.toLowerCase())) {
+  if (!validSections.includes(section)) {
     notFound();
   }
 
   const renderSection = () => {
-    switch (section.toLowerCase()) {
+    switch (section) {
       case "dashboard":
         return <Dashboard />;
       case "leads":
@@ -40,9 +35,45 @@ export default function AdminSectionPage({ params }: { params: Promise<{ section
     }
   };
 
-  return (
-    // <ProtectedRoute requireAuth={true}>
-    <>{renderSection()}</>
-    // </ProtectedRoute>
-  );
+  return <>{renderSection()}</>;
 }
+
+
+// export default function AdminSectionPage({ params }: { params: Promise<{ section: string }> }) {
+//   const [section, setSection] = useState<string>("");
+
+//   useEffect(() => {
+//     params.then(({ section }) => setSection(section));
+//   }, [params]);
+
+//   if (!section) {
+//     return <div>Loading...</div>;
+//   }
+
+//   if (!validSections.includes(section.toLowerCase())) {
+//     notFound();
+//   }
+
+//   const renderSection = () => {
+//     switch (section.toLowerCase()) {
+//       case "dashboard":
+//         return <Dashboard />;
+//       case "leads":
+//         return <Leads />;
+//       case "contractors":
+//         return <Contractors />;
+//       case "leads-request":
+//         return <LeadRequest />;
+//       case "settings":
+//         return <Setting />;
+//       default:
+//         return <Dashboard />;
+//     }
+//   };
+
+//   return (
+//     // <ProtectedRoute requireAuth={true}>
+//     <>{renderSection()}</>
+//     // </ProtectedRoute>
+//   );
+// }
