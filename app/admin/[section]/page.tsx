@@ -8,18 +8,23 @@ import { useEffect, useState } from "react";
 
 const validSections = ["dashboard", "leads", "contractors", "leads-request", "settings"];
 
+export default function AdminSectionPage({ params }: { params: Promise<{ section: string }> }) {
+  const [section, setSection] = useState<string>("");
 
-export default function AdminSectionPage({ params }: { params: { section: string } }) {
-  const section = params.section.toLowerCase();
+  useEffect(() => {
+    params.then(({ section }) => setSection(section));
+  }, [params]);
 
-  const validSections = ["dashboard", "leads", "contractors", "leads-request", "settings"];
+  if (!section) {
+    return <div>Loading...</div>;
+  }
 
-  if (!validSections.includes(section)) {
+  if (!validSections.includes(section.toLowerCase())) {
     notFound();
   }
 
   const renderSection = () => {
-    switch (section) {
+    switch (section.toLowerCase()) {
       case "dashboard":
         return <Dashboard />;
       case "leads":
@@ -37,43 +42,3 @@ export default function AdminSectionPage({ params }: { params: { section: string
 
   return <>{renderSection()}</>;
 }
-
-
-// export default function AdminSectionPage({ params }: { params: Promise<{ section: string }> }) {
-//   const [section, setSection] = useState<string>("");
-
-//   useEffect(() => {
-//     params.then(({ section }) => setSection(section));
-//   }, [params]);
-
-//   if (!section) {
-//     return <div>Loading...</div>;
-//   }
-
-//   if (!validSections.includes(section.toLowerCase())) {
-//     notFound();
-//   }
-
-//   const renderSection = () => {
-//     switch (section.toLowerCase()) {
-//       case "dashboard":
-//         return <Dashboard />;
-//       case "leads":
-//         return <Leads />;
-//       case "contractors":
-//         return <Contractors />;
-//       case "leads-request":
-//         return <LeadRequest />;
-//       case "settings":
-//         return <Setting />;
-//       default:
-//         return <Dashboard />;
-//     }
-//   };
-
-//   return (
-//     // <ProtectedRoute requireAuth={true}>
-//     <>{renderSection()}</>
-//     // </ProtectedRoute>
-//   );
-// }
