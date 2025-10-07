@@ -4,12 +4,20 @@ import { ProtectedRoute } from "@/components/Auth/ProtectedRoute";
 import { DashBoard, CRM, Leads, Setting, Team } from "@/components/dashboard/menuTabs";
 import PurchaseLeads from "@/components/dashboard/menuTabs/purchase-leads";
 import { notFound } from "next/navigation";
-import { DashboardSectionPageProps } from "@/types/DashboardTypes";
+import { useEffect, useState } from "react";
 
 const validSections = ["crm", "leads", "purchase-leads", "settings", "teams"];
 
-export default function DashboardSectionPage({ params }: DashboardSectionPageProps) {
-  const { section } = params;
+export default function DashboardSectionPage({ params }: { params: Promise<{ section: string }> }) {
+  const [section, setSection] = useState<string>("");
+
+  useEffect(() => {
+    params.then(({ section }) => setSection(section));
+  }, [params]);
+
+  if (!section) {
+    return <div>Loading...</div>;
+  }
 
   if (!validSections.includes(section.toLowerCase())) {
     notFound();
