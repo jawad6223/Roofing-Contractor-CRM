@@ -23,6 +23,7 @@ export interface LeadType {
   email: string;
   zipCode: string;
   address: string;
+  assignedDate: string;
   company: string;
   policy: string;
   assignedTo: string | null;
@@ -62,6 +63,7 @@ export interface requestLeadType {
   noOfLeads: number;
   price: number;
   date: string;
+  assignedDate: string;
   receivedLeads: number | string;
   pendingLeads: number | string;
   zipCode: string;
