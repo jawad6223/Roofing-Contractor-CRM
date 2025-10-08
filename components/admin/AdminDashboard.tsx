@@ -68,6 +68,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
   };
 
   const activeTab = getActiveTab();
+  console.log('activeTab', activeTab);
 
   return (
     <div className="h-screen bg-gray-50 flex overflow-hidden">

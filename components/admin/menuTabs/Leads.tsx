@@ -22,6 +22,7 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +37,7 @@ import * as ExcelJS from "exceljs";
 export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [activeTab, setActiveTab] = useState("open");
   const [selectedLead, setSelectedLead] = useState<LeadType | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -77,11 +79,26 @@ export const Leads = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Filter leads for Open tab (shows leads with "Open" and "Cancel" status)
+  const openLeads = filteredLeads.filter((lead) => {
+    const leadStatus = leadStatuses[lead.id.toString()] || "Open";
+    return leadStatus.toLowerCase() === "open" || leadStatus.toLowerCase() === "cancel";
+  });
+
+  // Filter leads for Close tab (shows leads with "Close" status)
+  const closeLeads = filteredLeads.filter((lead) => {
+    const leadStatus = leadStatuses[lead.id.toString()] || "Open";
+    return leadStatus.toLowerCase() === "close";
+  });
+
+  // Get current tab data
+  const currentTabData = activeTab === "open" ? openLeads : closeLeads;
+
   // Pagination logic
-  const totalPages = Math.ceil(filteredLeads.length / itemsPerPage);
+  const totalPages = Math.ceil(currentTabData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentData = filteredLeads.slice(startIndex, endIndex);
+  const currentData = currentTabData.slice(startIndex, endIndex);
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -89,6 +106,11 @@ export const Leads = () => {
 
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setCurrentPage(1); // Reset to first page when switching tabs
   };
 
   // Reset to first page when filters change
@@ -163,9 +185,21 @@ export const Leads = () => {
 
   const getStatusBadgeColor = (leadId: string) => {
     const status = getLeadStatus(leadId);
-    return status === "Cancel"
-      ? "bg-red-100 text-red-800 hover:bg-red-200"
-      : "bg-green-100 text-green-800 hover:bg-green-200";
+    switch (status.toLowerCase()) {
+      case "cancel":
+        return "bg-red-100 text-red-800 hover:bg-red-200";
+      case "close":
+        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
+      case "hot":
+        return "bg-orange-100 text-orange-800 hover:bg-orange-200";
+      case "warm":
+        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
+      case "cold":
+        return "bg-blue-100 text-blue-800 hover:bg-blue-200";
+      case "open":
+      default:
+        return "bg-green-100 text-green-800 hover:bg-green-200";
+    }
   };
 
   const handleContractorSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -301,154 +335,267 @@ export const Leads = () => {
         </CardContent>
       </Card>
 
-      {/* <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mt-4">
-              {["All", "Available", "Assigned", "In Progress", "Closed"].map((status) => {
-                const count = status === "All" 
-                  ? allLeads.length 
-                  : allLeads.filter(lead => lead.status === status).length;
-                return (
-                  <div
-                    key={status}
-                    onClick={() => setStatusFilter(status)}
-                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                      statusFilter === status 
-                        ? 'border-[#286BBD] bg-[#286BBD]/5' 
-                        : 'border-gray-200 hover:border-[#286BBD]/50'
-                    }`}
-                  >
-                    <div className="text-center">
-                      <div className="text-lg font-bold text-gray-900">{count}</div>
-                      <div className="text-xs text-gray-600">{status}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div> */}
-
-      {/* Leads Table */}
+      {/* Leads Table with Tabs */}
       <Card className="border-0 shadow-lg">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Zip Code
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Phone No
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentData.length > 0 ? (
-                  currentData.map((lead: LeadType, index: number) => (
-                    <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-bold text-[#122E5F]">
-                          {lead.firstName} {lead.lastName}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-900">{lead.phoneno}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <Mail className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-900">{lead.email}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Badge className={getStatusBadgeColor(lead.id.toString())}>
-                          {getLeadStatus(lead.id.toString())}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <div className="border-b border-gray-200">
+              <TabsList className="grid w-full grid-cols-2 bg-transparent h-auto p-0">
+                <TabsTrigger
+                  value="open"
+                  className="flex-1 py-4 px-6 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#286BBD] data-[state=active]:text-[#286BBD] data-[state=active]:bg-transparent rounded-none"
+                >
+                  Open Leads ({openLeads.length})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="close"
+                  className="flex-1 py-4 px-6 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#286BBD] data-[state=active]:text-[#286BBD] data-[state=active]:bg-transparent rounded-none"
+                >
+                  Close Leads ({closeLeads.length})
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <TabsContent value="open" className="m-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Zip Code
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Phone No
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {currentData.length > 0 ? (
+                      currentData.map((lead: LeadType, index: number) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-bold text-[#122E5F]">
+                              {lead.firstName} {lead.lastName}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">{lead.phoneno}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">{lead.email}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <Badge className={getStatusBadgeColor(lead.id.toString())}>
+                              {getLeadStatus(lead.id.toString())}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleViewLead(lead)} className="cursor-pointer">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleCloseLead(lead.id.toString())}
+                                  className="cursor-pointer text-red-600 hover:text-red-700"
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Cancel
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                              onClick={() => handleAssignLead(lead)}
                             >
-                              <MoreHorizontal className="h-4 w-4" />
+                              <Target className="h-4 w-4 mr-1" />
+                              Assign
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewLead(lead)} className="cursor-pointer">
-                              <Eye className="h-4 w-4 mr-2" />
-                              View
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleCloseLead(lead.id.toString())}
-                              className="cursor-pointer text-red-600 hover:text-red-700"
-                            >
-                              <X className="h-4 w-4 mr-2" />
-                              Cancel
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
-                          onClick={() => handleAssignLead(lead)}
-                        >
-                          <Target className="h-4 w-4 mr-1" />
-                          Assign
-                        </Button>
-                      </td>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-8 text-center">
+                          <div className="flex flex-col items-center justify-center space-y-3">
+                            <Search className="h-12 w-12 text-gray-300" />
+                            <div>
+                              <p className="text-lg font-medium text-gray-900">No leads found</p>
+                              <p className="text-sm text-gray-500">
+                                {searchTerm || statusFilter !== "All"
+                                  ? `No results for current filters`
+                                  : "Try adjusting your search terms"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="close" className="m-0">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Zip Code
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Phone No
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Action
+                      </th>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={5} className="px-6 py-8 text-center">
-                      <div className="flex flex-col items-center justify-center space-y-3">
-                        <Search className="h-12 w-12 text-gray-300" />
-                        <div>
-                          <p className="text-lg font-medium text-gray-900">No leads found</p>
-                          <p className="text-sm text-gray-500">
-                            {searchTerm || statusFilter !== "All"
-                              ? `No results for current filters`
-                              : "Try adjusting your search terms"}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {currentData.length > 0 ? (
+                      currentData.map((lead: LeadType, index: number) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-bold text-[#122E5F]">
+                              {lead.firstName} {lead.lastName}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">{lead.phoneno}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">{lead.email}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <Badge className={getStatusBadgeColor(lead.id.toString())}>
+                              {getLeadStatus(lead.id.toString())}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleViewLead(lead)} className="cursor-pointer">
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  View
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleCloseLead(lead.id.toString())}
+                                  className="cursor-pointer text-red-600 hover:text-red-700"
+                                >
+                                  <X className="h-4 w-4 mr-2" />
+                                  Cancel
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                              onClick={() => handleAssignLead(lead)}
+                            >
+                              <Target className="h-4 w-4 mr-1" />
+                              Assign
+                            </Button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-8 text-center">
+                          <div className="flex flex-col items-center justify-center space-y-3">
+                            <Search className="h-12 w-12 text-gray-300" />
+                            <div>
+                              <p className="text-lg font-medium text-gray-900">No closed leads found</p>
+                              <p className="text-sm text-gray-500">
+                                {searchTerm || statusFilter !== "All"
+                                  ? `No results for current filters`
+                                  : "No closed leads available"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
       {/* Pagination Controls */}
-      {filteredLeads.length > 0 && (
+      {currentTabData.length > 0 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Showing {startIndex + 1} to {Math.min(endIndex, filteredLeads.length)} of {filteredLeads.length} results
+            Showing {startIndex + 1} to {Math.min(endIndex, currentTabData.length)} of {currentTabData.length} results
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -491,37 +638,6 @@ export const Leads = () => {
           </div>
         </div>
       )}
-
-      {/* Results Summary */}
-      {/* {(searchTerm || statusFilter !== "All") && (
-              <div className="flex items-center justify-between text-sm text-gray-600">
-                <span>
-                  Showing {filteredLeads.length} of {allLeads.length} leads
-                  {searchTerm && ` matching "${searchTerm}"`}
-                  {statusFilter !== "All" && ` with status "${statusFilter}"`}
-                </span>
-                {(searchTerm || statusFilter !== "All") && (
-                  <div className="flex gap-2">
-                    {searchTerm && (
-                      <button
-                        onClick={() => setSearchTerm("")}
-                        className="text-[#286BBD] hover:text-[#1d4ed8] font-medium"
-                      >
-                        Clear search
-                      </button>
-                    )}
-                    {statusFilter !== "All" && (
-                      <button
-                        onClick={() => setStatusFilter("All")}
-                        className="text-[#286BBD] hover:text-[#1d4ed8] font-medium"
-                      >
-                        Clear filter
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            )} */}
 
       {/* Quick Stats */}
 
@@ -569,8 +685,12 @@ export const Leads = () => {
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Zip Code</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">{selectedLead.zipCode}</p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Zip Code <span className="text-xs text-gray-500">(Address)</span>
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                    {selectedLead.zipCode}, {selectedLead.address}
+                  </p>
                 </div>
 
                 <div>

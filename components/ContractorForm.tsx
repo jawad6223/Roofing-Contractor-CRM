@@ -236,14 +236,16 @@ export function ContractorForm() {
 
     if (!formData.password.trim()) {
       newErrors.password = "Password is required";
-    } else if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(formData.password)) {
+    } else if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/.test(formData.password)) {
       newErrors.password = "Password must be 8 characters, 1 uppercase, 1 number & 1 special character";
     }
+    
     if (!formData.confirmPassword.trim()) {
       newErrors.confirmPassword = "Please confirm your password";
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Passwords do not match";
     }
+    
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

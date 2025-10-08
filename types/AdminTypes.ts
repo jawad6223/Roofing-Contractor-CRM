@@ -22,6 +22,7 @@ export interface LeadType {
   phoneno: string;
   email: string;
   zipCode: string;
+  address: string;
   company: string;
   policy: string;
   assignedTo: string | null;

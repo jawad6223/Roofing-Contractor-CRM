@@ -20,25 +20,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { dashboardCardType } from "@/types/AdminTypes";
-import { dashboardCard, allLeads, contractors } from "./Data";
+import { dashboardCard, allLeads, contractors, requestLeads } from "./Data";
 import Link from "next/link";
-import { LeadType, ContractorType } from "@/types/AdminTypes";
+import {dashboardCardType, LeadType, ContractorType, requestLeadType } from "@/types/AdminTypes";
 
 export const Dashboard = () => {
   const [selectedLead, setSelectedLead] = useState<LeadType>();
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
-  const [selectedContractor, setSelectedContractor] = useState<ContractorType>();
-  const [isContractorModalOpen, setIsContractorModalOpen] = useState<boolean>(false);
+  const [selectedRequestLead, setSelectedRequestLead] = useState<requestLeadType>();
+  const [isRequestLeadModalOpen, setIsRequestLeadModalOpen] = useState<boolean>(false);
   const handleLeadClick = (lead: LeadType) => {
     setSelectedLead(lead);
     setIsLeadModalOpen(true);
   };
 
-  const handleContractorClick = (contractor: ContractorType) => {
-    console.log('contractor', contractor);
-    setSelectedContractor(contractor);
-    setIsContractorModalOpen(true);
+  const handleRequestLeadClick = (reqLead: requestLeadType) => {
+    console.log('reqLead', reqLead);
+    setSelectedRequestLead(reqLead);
+    setIsRequestLeadModalOpen(true);
   };
 
   return (
@@ -144,15 +143,15 @@ export const Dashboard = () => {
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
                 <Activity className="h-5 w-5 text-[#122E5F] mr-2" />
-                Top Performers
+                Request Leads
               </CardTitle>
-              <Link href="/admin/contractors">
+              <Link href="/admin/leads-request">
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-[#286BBD] hover:text-[#1d4ed8] hover:bg-[#286BBD]/10 flex items-center space-x-1"
                 >
-                  <span className="text-sm">View All Contractors</span>
+                  <span className="text-sm">View All Request Leads</span>
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               </Link>
@@ -160,33 +159,33 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-            {contractors.slice(0, 3).map((contractor: ContractorType) => (
+            {requestLeads.slice(0, 3).map((reqLead: requestLeadType) => (
                 <div
-                  key={contractor.id}
-                  onClick={() => handleContractorClick(contractor)}
+                  key={reqLead.id}
+                  onClick={() => handleRequestLeadClick(reqLead)}
                   className="flex flex-col lg:flex-row items-center justify-center md:justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-200"
                 >
                   <div className="w-full md:w-auto">
                     <div className="text-sm flex items-center font-semibold text-gray-900 transition-colors">
                       <User className="h-4 w-4 mr-1" />
-                      <span className="font-medium">{contractor.fullName}</span>
+                      <span className="font-medium">{reqLead.firstName} {reqLead.lastName}</span>
                     </div>
                     <div className="text-sm mt-1 flex items-center font-semibold text-gray-900 transition-colors">
                       <MapPin className="h-4 w-4 mr-1" />
                       <span className="font-medium">
-                        {contractor.businessAddress}
+                        {reqLead.zipCode}
                       </span>
                     </div>
                   </div>
                   <div className="flex w-full md:w-auto flex-col mt-2 space-y-2">
                     <div className="text-sm text-[#286BBD] flex hover:text-[#1d4ed8] transition-colors">
                       <Phone className="h-4 w-4 mr-1" />
-                      <span className="font-medium">{contractor.phoneno}</span>
+                      <span className="font-medium">{reqLead.phoneno}</span>
                     </div>
-                    <div className="text-sm mt-1 text-gray-600 flex hover:text-gray-800 transition-colors">
+                    {/* <div className="text-sm mt-1 text-gray-600 flex hover:text-gray-800 transition-colors">
                       <Mail className="h-4 w-4 mr-1" />
-                      <span className="font-medium">{contractor.email}</span>
-                    </div>
+                      <span className="font-medium">{reqLead.email}</span>
+                    </div> */}
                   </div>
                 </div>
               ))}
@@ -303,28 +302,28 @@ export const Dashboard = () => {
       </Dialog>
 
       {/* Contractor Details Modal */}
-      <Dialog open={isContractorModalOpen} onOpenChange={setIsContractorModalOpen}>
+      <Dialog open={isRequestLeadModalOpen} onOpenChange={setIsRequestLeadModalOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center justify-between">
               <DialogTitle className="text-xl font-bold text-[#286BBD]">
-                Contractor Details
+                Request Lead Details
               </DialogTitle>
-              <Link href="/admin/contractors">
+              <Link href="/admin/leads-request">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setIsContractorModalOpen(false)}
+                  onClick={() => setIsRequestLeadModalOpen(false)}
                   className="text-[#286BBD] mr-6 border-[#286BBD] hover:bg-[#286BBD] hover:text-white flex items-center space-x-1"
                 >
-                  <span className="text-sm">View All Contractors</span>
+                  <span className="text-sm">View All Request Leads</span>
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               </Link>
             </div>
           </DialogHeader>
 
-          {selectedContractor && (
+          {selectedRequestLead && (
             <div className="p-5">
               {/* Lead Information */}
               <div className="grid grid-cols-2 gap-3">
@@ -333,7 +332,7 @@ export const Dashboard = () => {
                     Name
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedContractor.fullName}
+                    {selectedRequestLead.firstName} {selectedRequestLead.lastName}
                   </p>
                 </div>
                 <div>
@@ -341,31 +340,55 @@ export const Dashboard = () => {
                     Phone Number
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedContractor.phoneno}
+                    {selectedRequestLead.phoneno}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Email Address
+                    Zip Code
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedContractor.email}
+                    {selectedRequestLead.zipCode}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Service Radius
+                    No of Leads
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedContractor.serviceRadius}
+                    {selectedRequestLead.noOfLeads}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Business Address
+                    Price
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedContractor.businessAddress}
+                    {selectedRequestLead.price}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Date
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                    {selectedRequestLead.date}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Pending Leads
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                    {selectedRequestLead.pendingLeads}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                    {selectedRequestLead.status}
                   </p>
                 </div>
               </div>
@@ -374,7 +397,7 @@ export const Dashboard = () => {
               <div className="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200">
                 <Button
                   variant="outline"
-                  onClick={() => setIsContractorModalOpen(false)}
+                  onClick={() => setIsRequestLeadModalOpen(false)}
                   className="px-4 py-2 text-sm"
                 >
                   Close
