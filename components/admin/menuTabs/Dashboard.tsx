@@ -28,10 +28,17 @@ import { LeadType, ContractorType } from "@/types/AdminTypes";
 export const Dashboard = () => {
   const [selectedLead, setSelectedLead] = useState<LeadType>();
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
-
+  const [selectedContractor, setSelectedContractor] = useState<ContractorType>();
+  const [isContractorModalOpen, setIsContractorModalOpen] = useState<boolean>(false);
   const handleLeadClick = (lead: LeadType) => {
     setSelectedLead(lead);
     setIsLeadModalOpen(true);
+  };
+
+  const handleContractorClick = (contractor: ContractorType) => {
+    console.log('contractor', contractor);
+    setSelectedContractor(contractor);
+    setIsContractorModalOpen(true);
   };
 
   return (
@@ -59,7 +66,7 @@ export const Dashboard = () => {
                   </p>
                 </div>
                 <div
-                  className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center`}
+                  className={`w-12 h-12 bg-[#122E5F] rounded-xl flex items-center justify-center`}
                 >
                   <stat.icon className="h-6 w-6 text-white" />
                 </div>
@@ -137,17 +144,30 @@ export const Dashboard = () => {
 
         <Card className="border-0 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
-              <BarChart3 className="h-5 w-5 text-[#122E5F] mr-2" />
-              Top Performers
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
+                <Activity className="h-5 w-5 text-[#122E5F] mr-2" />
+                Top Performers
+              </CardTitle>
+              <Link href="/admin/contractors">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[#286BBD] hover:text-[#1d4ed8] hover:bg-[#286BBD]/10 flex items-center space-x-1"
+                >
+                  <span className="text-sm">View All Contractors</span>
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {contractors.slice(0, 3).map((contractor: ContractorType) => (
+            {contractors.slice(0, 3).map((contractor: ContractorType) => (
                 <div
                   key={contractor.id}
-                  className="flex flex-col lg:flex-row items-center justify-center md:justify-between p-3 bg-gray-50 rounded-lg"
+                  onClick={() => handleContractorClick(contractor)}
+                  className="flex flex-col lg:flex-row items-center justify-center md:justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-200"
                 >
                   <div className="w-full md:w-auto">
                     <div className="text-sm flex items-center font-semibold text-gray-900 transition-colors">
@@ -170,16 +190,6 @@ export const Dashboard = () => {
                       <Mail className="h-4 w-4 mr-1" />
                       <span className="font-medium">{contractor.email}</span>
                     </div>
-                    {/* <div className="flex flex-col items-center lg:items-end space-y-1">
-                    <div className="text-sm text-[#286BBD] flex justify-start hover:text-[#1d4ed8] transition-colors">
-                      <Phone className="h-4 w-4 mr-1" />
-                      <span className="font-medium">{contractor.phoneno}</span>
-                    </div>
-                    <div className="text-sm text-gray-600 flex items-center hover:text-gray-800 transition-colors">
-                      <Mail className="h-4 w-4 mr-1" />
-                      <span className="font-medium">{contractor.email}</span>
-                    </div>
-                  </div> */}
                   </div>
                 </div>
               ))}
@@ -285,6 +295,89 @@ export const Dashboard = () => {
                 <Button
                   variant="outline"
                   onClick={() => setIsLeadModalOpen(false)}
+                  className="px-4 py-2 text-sm"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Contractor Details Modal */}
+      <Dialog open={isContractorModalOpen} onOpenChange={setIsContractorModalOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-xl font-bold text-[#286BBD]">
+                Contractor Details
+              </DialogTitle>
+              <Link href="/admin/contractors">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsContractorModalOpen(false)}
+                  className="text-[#286BBD] mr-6 border-[#286BBD] hover:bg-[#286BBD] hover:text-white flex items-center space-x-1"
+                >
+                  <span className="text-sm">View All Contractors</span>
+                  <ExternalLink className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </DialogHeader>
+
+          {selectedContractor && (
+            <div className="p-5">
+              {/* Lead Information */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                    {selectedContractor.fullName}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                    {selectedContractor.phoneno}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Email Address
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                    {selectedContractor.email}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Service Radius
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                    {selectedContractor.serviceRadius}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Business Address
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                    {selectedContractor.businessAddress}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsContractorModalOpen(false)}
                   className="px-4 py-2 text-sm"
                 >
                   Close

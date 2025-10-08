@@ -36,6 +36,19 @@ import { purchasedLeads, LeadsInfo, sampleLeads } from "./Data";
 export const Leads = () => {
   const router = useRouter();
   const [showLeadPurchaseInfoModal, setShowLeadPurchaseInfoModal] = useState<boolean>(false);
+  const [leadStatuses, setLeadStatuses] = useState<Record<string, string>>({});
+
+  const handleStatusChange = (leadId: string, status: string) => {
+    setLeadStatuses((prev) => ({
+      ...prev,
+      [leadId]: status,
+    }));
+  };
+  console.log("leadStatuses", leadStatuses);
+
+  const getLeadStatus = (leadId: string) => {
+    return leadStatuses[leadId] || "open";
+  };
 
   const [purchaseForm, setPurchaseForm] = useState<purchaseFormType>({
     quantity: "1",
@@ -224,7 +237,7 @@ export const Leads = () => {
                   <tr key={lead.id} className={`border-l-4`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
-                        <div className="text-sm font-bold text-gray-400 blur-sm">
+                        <div className="text-sm font-bold text-gray-400 blur-[2px] select-none">
                           {lead.firstName} {lead.lastName}
                         </div>
                       </div>
@@ -232,19 +245,19 @@ export const Leads = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-400 blur-sm">{lead.zipCode}</span>
+                        <span className="text-sm font-medium text-gray-400 blur-[2px] select-none">{lead.zipCode}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                        <span className="text-sm text-gray-400 blur-sm">{lead.phone}</span>
+                        <span className="text-sm text-gray-400 blur-[2px] select-none">{lead.phone}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                        <span className="text-sm text-gray-400 blur-sm">{lead.email}</span>
+                        <span className="text-sm text-gray-400 blur-[2px] select-none">{lead.email}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap" colSpan={2}>
@@ -283,7 +296,7 @@ export const Leads = () => {
                 </tr> */}
 
                 {currentData.length > 0 ? (
-                  currentData.map((lead, index) => (
+                  currentData.map((lead: purchasedLeadType, index: number) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
@@ -311,6 +324,24 @@ export const Leads = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <Select
+                          value={getLeadStatus(lead.id)}
+                          onValueChange={(val) => handleStatusChange(lead.id, val)}
+                        >
+                          <SelectTrigger className="w-32 h-8 text-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="open">Open</SelectItem>
+                            <SelectItem value="hot">Hot Lead</SelectItem>
+                            <SelectItem value="warm">Warm Lead</SelectItem>
+                            <SelectItem value="cold">Cold Lead</SelectItem>
+                            <SelectItem value="close">Close</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </td>
+
+                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Select defaultValue="open">
                           <SelectTrigger className="w-32 h-8 text-xs">
                             <SelectValue placeholder="Status" />
@@ -323,7 +354,7 @@ export const Leads = () => {
                             <SelectItem value="close">Close</SelectItem>
                           </SelectContent>
                         </Select>
-                      </td>
+                      </td> */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Button
                           size="sm"

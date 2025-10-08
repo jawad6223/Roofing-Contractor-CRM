@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { User, Bell, CreditCard, Edit3, Save, X, Calendar, Lock } from "lucide-react";
+import { User, Bell, CreditCard, Edit3, Save, X, Calendar, Lock, Trash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -226,7 +226,12 @@ export const Setting = () => {
                     <p className="text-sm text-gray-600">Visa • Expires 12/25</p>
                   </div>
                 </div>
-                <Badge className="bg-green-100 text-green-800">Primary</Badge>
+                <div className="flex flex-col items-center space-y-3">
+                  <Badge className="bg-green-100 text-green-800">Primary</Badge>
+                  <Button variant="outline" className="h-8 text-red-500 hover:bg-red-500 hover:text-white">
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <Button
                 variant="outline"

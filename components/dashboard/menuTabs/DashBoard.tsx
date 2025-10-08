@@ -223,22 +223,22 @@ export const DashBoard = () => {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <div className="text-sm font-bold text-gray-400 blur-sm select-none">
+                        <div className="text-sm font-bold text-gray-400 blur-[2px] select-none">
                           {lead.firstName} {lead.lastName}
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs text-gray-500">
                         <div className="flex items-center">
                           <MapPin className="h-3 w-3 mr-1" />
-                          <span className="blur-sm select-none">{lead.zipCode}</span>
+                        <span className="blur-[2px] select-none">{lead.zipCode}</span>
                         </div>
                         <div className="flex items-center">
                           <Phone className="h-3 w-3 mr-1" />
-                          <span className="blur-sm select-none">{lead.phone}</span>
+                          <span className="blur-[2px] select-none">{lead.phone}</span>
                         </div>
                         <div className="flex items-center">
                           <Mail className="h-3 w-3 mr-1" />
-                          <span className="blur-sm select-none">{lead.email}</span>
+                          <span className="blur-[2px] select-none">{lead.email}</span>
                         </div>
                       </div>
                     </div>

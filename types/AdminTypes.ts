@@ -43,7 +43,6 @@ export interface dashboardCardType {
   value: string;
   change: string;
   icon: React.ComponentType<any>;
-  color: string;
   time?: string;
 }
 
@@ -61,6 +60,8 @@ export interface requestLeadType {
   lastName: string;
   phoneno: string;
   noOfLeads: number;
+  price: number;
+  date: string;
   receivedLeads: number | string;
   pendingLeads: number | string;
   zipCode: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Home, Users, Settings, BarChart3, Menu, X, User, LogOut, UserPlus, ShoppingCart } from "lucide-react";
+import { Home, Settings, BarChart3, Menu, X, User, LogOut, UserPlus, ShoppingCart, FileText } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +41,8 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
         return "Leads";
       case "purchase-leads":
         return "Purchase Leads";
+      case "lead-purchase-info":
+        return "Lead Purchase Info";
       case "settings":
         return "Settings";
       case "teams":
@@ -55,8 +57,9 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: BarChart3, label: "CRM", path: "/dashboard/crm" },
-    { icon: Users, label: "Leads", path: "/dashboard/leads" },
+    { icon: FileText, label: "Leads", path: "/dashboard/leads" },
     { icon: ShoppingCart, label: "Purchase Leads", path: "/dashboard/purchase-leads" },
+    { icon: FileText, label: "Lead Purchase Info", path: "/dashboard/lead-purchase-info" },
     { icon: Settings, label: "Settings", path: "/dashboard/settings" },
     { icon: UserPlus, label: "Teams", path: "/dashboard/teams" },
   ];

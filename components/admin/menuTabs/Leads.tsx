@@ -70,7 +70,8 @@ export const Leads = () => {
       lead.company.toLowerCase().includes(searchLower) ||
       lead.policy.includes(searchTerm);
 
-    const matchesStatus = statusFilter === "All";
+    const leadStatus = leadStatuses[lead.id.toString()] || "Open";
+    const matchesStatus = statusFilter === "All" || leadStatus.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
@@ -290,10 +291,8 @@ export const Leads = () => {
                 className="appearance-none bg-white border border-[#286BBD] lg:w-auto w-full text-[#286BBD] px-4 py-2 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-[#286BBD] focus:border-transparent min-w-[140px]"
               >
                 <option value="All">All Status</option>
-                <option value="Available">Available</option>
-                <option value="Assigned">Assigned</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Closed">Closed</option>
+                <option value="open">Open</option>
+                <option value="close">Close</option>
               </select>
               <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#286BBD] h-4 w-4 pointer-events-none" />
             </div>

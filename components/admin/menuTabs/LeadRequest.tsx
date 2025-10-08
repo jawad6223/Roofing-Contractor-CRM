@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Users, MapPin, Phone, Eye, X, Mail, Building, Calendar, User, FileText, Target } from "lucide-react";
+import { Search, Users, MapPin, Phone, Eye, X, Mail, Building, Calendar, User, DollarSign, Target, FileText } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -122,7 +122,7 @@ export const LeadRequest = () => {
       {/* Header */}
       <div className="text-center mb-6">
         <div className="w-12 h-12 bg-[#122E5F]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-          <Users className="h-6 w-6 text-[#122E5F]" />
+          <FileText className="h-6 w-6 text-[#122E5F]" />
         </div>
         <h2 className="text-xl font-bold text-gray-900 mb-1">Requested Leads</h2>
         <p className="text-sm text-gray-600">Browse and manage lead requests</p>
@@ -134,7 +134,7 @@ export const LeadRequest = () => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             type="text"
-            placeholder="Search Leads..."
+            placeholder="Search Contractors..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#122E5F] focus:border-transparent"
@@ -174,6 +174,12 @@ export const LeadRequest = () => {
                         No. of Leads
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Price
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Send Leads
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -210,6 +216,18 @@ export const LeadRequest = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <span className="text-sm font-medium text-gray-900">{lead.noOfLeads}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex items-center">
+                              <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
+                              <span className="text-sm font-medium text-gray-900">{lead.price}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex items-center">
+                              <Calendar className="h-3 w-3 text-gray-400 mr-1" />
+                              <span className="text-sm font-medium text-gray-900">{lead.date}</span>
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <span className="text-sm font-medium text-gray-900">{lead.receivedLeads}</span>
@@ -258,6 +276,12 @@ export const LeadRequest = () => {
                         No. of Leads
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Price
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Pending Leads
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -294,6 +318,18 @@ export const LeadRequest = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <span className="text-sm font-medium text-gray-900">{lead.noOfLeads}</span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex items-center">
+                              <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
+                              <span className="text-sm font-medium text-gray-900">{lead.price}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                            <div className="flex items-center">
+                              <Calendar className="h-3 w-3 text-gray-400 mr-1" />
+                              <span className="text-sm font-medium text-gray-900">{lead.date}</span>
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <span className="text-sm font-medium text-gray-900">{lead.pendingLeads}</span>
@@ -349,7 +385,7 @@ export const LeadRequest = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <User className="h-6 w-6 text-green-600" />
+                  <FileText className="h-6 w-6 text-green-600" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">Assigned Lead Details</h2>
                 <p className="text-sm text-gray-600">Complete information about this assigned lead</p>
@@ -453,7 +489,7 @@ export const LeadRequest = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <User className="h-6 w-6 text-yellow-600" />
+                  <FileText className="h-6 w-6 text-yellow-600" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">Pending Lead Details</h2>
                 <p className="text-sm text-gray-600">Complete information about this pending lead</p>
@@ -557,7 +593,7 @@ export const LeadRequest = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Target className="h-6 w-6 text-blue-600" />
+                  <FileText className="h-6 w-6 text-[#122E5F]" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">Assign Leads</h2>
                 <p className="text-sm text-gray-600">Select leads to assign to contractors</p>
@@ -651,7 +687,7 @@ export const LeadRequest = () => {
                     className={`px-6 py-2 text-white ${
                       selectedAssignLeads.size === 0
                         ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
+                        : "bg-[#122E5F] hover:bg-[#122E5F]/80"
                     }`}
                   >
                     Assign ({selectedAssignLeads.size})
