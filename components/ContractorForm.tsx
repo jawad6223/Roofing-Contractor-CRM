@@ -252,30 +252,28 @@ export function ContractorForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateStep2()) {
-      console.log("Form submitted:", formData);
-      // Get existing users from localStorage or initialize empty array
+      // Convert email to lowercase before saving
+      const formDataWithLowerEmail = {
+        ...formData,
+        emailAddress: formData.emailAddress.toLowerCase(),
+      };
+
       const existingUsers = JSON.parse(localStorage.getItem("userInfo") || "[]");
 
-      // Add new user data to array
       const usersArray = Array.isArray(existingUsers) ? existingUsers : [];
-      usersArray.push(formData);
+      usersArray.push(formDataWithLowerEmail);
 
-      // Save updated array back to localStorage
-      localStorage.setItem("userInfo", JSON.stringify(existingUsers));
+      localStorage.setItem("userInfo", JSON.stringify(usersArray));
 
-      // Redirect to success page with user info
       const params = new URLSearchParams({
-        name: formData.fullName,
-        email: formData.emailAddress,
+        name: formDataWithLowerEmail.fullName,
+        email: formDataWithLowerEmail.emailAddress,
       });
 
       if (validateStep2()) {
-        console.log("Form submitted:", formData);
         toast.success("Form submitted successfully.");
-        // Show success modal instead of redirecting
         setShowSuccessModal(true);
       } else {
-        // Scroll to first error field
         const firstErrorField = document.querySelector(".border-red-500");
         if (firstErrorField) {
           firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });

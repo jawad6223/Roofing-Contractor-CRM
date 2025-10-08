@@ -110,7 +110,7 @@
       phoneno: '(214) 555-0789',
       email: 'michael.davis@email.com',
       location: 'Austin, TX',
-      company: 'USAA',
+      company: 'USA',
       policy: 'US456789123',
       purchaseDate: '2024-01-13',
     },

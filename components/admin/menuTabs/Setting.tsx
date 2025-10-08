@@ -135,14 +135,19 @@ export const Setting = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Leads
+                  Price Per Lead
                 </label>
-                <Input
-                  value={formData.leads}
-                  onChange={(e) => handleInputChange('leads', e.target.value)}
-                  readOnly={!isEditing}
-                  className={`text-gray-900 h-11 ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
-                />
+                <div className="relative">
+                  <Input
+                    value={formData.leads}
+                    onChange={(e) => handleInputChange('leads', e.target.value)}
+                    readOnly={!isEditing}
+                    className={`text-gray-900 h-11 pr-16 ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
+                </div>
               </div>
             </div>
             {!isEditing ? (

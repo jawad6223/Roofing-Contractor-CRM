@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Phone, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -152,7 +153,7 @@ export const Leads = () => {
   const handleCloseLead = (leadId: string) => {
     setLeadStatuses((prev) => ({
       ...prev,
-      [leadId]: "Close",
+      [leadId]: "Cancel",
     }));
   };
 
@@ -162,7 +163,7 @@ export const Leads = () => {
 
   const getStatusBadgeColor = (leadId: string) => {
     const status = getLeadStatus(leadId);
-    return status === "Close"
+    return status === "Cancel"
       ? "bg-red-100 text-red-800 hover:bg-red-200"
       : "bg-green-100 text-green-800 hover:bg-green-200";
   };
@@ -292,7 +293,7 @@ export const Leads = () => {
               >
                 <option value="All">All Status</option>
                 <option value="open">Open</option>
-                <option value="close">Close</option>
+                <option value="cancel">Cancel</option>
               </select>
               <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-[#286BBD] h-4 w-4 pointer-events-none" />
             </div>
@@ -353,7 +354,7 @@ export const Leads = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentData.length > 0 ? (
-                  currentData.map((lead, index) => (
+                  currentData.map((lead: LeadType, index: number) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm font-bold text-[#122E5F]">
@@ -361,13 +362,22 @@ export const Leads = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm font-bold text-[#122E5F]">{lead.zipCode}</span>
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                          <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-900">{lead.phoneno}</span>
+                        <div className="flex items-center">
+                          <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                          <span className="text-sm font-medium text-gray-900">{lead.phoneno}</span>
+                        </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <span className="text-sm text-gray-900">{lead.email}</span>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                          <span className="text-sm font-medium text-gray-900">{lead.email}</span>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Badge className={getStatusBadgeColor(lead.id.toString())}>
@@ -395,7 +405,7 @@ export const Leads = () => {
                               className="cursor-pointer text-red-600 hover:text-red-700"
                             >
                               <X className="h-4 w-4 mr-2" />
-                              Close
+                              Cancel
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

@@ -1,5 +1,19 @@
 import React, { useState } from "react";
-import { Search, Users, MapPin, Phone, Eye, X, Mail, Building, Calendar, User, DollarSign, Target, FileText } from "lucide-react";
+import {
+  Search,
+  Users,
+  MapPin,
+  Phone,
+  Eye,
+  X,
+  Mail,
+  Building,
+  Calendar,
+  User,
+  DollarSign,
+  Target,
+  FileText,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +31,7 @@ export const LeadRequest = () => {
   const [pendingModalSearchTerm, setPendingModalSearchTerm] = useState("");
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedAssignLeads, setSelectedAssignLeads] = useState<Set<number>>(new Set());
+  const [assignModalSearchTerm, setAssignModalSearchTerm] = useState("");
 
   const filteredLeads = requestLeads.filter(
     (lead) =>
@@ -53,6 +68,18 @@ export const LeadRequest = () => {
         lead.company.toLowerCase().includes(pendingModalSearchTerm.toLowerCase()) ||
         lead.policy.includes(pendingModalSearchTerm)
     );
+
+  // Filter leads for assign modal
+  const filteredAssignLeads = allLeads.filter(
+    (lead) =>
+      lead.firstName.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
+      lead.lastName.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
+      lead.zipCode.includes(assignModalSearchTerm) ||
+      lead.phoneno.includes(assignModalSearchTerm) ||
+      lead.email.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
+      lead.company.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
+      lead.policy.includes(assignModalSearchTerm)
+  );
 
   const handleViewAssignedLead = (lead: requestLeadType) => {
     const matchingLead = allLeads.find(
@@ -599,6 +626,20 @@ export const LeadRequest = () => {
                 <p className="text-sm text-gray-600">Select leads to assign to contractors</p>
               </div>
 
+              {/* Search Bar */}
+              <div className="mb-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search leads..."
+                    value={assignModalSearchTerm}
+                    onChange={(e) => setAssignModalSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#122E5F] focus:border-transparent"
+                  />
+                </div>
+              </div>
+
               {/* Leads Data Table */}
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -628,7 +669,7 @@ export const LeadRequest = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {allLeads.map((lead: LeadType, index: number) => (
+                    {filteredAssignLeads.map((lead: LeadType, index: number) => (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-4 py-3 whitespace-nowrap">
                           <input

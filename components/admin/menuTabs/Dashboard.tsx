@@ -61,9 +61,6 @@ export const Dashboard = () => {
                   <p className="text-2xl font-bold text-gray-900">
                     {stat.value}
                   </p>
-                  <p className="text-sm text-[#286BBD] font-medium">
-                    {stat.change}
-                  </p>
                 </div>
                 <div
                   className={`w-12 h-12 bg-[#122E5F] rounded-xl flex items-center justify-center`}

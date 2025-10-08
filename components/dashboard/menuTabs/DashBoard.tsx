@@ -108,10 +108,6 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-[#286BBD] font-bold mb-1">2,847</div>
-            <p className="text-sm text-green-600 font-medium flex items-center">
-              <TrendingUp className="h-4 w-4 mr-1" />
-              +12.5%
-            </p>
           </CardContent>
         </Card>
 
@@ -124,7 +120,6 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-green-600 font-bold mb-1">150</div>
-            <p className="text-sm text-gray-600 font-medium">Ready to use</p>
           </CardContent>
         </Card>
 
@@ -137,7 +132,6 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-red-600 font-bold mb-1">1,369</div>
-            <p className="text-sm text-gray-600 font-medium">Ready to use</p>
           </CardContent>
         </Card>
       </div>
@@ -223,22 +217,22 @@ export const DashBoard = () => {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
-                        <div className="text-sm font-bold text-gray-400 blur-[2px] select-none">
-                          {lead.firstName} {lead.lastName}
+                        <div className="text-sm font-bold text-gray-400 select-none">
+                          {`${lead.firstName.slice(0, 2)}${'*'.repeat(Math.max(lead.firstName.length - 2, 0))} ${lead.lastName.slice(0, 2)}${'*'.repeat(Math.max(lead.lastName.length - 2, 0))}`}
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs text-gray-500">
                         <div className="flex items-center">
                           <MapPin className="h-3 w-3 mr-1" />
-                        <span className="blur-[2px] select-none">{lead.zipCode}</span>
+                        <span className="select-none">{`${lead.zipCode.slice(0, 2)}${'*'.repeat(Math.max(lead.zipCode.length - 2, 0))}`}</span>
                         </div>
                         <div className="flex items-center">
                           <Phone className="h-3 w-3 mr-1" />
-                          <span className="blur-[2px] select-none">{lead.phone}</span>
+                          <span className="select-none">{`${lead.phone.slice(0, 2)}${'*'.repeat(Math.max(lead.phone.length - 2, 0))}`}</span>
                         </div>
                         <div className="flex items-center">
                           <Mail className="h-3 w-3 mr-1" />
-                          <span className="blur-[2px] select-none">{lead.email}</span>
+                          <span className="select-none">{`${lead.email.slice(0, 2)}${'*'.repeat(Math.max(lead.email.length - 2, 0))}`}</span>
                         </div>
                       </div>
                     </div>

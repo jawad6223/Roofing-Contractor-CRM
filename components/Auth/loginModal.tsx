@@ -56,12 +56,8 @@ export default function LoginModal() {
     const existingUsers = JSON.parse(localStorage.getItem("userInfo") || "[]");
     const isValid = existingUsers.some(
       (user: FormDataType) =>
-        user.emailAddress === data.emailAddress && user.password === data.password
+        user.emailAddress.toLowerCase() === data.emailAddress.toLowerCase() && user.password === data.password
     );
-
-    // const isValidCredentials = validCredentials.some(
-    //   cred => cred.emailAddress === data.emailAddress && cred.password === data.password
-    // );
 
     if (!isValid) {
       toast.error("Invalid credentials. Please use the Correct credentials.");
@@ -84,12 +80,6 @@ export default function LoginModal() {
       `}</style>
       <div className="relative my-auto w-full flex justify-center">
         <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 border border-gray-200">
-          {/* <button
-            onClick={handleClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100"
-          >
-            <X className="h-5 w-5" />
-          </button> */}
 
           <div className="text-center mb-8">
             <div className="relative inline-block mb-6">

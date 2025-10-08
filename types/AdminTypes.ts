@@ -41,7 +41,6 @@ export interface ContractorType {
 export interface dashboardCardType {
   title: string;
   value: string;
-  change: string;
   icon: React.ComponentType<any>;
   time?: string;
 }

@@ -12,6 +12,7 @@ import {
   Mail,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   CheckCircle,
   Calendar,
   DollarSign,
@@ -23,19 +24,12 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { purchasedLeadType, purchaseFormType, leadsInfoType, sampleLeadType } from "@/types/DashboardTypes";
 import { purchasedLeads, LeadsInfo, sampleLeads } from "./Data";
 
 export const Leads = () => {
   const router = useRouter();
-  const [showLeadPurchaseInfoModal, setShowLeadPurchaseInfoModal] = useState<boolean>(false);
   const [leadStatuses, setLeadStatuses] = useState<Record<string, string>>({});
 
   const handleStatusChange = (leadId: string, status: string) => {
@@ -57,20 +51,27 @@ export const Leads = () => {
   const [loadingLeads, setLoadingLeads] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("All");
   const itemsPerPage = 10;
 
-  // Filter data based on search term
-  const filteredData = purchasedLeads.filter(
-    (lead) =>
-      lead.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  // Filter data based on search term and status
+  const filteredData = purchasedLeads.filter((lead) => {
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch =
+      lead.firstName.toLowerCase().includes(searchLower) ||
+      lead.lastName.toLowerCase().includes(searchLower) ||
+      lead.email.toLowerCase().includes(searchLower) ||
       lead.phoneno.includes(searchTerm) ||
       lead.zipCode.includes(searchTerm) ||
-      lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead.company.toLowerCase().includes(searchLower) ||
       lead.policy.includes(searchTerm) ||
-      lead.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      lead.location.toLowerCase().includes(searchLower);
+
+    const leadStatus = getLeadStatus(lead.id.toString());
+    const matchesStatus = statusFilter === "All" || leadStatus.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus;
+  });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -164,6 +165,11 @@ export const Leads = () => {
     setCurrentPage(1); // Reset to first page when searching
   };
 
+  const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -181,7 +187,7 @@ export const Leads = () => {
             <span>Add Purchase Leads</span>
           </Button>
           <Button
-            onClick={() => setShowLeadPurchaseInfoModal(true)}
+            onClick={() => router.push("/dashboard/lead-purchase-info")}
             className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
           >
             <Info className="h-4 w-4 mr-2" />
@@ -190,9 +196,9 @@ export const Leads = () => {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="w-full">
-        <div className="relative w-full">
+      {/* Search Bar and Filter */}
+      <div className="flex flex-col sm:flex-row gap-4 w-full">
+        <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             type="text"
@@ -201,6 +207,21 @@ export const Leads = () => {
             onChange={handleSearchChange}
             className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#286BBD] focus:border-transparent"
           />
+        </div>
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={handleStatusFilterChange}
+            className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-[#286BBD] focus:border-transparent min-w-[140px]"
+          >
+            <option value="All">All Status</option>
+            <option value="open">Open</option>
+            <option value="hot">Hot Lead</option>
+            <option value="warm">Warm Lead</option>
+            <option value="cold">Cold Lead</option>
+            <option value="close">Close</option>
+          </select>
+          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
         </div>
       </div>
 
@@ -237,27 +258,36 @@ export const Leads = () => {
                   <tr key={lead.id} className={`border-l-4`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
-                        <div className="text-sm font-bold text-gray-400 blur-[2px] select-none">
-                          {lead.firstName} {lead.lastName}
+                        <div className="text-sm font-bold text-gray-400 select-none">
+                          {`${lead.firstName.slice(0, 2)}${"*".repeat(
+                            Math.max(lead.firstName.length - 2, 0)
+                          )} ${lead.lastName.slice(0, 2)}${"*".repeat(Math.max(lead.lastName.length - 2, 0))}`}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-400 blur-[2px] select-none">{lead.zipCode}</span>
+                        <span className="text-sm font-medium text-gray-400 select-none">{`${lead.zipCode.slice(
+                          0,
+                          2
+                        )}${"*".repeat(Math.max(lead.zipCode.length - 2, 0))}`}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                        <span className="text-sm text-gray-400 blur-[2px] select-none">{lead.phone}</span>
+                        <span className="text-sm text-gray-400 select-none">{`${lead.phone.slice(0, 2)}${"*".repeat(
+                          Math.max(lead.phone.length - 2, 0)
+                        )}`}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                        <span className="text-sm text-gray-400 blur-[2px] select-none">{lead.email}</span>
+                        <span className="text-sm text-gray-400 select-none">{`${lead.email.slice(0, 2)}${"*".repeat(
+                          Math.max(lead.email.length - 2, 0)
+                        )}`}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap" colSpan={2}>
@@ -573,137 +603,6 @@ export const Leads = () => {
               <Button onClick={handleCloseSuccessModal} className="w-full bg-[#286BBD] hover:bg-[#1d4ed8] text-white">
                 Continue
               </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Lead Purchase Info Modal */}
-      {showLeadPurchaseInfoModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setShowLeadPurchaseInfoModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
-              aria-label="Close modal"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="p-6">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Info className="h-6 w-6 text-[#286BBD]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Lead Purchase Information</h2>
-                <p className="text-sm text-gray-600">Overview of your purchased leads and total investment</p>
-              </div>
-
-              {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <Card className="border-0 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                        <ShoppingCart className="h-6 w-6 text-blue-600" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900">{totalLeads}</h3>
-                        <p className="text-sm text-gray-600">Total Leads Purchased</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="border-0 shadow-lg">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                        <CheckCircle className="h-6 w-6 text-green-600" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900">${totalPrice.toLocaleString()}</h3>
-                        <p className="text-sm text-gray-600">Total Investment</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Leads Table */}
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-0">
-                  <div className="overflow-auto max-h-64">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Zip Code
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Price
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            No. of Leads
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Received Leads
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Pending Leads
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {LeadsInfo.map((lead, index) => (
-                          <tr key={lead.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">
-                              <div className="flex items-center">
-                                <Calendar className="h-3 w-3 text-gray-400 mr-1" />
-                                {lead.date}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">
-                              <div className="flex items-center">
-                                <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
-                                {lead.price}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm font-medium text-gray-900">{lead.noOfLeads}</span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm font-bold text-[#286BBD]">{lead.receivedLeads}</span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-center">
-                              <span className="text-sm text-red-500">{lead.pendingLeads}</span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Close Button */}
-              <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
-                <Button
-                  onClick={() => setShowLeadPurchaseInfoModal(false)}
-                  className="px-6 py-2 bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
-                >
-                  Close
-                </Button>
-              </div>
             </div>
           </div>
         </div>
