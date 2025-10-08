@@ -223,7 +223,9 @@ export function ContractorForm() {
     }
     if (!formData.serviceRadius.trim()) {
       newErrors.serviceRadius = "Service radius is required";
-    } else if (isNaN(Number(formData.serviceRadius)) || Number(formData.serviceRadius) <= 0) {
+    } else if (!/^\d+$/.test(formData.serviceRadius.trim())) {
+      newErrors.serviceRadius = "Allow numeric only";
+    } else if (Number(formData.serviceRadius) <= 0) {
       newErrors.serviceRadius = "Please enter a valid number";
     }
 

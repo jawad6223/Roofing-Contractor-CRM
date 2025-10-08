@@ -21,9 +21,12 @@ const schema = yup.object().shape({
   )
   .required('Email is required'),
   password: yup
-    .string()
-    .matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 'Password must be 8 characters, 1 uppercase, 1 number & 1 special character')
-    .required("Password is required"),
+  .string()
+  .matches(
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/,
+    'Password must be 8 characters, 1 uppercase, 1 number & 1 special character'
+  )
+  .required("Password is required"),
 });
 
 // 2. Form data type
