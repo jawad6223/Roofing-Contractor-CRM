@@ -25,6 +25,7 @@ export function ContractorForm() {
   const [addressSuggestions, setAddressSuggestions] = useState<PlacePrediction[]>([]);
   const [showAddressSuggestions, setShowAddressSuggestions] = useState<boolean>(false);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const addressInputRef = useRef<HTMLInputElement>(null);
@@ -49,6 +50,16 @@ export function ContractorForm() {
       document.body.style.overflow = "unset";
     };
   }, [showSuccessModal]);
+
+  useEffect(()=>{
+    if(window.innerWidth < 768){
+      setIsMobile(true);
+    }else{
+      setIsMobile(false);
+    }
+  }, [])
+
+  console.log('isMobile', isMobile);
 
   const [formData, setFormData] = useState<ContractorType>({
     fullName: "",
@@ -272,7 +283,11 @@ export function ContractorForm() {
 
       if (validateStep2()) {
         toast.success("Form submitted successfully.");
-        setShowSuccessModal(true);
+        if(isMobile){
+          router.push(`/thank-you`);
+        }else{
+          setShowSuccessModal(true);
+        }
       } else {
         const firstErrorField = document.querySelector(".border-red-500");
         if (firstErrorField) {

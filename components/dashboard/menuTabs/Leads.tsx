@@ -213,6 +213,7 @@ export const Leads = () => {
             value={statusFilter}
             onChange={handleStatusFilterChange}
             className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:ring-2 focus:ring-[#286BBD] focus:border-transparent min-w-[140px]"
+            aria-label="Select status"
           >
             <option value="All">All Status</option>
             <option value="open">Open</option>
