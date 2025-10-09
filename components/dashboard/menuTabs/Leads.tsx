@@ -2,33 +2,13 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import {
-  Plus,
-  X,
-  ShoppingCart,
-  Eye,
-  MapPin,
-  Phone,
-  Mail,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  CheckCircle,
-  Calendar,
-  Hash,
-  User,
-  DollarSign,
-  MoreHorizontal,
-  Search,
-  Info,
-  FileText,
-} from "lucide-react";
+import { Plus, X, ShoppingCart, Eye, MapPin, Phone, Mail, ChevronDown, Calendar, Hash, User, Search, Info, FileText, } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
 import { useState } from "react";
-import { purchasedLeadType, purchaseFormType, leadsInfoType, sampleLeadType } from "@/types/DashboardTypes";
-import { purchasedLeads, LeadsInfo, sampleLeads } from "./Data";
+import { purchasedLeadType, sampleLeadType } from "@/types/DashboardTypes";
+import { purchasedLeads, sampleLeads } from "./Data";
 
 export const Leads = () => {
   const router = useRouter();
@@ -40,16 +20,11 @@ export const Leads = () => {
       [leadId]: status,
     }));
   };
-  console.log("leadStatuses", leadStatuses);
 
   const getLeadStatus = (leadId: string) => {
     return leadStatuses[leadId] || "open";
   };
 
-  const [purchaseForm, setPurchaseForm] = useState<purchaseFormType>({
-    quantity: "1",
-    zipCode: "",
-  });
   const [loadingLeads, setLoadingLeads] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -80,9 +55,10 @@ export const Leads = () => {
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredData.slice(startIndex, endIndex);
 
-  // Calculate total leads and total price
-  const totalLeads = purchasedLeads.length;
-  const totalPrice = purchasedLeads.length * 150; // Assuming $150 per lead
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -94,8 +70,6 @@ export const Leads = () => {
 
   const [selectedLead, setSelectedLead] = useState<purchasedLeadType | null>(null);
   const [showViewModal, setShowViewModal] = useState<boolean>(false);
-  const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
-  const [purchaseQuantity, setPurchaseQuantity] = useState<string>("");
 
   const handleViewLead = (lead: purchasedLeadType): void => {
     setSelectedLead(lead);
@@ -105,11 +79,6 @@ export const Leads = () => {
   const handleCloseViewModal = (): void => {
     setSelectedLead(null);
     setShowViewModal(false);
-  };
-
-  const handleOpenLead = (lead: purchasedLeadType) => {
-    console.log(`Opening lead: ${lead.firstName} ${lead.lastName}`);
-    // TODO: Add open lead logic here
   };
 
   async function handleBuyNow(lead: sampleLeadType) {
@@ -147,20 +116,7 @@ export const Leads = () => {
     }
   }
 
-  const handlePurchaseInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setPurchaseForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
-    setPurchaseQuantity("");
-  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -183,7 +139,7 @@ export const Leads = () => {
         <div className="flex flex-col w-full lg:w-auto md:flex-row gap-3">
           <Button
             onClick={() => router.push("/dashboard/purchase-leads")}
-            className="bg-[#122E5F] hover:bg-[#0f2347] text-white"
+            className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             <span>Add Purchase Leads</span>
@@ -373,58 +329,16 @@ export const Leads = () => {
                           </SelectContent>
                         </Select>
                       </td>
-
-                      {/* <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <Select defaultValue="open">
-                          <SelectTrigger className="w-32 h-8 text-xs">
-                            <SelectValue placeholder="Status" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="open">Open</SelectItem>
-                            <SelectItem value="hot">Hot Lead</SelectItem>
-                            <SelectItem value="warm">Warm Lead</SelectItem>
-                            <SelectItem value="cold">Cold Lead</SelectItem>
-                            <SelectItem value="close">Close</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </td> */}
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Button
                           size="sm"
                           variant="outline"
-                          className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                          className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                           onClick={() => handleViewLead(lead)}
                         >
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
-                        {/* <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white cursor-pointer"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem
-                              onClick={() => handleViewLead(lead)}
-                              className="cursor-pointer hover:bg-gray-50"
-                            >
-                              <Eye className="h-4 w-4 mr-2 text-[#286BBD]" />
-                              <span className="text-gray-700"></span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleCloseLead(lead)}
-                              className="cursor-pointer hover:bg-red-50 focus:bg-red-50"
-                            >
-                              <X className="h-4 w-4 mr-2 text-red-600" />
-                              <span className="text-red-700 font-medium">Close</span>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu> */}
                       </td>
                     </tr>
                   ))
@@ -452,56 +366,22 @@ export const Leads = () => {
       </Card>
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-700">
-          Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of {filteredData.length} results
-          {searchTerm && <span className="text-[#286BBD] ml-2">(filtered from {purchasedLeads.length} total)</span>}
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1}
-            className="flex items-center space-x-1"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            <span>Previous</span>
-          </Button>
-
-          <div className="flex items-center space-x-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 p-0 ${
-                  currentPage === page ? "bg-[#286BBD] text-white" : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {page}
-              </Button>
-            ))}
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            className="flex items-center space-x-1"
-          >
-            <span>Next</span>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredData.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+        onPreviousPage={handlePreviousPage}
+        onNextPage={handleNextPage}
+        startIndex={startIndex}
+        endIndex={endIndex}
+      />
 
       {/* View Lead Modal */}
       {showViewModal && selectedLead && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full mx-4 relative animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full mx-4 relative h-[90vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
             {/* Close Button */}
             <button
               onClick={handleCloseViewModal}
@@ -522,7 +402,7 @@ export const Leads = () => {
               </div>
 
               {/* Lead Information */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
@@ -587,45 +467,6 @@ export const Leads = () => {
                   Close
                 </Button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 relative animate-in zoom-in-95 duration-300">
-            {/* Close Button */}
-            <button
-              onClick={handleCloseSuccessModal}
-              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
-              aria-label="Close modal"
-            >
-              <X className="h-3 w-3" />
-            </button>
-
-            <div className="p-6 text-center">
-              {/* Success Icon */}
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="h-8 w-8 text-green-600" />
-              </div>
-
-              {/* Success Message */}
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Purchase Successful!</h2>
-              <p className="text-gray-600 mb-4">
-                Thank you for purchasing {purchaseQuantity} lead
-                {purchaseQuantity !== "1" ? "s" : ""}!
-              </p>
-              <p className="text-sm text-gray-500 mb-6">
-                Your leads will be available in your dashboard shortly. You will receive an email confirmation with the
-                details.
-              </p>
-
-              {/* Action Button */}
-              <Button onClick={handleCloseSuccessModal} className="w-full bg-[#286BBD] hover:bg-[#1d4ed8] text-white">
-                Continue
-              </Button>
             </div>
           </div>
         </div>

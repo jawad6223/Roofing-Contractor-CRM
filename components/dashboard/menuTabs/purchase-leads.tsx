@@ -30,7 +30,6 @@ const PurchaseLeads = () => {
 
   async function handlePurchaseSubmitStripe(e: React.FormEvent) {
     e.preventDefault();
-    toast.success("Leads purchased successfully");
     setIsLoading(true);
     try {
       const response = await fetch("/api/create-checkout-session", {
@@ -133,7 +132,7 @@ const PurchaseLeads = () => {
               <Button
                 disabled={isLoading}
                 type="submit"
-                className="px-6 py-2 text-sm bg-[#122E5F] hover:bg-[#0f2347] text-white"
+                className="px-6 py-2 text-sm bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
                 onClick={handlePurchaseSubmitStripe}
               >
                 {isLoading ? (

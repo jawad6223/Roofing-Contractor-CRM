@@ -198,7 +198,7 @@
   ]
 
   export const teamMembers = [
-    { name: 'Sarah Johnson', email: 'sarah@company.com', phoneno: '1234567890'},
-    { name: 'Mike Davis', email: 'mike@company.com', phoneno: '1234567890'},
+    { name: 'Sarah Johnson', email: 'sarah@company.com', phoneno: '(214) 555-0123'},
+    { name: 'Mike Davis', email: 'mike@company.com', phoneno: '(214) 555-0123'},
     { name: 'Lisa Chen', email: 'lisa@company.com', phoneno: '1234567890'}
   ]

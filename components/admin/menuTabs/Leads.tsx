@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Search,
   Target,
@@ -14,8 +15,6 @@ import {
   ChevronDown,
   X,
   UserPlus,
-  ChevronLeft,
-  ChevronRight,
   Check,
   FileText,
   MoreHorizontal,
@@ -111,6 +110,10 @@ export const Leads = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = currentTabData.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -318,10 +321,10 @@ export const Leads = () => {
         [name]: formattedValue,
       }));
     } else {
-      setNewLead((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+    setNewLead((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
     }
   };
 
@@ -382,7 +385,7 @@ export const Leads = () => {
                 aria-label="Select status"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="appearance-none bg-white border border-[#286BBD] lg:w-auto w-full text-[#286BBD] px-4 py-2 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-[#286BBD] focus:border-transparent min-w-[140px]"
+                className="appearance-none bg-white border border-[#122E5F] lg:w-auto w-full text-[#122E5F] px-4 py-2 pr-8 rounded-md focus:outline-none focus:ring-2 focus:ring-[#122E5F] focus:border-transparent min-w-[140px]"
               >
                 <option value="All">All Status</option>
                 <option value="open">Open</option>
@@ -519,7 +522,7 @@ export const Leads = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                              className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                               onClick={() => handleAssignLead(lead)}
                             >
                               <Target className="h-4 w-4 mr-1" />
@@ -689,65 +692,22 @@ export const Leads = () => {
       </Card>
 
       {/* Pagination Controls */}
-      {currentTabData.length > 0 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Showing {startIndex + 1} to{" "}
-            {Math.min(endIndex, currentTabData.length)} of{" "}
-            {currentTabData.length} results
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-              className="flex items-center space-x-1"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span>Previous</span>
-            </Button>
-
-            <div className="flex items-center space-x-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 p-0 ${
-                      currentPage === page
-                        ? "bg-[#286BBD] text-white"
-                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {page}
-                  </Button>
-                )
-              )}
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className="flex items-center space-x-1"
-            >
-              <span>Next</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* Quick Stats */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={currentTabData.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+        onPreviousPage={handlePreviousPage}
+        onNextPage={handleNextPage}
+        startIndex={startIndex}
+        endIndex={endIndex}
+      />
 
       {/* View Lead Modal */}
       {showModal && selectedLead && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300 h-[90vh] md:h-auto overflow-auto">
             {/* Close Button */}
             <button
               onClick={handleCloseModal}
@@ -772,7 +732,7 @@ export const Leads = () => {
               </div>
 
               {/* Lead Information */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     First Name
@@ -1021,7 +981,7 @@ export const Leads = () => {
       {/* Assign Lead Modal */}
       {showAssignModal && leadToAssign && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-4xl  w-full mx-4 relative animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl h-[90vh] w-full mx-4 relative animate-in zoom-in-95 duration-300 overflow-auto">
             {/* Close Button */}
             <button
               onClick={handleCloseAssignModal}

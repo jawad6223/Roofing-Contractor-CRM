@@ -122,7 +122,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
 
           <div className="p-4 border-t bg-white flex-shrink-0">
             <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 mb-2">
-              <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-[#122E5F] rounded-full flex items-center justify-center">
                 <User className="h-4 w-4 text-white" />
               </div>
               <div className="flex-1 min-w-0">
@@ -132,7 +132,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full text-[#286BBD]">
+                <Button variant="outline" size="sm" className="w-full border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white">
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
                 </Button>
@@ -146,7 +146,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel className="text-[#286BBD]">Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleLogout}>Yes, Logout</AlertDialogAction>
+                  <AlertDialogAction className="bg-[#122E5F] hover:bg-[#0f2347]/80" onClick={handleLogout}>Yes, Logout</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -168,7 +168,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
                 >
                   <Menu className="h-5 w-5" />
                 </button>
-                <h1 className="text-2xl font-bold text-gray-900">Contractor Dashboard</h1>
+                <h1 className="text-2xl sm:whitespace-nowrap whitespace-normal font-bold text-gray-900">Contractor Dashboard</h1>
               </div>
             </div>
           </div>

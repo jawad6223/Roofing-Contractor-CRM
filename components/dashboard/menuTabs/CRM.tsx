@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import {
   MapPin,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   X,
   Phone,
@@ -17,6 +15,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
 import { crmDataType } from "@/types/DashboardTypes";
 import { crmData } from "./Data";
 import { toast } from "react-toastify";
@@ -51,6 +50,10 @@ export const CRM = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredData.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -143,7 +146,7 @@ export const CRM = () => {
           <Button 
             variant="outline" 
             size="sm" 
-            className="bg-[#122E5F] hover:bg-[#183B7A] text-white mt-4 md:mt-0 hover:text-white w-full md:w-auto"
+            className="bg-[#122E5F] hover:bg-[#183B7A]/80 text-white mt-4 md:mt-0 hover:text-white w-full md:w-auto"
             onClick={handleAddMember}
           >
             <UserPlus className="h-4 w-4 mr-2" />
@@ -221,7 +224,7 @@ export const CRM = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                        className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                         onClick={() => handleViewLead(lead)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
@@ -254,89 +257,22 @@ export const CRM = () => {
       </Card>
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-gray-700">
-          Showing {startIndex + 1} to {Math.min(endIndex, filteredData.length)} of{" "}
-          {filteredData.length} results
-          {searchTerm && (
-            <span className="text-[#286BBD] ml-2">
-              (filtered from {crmData.length} total)
-            </span>
-          )}
-        </div>
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handlePreviousPage}
-            disabled={currentPage === 1}
-            className="flex items-center space-x-1"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            <span>Previous</span>
-          </Button>
-
-          <div className="flex items-center space-x-1">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <Button
-                key={page}
-                variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCurrentPage(page)}
-                className={`w-8 h-8 p-0 ${
-                  currentPage === page
-                    ? "bg-[#286BBD] text-white"
-                    : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                {page}
-              </Button>
-            ))}
-          </div>
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleNextPage}
-            disabled={currentPage === totalPages}
-            className="flex items-center space-x-1"
-          >
-            <span>Next</span>
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Summary Stats */}
-      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border-0 shadow-lg">
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-[#286BBD] mb-2">5</div>
-            <div className="text-sm text-gray-600">Total Closed</div>
-          </CardContent>
-        </Card>
-        <Card className="border-0 shadow-lg">
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-green-600 mb-2">
-              $186,000
-            </div>
-            <div className="text-sm text-gray-600">Total Revenue</div>
-          </CardContent>
-        </Card>
-        <Card className="border-0 shadow-lg">
-          <CardContent className="p-6 text-center">
-            <div className="text-2xl font-bold text-yellow-600 mb-2">
-              $37,200
-            </div>
-            <div className="text-sm text-gray-600">Avg. Deal Size</div>
-          </CardContent>
-        </Card>
-      </div> */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredData.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+        onPreviousPage={handlePreviousPage}
+        onNextPage={handleNextPage}
+        startIndex={startIndex}
+        endIndex={endIndex}
+      />
 
       {/* Lead Details Modal */}
       {showModal && selectedLead && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 relative animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 relative h-[90vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
             {/* Close Button */}
             <button
               onClick={handleCloseModal}
@@ -359,7 +295,7 @@ export const CRM = () => {
               </div>
 
               {/* Lead Information */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Full Name
@@ -434,7 +370,7 @@ export const CRM = () => {
       {/* Add Member Modal */}
       {showAddMemberModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in h-[90vh] md:h-auto overflow-auto zoom-in-95 duration-300">
             <button
               onClick={handleCloseAddMemberModal}
               className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"

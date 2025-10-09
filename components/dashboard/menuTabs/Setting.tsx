@@ -139,7 +139,7 @@ export const Setting = () => {
           </CardHeader>
           <CardContent className="space-y-6 p-6">
             <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-[#286BBD] rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="w-20 h-20 bg-[#122E5F] rounded-full flex items-center justify-center mx-auto mb-3">
                 <User className="h-10 w-10 text-white" />
               </div>
               <h3 className="font-semibold text-gray-900 capitalize">{currentUserFullName}</h3>
@@ -222,7 +222,7 @@ export const Setting = () => {
               <div className="flex items-center justify-between p-6 border-2 border-gray-200 rounded-xl hover:border-[#286BBD] transition-colors">
                 <div className="flex items-center space-x-3">
                   <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <CreditCard className="h-6 w-6 text-blue-600" />
+                    <CreditCard className="h-6 w-6 text-[#286BBD]" />
                   </div>
                   <div>
                     <p className="font-semibold text-gray-900">•••• •••• •••• 4242</p>
@@ -239,7 +239,7 @@ export const Setting = () => {
               <Button
                 variant="outline"
                 onClick={handleAddPaymentMethod}
-                className="w-full h-12 border-2 border-dashed border-gray-300 hover:border-[#286BBD] hover:bg-[#286BBD]/5"
+                className="w-full h-12 border-2 border-dashed border-gray-300 hover:border-[#122E5F] text-[#286BBD]"
               >
                 <CreditCard className="h-5 w-5 mr-2" />
                 Add New Payment Method
@@ -258,26 +258,26 @@ export const Setting = () => {
 
       {/* Add Payment Method Modal */}
       <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] overflow-y-auto max-w-md mx-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-[#286BBD] flex items-center">
-              <CreditCard className="h-6 w-6 mr-2" />
-              Add New Payment Method
+            <DialogTitle className="text-lg font-bold text-[#286BBD] flex items-center">
+              <CreditCard className="h-5 w-5 mr-2" />
+              Add Payment Method
             </DialogTitle>
           </DialogHeader>
 
-          <div className="p-6">
-            <form onSubmit={handleSavePaymentMethod} className="space-y-6">
+          <div className="p-4">
+            <form onSubmit={handleSavePaymentMethod} className="space-y-4">
               {/* Card Number */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Card Number *</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Card Number *</label>
                 <div className="relative">
-                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <CreditCard className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
                   <Input
                     value={paymentForm.cardNumber}
                     onChange={(e) => handlePaymentInputChange("cardNumber", e.target.value)}
                     placeholder="1234 5678 9012 3456"
-                    className="pl-10 h-11"
+                    className="pl-8 h-9 text-sm"
                     maxLength={19}
                   />
                 </div>
@@ -285,39 +285,39 @@ export const Setting = () => {
 
               {/* Cardholder Name */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Cardholder Name *</label>
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Cardholder Name *</label>
                 <Input
                   value={paymentForm.cardholderName}
                   onChange={(e) => handlePaymentInputChange("cardholderName", e.target.value)}
                   placeholder="John Doe"
-                  className="h-11"
+                  className="h-9 text-sm"
                 />
               </div>
 
               {/* Expiry Date and CVV */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Expiry Date *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Expiry Date *</label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
                     <Input
                       value={paymentForm.expiryDate}
                       onChange={(e) => handlePaymentInputChange("expiryDate", e.target.value)}
                       placeholder="MM/YY"
-                      className="pl-10 h-11"
+                      className="pl-8 h-9 text-sm"
                       maxLength={5}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">CVV *</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">CVV *</label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Lock className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
                     <Input
                       value={paymentForm.cvv}
                       onChange={(e) => handlePaymentInputChange("cvv", e.target.value)}
                       placeholder="123"
-                      className="pl-10 h-11"
+                      className="pl-8 h-9 text-sm"
                       maxLength={4}
                       type="password"
                     />
@@ -327,46 +327,46 @@ export const Setting = () => {
 
               {/* Card Type */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Card Type *</label>
-                <div className="grid grid-cols-2 gap-3">
+                <label className="block text-xs font-semibold text-gray-700 mb-1">Card Type *</label>
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => handlePaymentInputChange("cardType", "visa")}
-                    className={`p-4 border-2 rounded-lg flex items-center justify-center space-x-2 transition-all ${
+                    className={`p-3 border-2 rounded-lg flex items-center justify-center space-x-1 transition-all ${
                       paymentForm.cardType === "visa"
                         ? "border-[#286BBD] bg-[#286BBD]/5"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <div className="w-8 h-5 bg-blue-600 rounded flex items-center justify-center">
+                    <div className="w-6 h-4 bg-blue-600 rounded flex items-center justify-center">
                       <span className="text-white text-xs font-bold">VISA</span>
                     </div>
-                    <span className="text-sm font-medium">Visa</span>
+                    <span className="text-xs font-medium">Visa</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => handlePaymentInputChange("cardType", "mastercard")}
-                    className={`p-4 border-2 rounded-lg flex items-center justify-center space-x-2 transition-all ${
+                    className={`p-3 border-2 rounded-lg flex items-center justify-center space-x-1 transition-all ${
                       paymentForm.cardType === "mastercard"
                         ? "border-[#286BBD] bg-[#286BBD]/5"
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                   >
-                    <div className="w-8 h-5 bg-red-600 rounded flex items-center justify-center">
+                    <div className="w-6 h-4 bg-red-600 rounded flex items-center justify-center">
                       <span className="text-white text-xs font-bold">MC</span>
                     </div>
-                    <span className="text-sm font-medium">Mastercard</span>
+                    <span className="text-xs font-medium">Mastercard</span>
                   </button>
                 </div>
               </div>
 
               {/* Security Notice */}
-              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-start space-x-3">
-                  <Lock className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-start space-x-2">
+                  <Lock className="h-4 w-4 text-blue-600 mt-0.5" />
                   <div>
-                    <h4 className="font-semibold text-blue-900 mb-1">Secure Payment</h4>
-                    <p className="text-sm text-blue-700">
+                    <h4 className="font-semibold text-blue-900 mb-1 text-sm">Secure Payment</h4>
+                    <p className="text-xs text-blue-700">
                       Your payment information is encrypted and secure. We use industry-standard security measures to
                       protect your data.
                     </p>
@@ -375,14 +375,14 @@ export const Setting = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200">
-                <Button type="button" variant="outline" onClick={handleClosePaymentModal} className="px-6 py-2">
-                  <X className="h-4 w-4 mr-2" />
+              <div className="flex justify-end space-x-2 pt-3 border-t border-gray-200">
+                <Button type="button" variant="outline" onClick={handleClosePaymentModal} className="px-4 py-2 text-sm">
+                  <X className="h-3 w-3 mr-1" />
                   Cancel
                 </Button>
-                <Button type="submit" className="px-6 py-2 bg-[#286BBD] hover:bg-[#1d4ed8] text-white">
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Payment Method
+                <Button type="submit" className="px-4 py-2 bg-[#122E5F] hover:bg-[#0f2347] text-white text-sm">
+                  <Save className="h-3 w-3 mr-1" />
+                  Save
                 </Button>
               </div>
             </form>

@@ -1,32 +1,65 @@
-'use client'
+"use client";
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
+import { CheckCircle, ArrowRight } from "lucide-react";
 
 export default function SuccessPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center px-4">
-      <div className="text-center animate-fade-in-up">
-        <div className="bg-white p-8 rounded-2xl shadow-xl transition-all duration-500 hover:shadow-2xl">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
-            <svg className="w-8 h-8 text-green-500 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-            </svg>
+    <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center px-4 relative overflow-hidden">
+      <div className="text-center max-w-lg w-full relative z-10">
+        {/* Main Success Card */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-8 mb-6 transform transition-all duration-500 hover:shadow-3xl hover:-translate-y-2 border border-white/20">
+          {/* Success Icon with Glow */}
+          <div className="w-20 h-20 bg-[#122E5F] hover:bg-[#0f2347] rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg animate-bounce">
+            <CheckCircle className="h-10 w-10 text-white drop-shadow-lg" />
           </div>
-          
-          <h1 className="text-3xl font-bold text-gray-800 mb-4 animate-fade-in">Payment Successful!</h1>
-          <p className="text-gray-600 mb-8 animate-fade-in">Thank you for your purchase. Your leads will be available in your dashboard.</p>
-          
+
+          {/* Main Message */}
+          <h1 className="text-4xl font-black mb-4 bg-[#122E5F] hover:bg-[#0f2347] bg-clip-text text-transparent">
+            Payment Successful!
+          </h1>
+          <p className="text-lg text-gray-600 mb-6 leading-relaxed font-medium">
+            Your payment has been processed successfully
+          </p>
+
+          {/* Status Card */}
+          <div className="bg-[#F5F5F5] rounded-2xl p-6 mb-6 border-2 border-gray-200 shadow-lg">
+            <div className="flex items-center justify-center mb-3">
+              <div className="w-2 h-2 bg-[#286BBD] rounded-full mr-2 animate-pulse"></div>
+              <h3 className="text-base font-bold text-gray-800">
+                Request Status
+              </h3>
+            </div>
+            <p className="text-sm text-gray-700 leading-relaxed font-medium mb-3">
+              ✅ Your lead request has been{" "}
+              <span className="text-[#286BBD] font-bold">submitted</span> and
+              payment{" "}
+              <span className="text-[#122E5F] font-bold">confirmed</span>
+            </p>
+            <p className="text-xs text-gray-600 leading-relaxed">
+              🚀 Our team will process your request and provide you with{" "}
+              <span className="text-[#286BBD] font-semibold">
+                qualified leads
+              </span>{" "}
+              within{" "}
+              <span className="text-[#122E5F] font-bold">24-48 hours</span>
+            </p>
+          </div>
+
+          {/* Action Button */}
           <button
-            onClick={() => router.push('/')}
-            className="bg-green-500 text-white px-8 py-3 rounded-lg font-semibold transform transition-all duration-300 hover:bg-green-600 hover:scale-105 active:scale-95"
+            onClick={() => router.push("/dashboard/purchase-leads")}
+            className="w-full bg-[#122E5F] hover:bg-[#0f2347] text-white py-4 px-8 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform transition-all duration-300 hover:scale-105 active:scale-95 relative overflow-hidden group"
           >
-            Return Home
+            <span className="relative z-10 flex items-center justify-center">
+              Go to Dashboard
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </span>
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
-

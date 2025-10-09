@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import { requestLeads, allLeads } from "./Data";
 import { requestLeadType, LeadType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
@@ -34,6 +35,11 @@ export const LeadRequest = () => {
   const [selectedAssignLeads, setSelectedAssignLeads] = useState<Set<number>>(new Set());
   const [assignModalSearchTerm, setAssignModalSearchTerm] = useState("");
   const [selectedContractorRequest, setSelectedContractorRequest] = useState<any>(null);
+  
+  // Pagination state
+  const [assignCurrentPage, setAssignCurrentPage] = useState(1);
+  const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const filteredLeads = requestLeads.filter(
     (lead) =>
@@ -42,6 +48,51 @@ export const LeadRequest = () => {
       lead.zipCode.includes(searchTerm) ||
       lead.phoneno.includes(searchTerm)
   );
+
+  // Pagination logic for Assign tab
+  const assignLeads = filteredLeads.filter((lead) => lead.status === "Assign");
+  const assignTotalPages = Math.ceil(assignLeads.length / itemsPerPage);
+  const assignStartIndex = (assignCurrentPage - 1) * itemsPerPage;
+  const assignEndIndex = assignStartIndex + itemsPerPage;
+  const assignCurrentData = assignLeads.slice(assignStartIndex, assignEndIndex);
+
+  // Pagination logic for Pending tab
+  const pendingLeads = filteredLeads.filter((lead) => lead.status === "Pending");
+  const pendingTotalPages = Math.ceil(pendingLeads.length / itemsPerPage);
+  const pendingStartIndex = (pendingCurrentPage - 1) * itemsPerPage;
+  const pendingEndIndex = pendingStartIndex + itemsPerPage;
+  const pendingCurrentData = pendingLeads.slice(pendingStartIndex, pendingEndIndex);
+
+  // Pagination handlers
+  const handleAssignPageChange = (page: number) => {
+    setAssignCurrentPage(page);
+  };
+
+  const handlePendingPageChange = (page: number) => {
+    setPendingCurrentPage(page);
+  };
+
+  const handleAssignPreviousPage = () => {
+    setAssignCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleAssignNextPage = () => {
+    setAssignCurrentPage((prev) => Math.min(prev + 1, assignTotalPages));
+  };
+
+  const handlePendingPreviousPage = () => {
+    setPendingCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handlePendingNextPage = () => {
+    setPendingCurrentPage((prev) => Math.min(prev + 1, pendingTotalPages));
+  };
+
+  // Reset pagination when search term changes
+  React.useEffect(() => {
+    setAssignCurrentPage(1);
+    setPendingCurrentPage(1);
+  }, [searchTerm]);
 
   // Filter leads for assigned modal
   const filteredAssignedLeads = allLeads
@@ -222,9 +273,8 @@ export const LeadRequest = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredLeads
-                      .filter((lead) => lead.status === "Assign")
-                      .map((lead: requestLeadType) => (
+                    {assignCurrentData.length > 0 ? (
+                      assignCurrentData.map((lead: requestLeadType) => (
                         <tr key={lead.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex flex-col items-center">
@@ -271,7 +321,7 @@ export const LeadRequest = () => {
                             <Button
                               size="sm"
                               variant="outline"
-                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                              className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                               onClick={() => handleViewAssignedLead(lead)}
                             >
                               <Eye className="h-4 w-4 mr-1" />
@@ -279,12 +329,44 @@ export const LeadRequest = () => {
                             </Button>
                           </td>
                         </tr>
-                      ))}
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={8} className="px-6 py-8 text-center">
+                          <div className="flex flex-col items-center justify-center space-y-3">
+                            <Search className="h-12 w-12 text-gray-300" />
+                            <div>
+                              <p className="text-lg font-medium text-gray-900">
+                                No assigned leads found
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {searchTerm
+                                  ? `No results for "${searchTerm}"`
+                                  : "No assigned leads available"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
             </CardContent>
           </Card>
+
+          {/* Pagination Controls for Assign Tab */}
+          <Pagination
+            currentPage={assignCurrentPage}
+            totalPages={assignTotalPages}
+            totalItems={assignLeads.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handleAssignPageChange}
+            onPreviousPage={handleAssignPreviousPage}
+            onNextPage={handleAssignNextPage}
+            startIndex={assignStartIndex}
+            endIndex={assignEndIndex}
+          />
         </TabsContent>
 
         {/* Pending Tab */}
@@ -322,9 +404,8 @@ export const LeadRequest = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredLeads
-                      .filter((lead) => lead.status === "Pending")
-                      .map((lead: requestLeadType) => (
+                    {pendingCurrentData.length > 0 ? (
+                      pendingCurrentData.map((lead: requestLeadType) => (
                         <tr key={lead.id} className="hover:bg-gray-50">
                           <td className="px-4 py-2 whitespace-nowrap">
                             <div className="flex flex-col items-start">
@@ -370,7 +451,7 @@ export const LeadRequest = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-[#286BBD] w-full text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                                className="border-[#122E5F] w-full text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                                 onClick={() => handleViewPendingLead(lead)}
                               >
                                 <Eye className="h-4 w-4 mr-1" />
@@ -379,7 +460,7 @@ export const LeadRequest = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-[#286BBD] w-full text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                                className="border-[#122E5F] w-full text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                                 onClick={() => handleOpenAssignModal(lead)}
                               >
                                 <Target className="h-4 w-4 mr-1" />
@@ -388,12 +469,44 @@ export const LeadRequest = () => {
                             </div>
                           </td>
                         </tr>
-                      ))}
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={8} className="px-6 py-8 text-center">
+                          <div className="flex flex-col items-center justify-center space-y-3">
+                            <Search className="h-12 w-12 text-gray-300" />
+                            <div>
+                              <p className="text-lg font-medium text-gray-900">
+                                No pending leads found
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {searchTerm
+                                  ? `No results for "${searchTerm}"`
+                                  : "No pending leads available"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
             </CardContent>
           </Card>
+
+          {/* Pagination Controls for Pending Tab */}
+          <Pagination
+            currentPage={pendingCurrentPage}
+            totalPages={pendingTotalPages}
+            totalItems={pendingLeads.length}
+            itemsPerPage={itemsPerPage}
+            onPageChange={handlePendingPageChange}
+            onPreviousPage={handlePendingPreviousPage}
+            onNextPage={handlePendingNextPage}
+            startIndex={pendingStartIndex}
+            endIndex={pendingEndIndex}
+          />
         </TabsContent>
       </Tabs>
 
@@ -434,7 +547,7 @@ export const LeadRequest = () => {
               </div>
 
               {/* Leads Data Table */}
-              <div className="overflow-x-auto">
+              <div className="overflow-auto max-h-64">
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
@@ -544,7 +657,7 @@ export const LeadRequest = () => {
               </div>
 
               {/* Leads Data Table */}
-              <div className="overflow-x-auto">
+              <div className="overflow-auto max-h-64">
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
@@ -661,7 +774,7 @@ export const LeadRequest = () => {
               </div>
 
               {/* Leads Data Table */}
-              <div className="overflow-x-auto">
+              <div className="overflow-auto max-h-64">
                 <table className="w-full">
                   <thead className="bg-gray-50">
                     <tr>
@@ -733,7 +846,7 @@ export const LeadRequest = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-gray-200">
+              <div className="flex flex-col md:flex-row gap-3 justify-between items-center mt-6 pt-4 border-t border-gray-200">
                 <div className="text-sm text-gray-600">
                   {selectedAssignLeads.size > 0 && (
                     <span className="font-medium text-blue-600">
@@ -747,7 +860,7 @@ export const LeadRequest = () => {
                     </span>
                   )}
                 </div>
-                <div className="flex flex-col md:flex-row gap-3">
+                <div className="flex gap-3">
                   <Button
                     onClick={handleCloseAssignModal}
                     className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white"

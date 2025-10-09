@@ -258,7 +258,7 @@ export const DashBoard = () => {
                 <Link href="/dashboard/leads">
                   <Button
                     variant="outline"
-                    className="text-[#286BBD] border-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                    className="text-[#122E5F] border-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                   >
                     View All Leads
                   </Button>
@@ -291,7 +291,7 @@ export const DashBoard = () => {
           {selectedLead && (
             <div className="p-5">
               {/* Lead Information */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
@@ -315,7 +315,7 @@ export const DashBoard = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md break-all text-sm flex items-center">
                     <Mail className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.email}
                   </p>

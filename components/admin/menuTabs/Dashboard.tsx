@@ -204,7 +204,7 @@ export const Dashboard = () => {
           {selectedLead && (
             <div className="p-5">
               {/* Lead Information */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Name
@@ -236,7 +236,7 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Email Address
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                  <p className="text-gray-900 break-all bg-gray-50 p-2 rounded-md text-sm flex items-center">
                     <Mail className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.email}
                   </p>
@@ -289,7 +289,7 @@ export const Dashboard = () => {
       <Dialog open={isRequestLeadModalOpen} onOpenChange={setIsRequestLeadModalOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-3 justify-between">
               <DialogTitle className="text-xl font-bold text-[#286BBD]">
                 Request Lead Details
               </DialogTitle>
@@ -310,7 +310,7 @@ export const Dashboard = () => {
           {selectedRequestLead && (
             <div className="p-5">
               {/* Lead Information */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Name

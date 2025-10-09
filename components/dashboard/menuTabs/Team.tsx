@@ -125,14 +125,14 @@ export const Team = () => {
   return (
     <>
       <div className="space-y-8">
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
+              <h1 className="text-2xl sm:text-3xl text-center md:text-start font-bold text-gray-900 mb-6">
                 Team Management
               </h1>
               
               <div className="mb-6">
                 <Button 
                   onClick={() => setShowAddModal(true)}
-                  className="bg-[#286BBD] hover:bg-[#1d4ed8]"
+                  className="bg-[#122E5F] hover:bg-[#0f2347] w-full md:w-auto"
                 >
                   <UserPlus className="h-5 w-5 mr-2" />
                   Add Team Member
@@ -145,7 +145,7 @@ export const Team = () => {
                     <CardContent className="p-6">
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex items-center space-x-4 flex-1 min-w-0">
-                          <div className="w-12 h-12 bg-[#286BBD] rounded-full flex items-center justify-center flex-shrink-0">
+                          <div className="w-12 h-12 bg-[#122E5F] rounded-full flex items-center justify-center flex-shrink-0">
                             <User className="h-6 w-6 text-white" />
                           </div>
                           <div className="flex-1 min-w-0 max-w-xs">
@@ -171,10 +171,10 @@ export const Team = () => {
                                 />
                               </div>
                             ) : (
-                              <div className="flex flex-col space-y-3">
-                                <input type="text" value={member.name} onChange={(e) => handleEditInputChange('name', e.target.value)} className="text-sm w-full" placeholder="Full Name" />
-                                <input type="email" value={member.email} onChange={(e) => handleEditInputChange('email', e.target.value)} className="text-sm w-full" placeholder="Email Address" />
-                                <input type="text" value={member.phoneno} onChange={(e) => handleEditInputChange('phoneno', e.target.value)} className="text-sm font-medium w-full" placeholder="Phone Number" />
+                              <div className="flex flex-col space-y-1">
+                                <input type="text" value={member.name} onChange={(e) => handleEditInputChange('name', e.target.value)} className="text-sm text-[#286BBD] w-full" placeholder="Full Name" />
+                                <input type="email" value={member.email} onChange={(e) => handleEditInputChange('email', e.target.value)} className="text-sm text-[#286BBD] w-full" placeholder="Email Address" />
+                                <input type="text" value={member.phoneno} onChange={(e) => handleEditInputChange('phoneno', e.target.value)} className="text-sm font-medium text-[#286BBD] w-full" placeholder="Phone Number" />
                               </div>
                             )}
                           </div>
@@ -225,7 +225,7 @@ export const Team = () => {
                               variant="outline" 
                               size="sm" 
                               onClick={() => handleEditClick(index, member)}
-                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                              className="border-[#122E5F] text-[#122E5F] hover:bg-[#0f2347] hover:text-white"
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>

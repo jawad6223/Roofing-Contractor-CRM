@@ -6,14 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
 import {
   MapPin,
   Eye,
   Target,
   X,
   Globe,
-  ChevronLeft,
-  ChevronRight,
   Phone,
   Mail,
   Search,
@@ -74,12 +73,16 @@ export const Contractors = () => {
     );
 
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 3;
+  const itemsPerPage = 10;
   const totalPages = Math.ceil(filteredContractors.length / itemsPerPage);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredContractors.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   const handlePreviousPage = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
@@ -238,7 +241,7 @@ export const Contractors = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                        className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                         onClick={() => handleViewContractor(contractor)}
                       >
                         <Eye className="h-4 w-4 mr-1" />
@@ -247,7 +250,7 @@ export const Contractors = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                        className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                         onClick={() =>
                           handleAssignLead(contractor as unknown as LeadType)
                         }
@@ -265,63 +268,17 @@ export const Contractors = () => {
       </Card>
 
       {/* Pagination Controls */}
-      {filteredContractors.length > 0 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-gray-700">
-            Showing {startIndex + 1} to{" "}
-            {Math.min(endIndex, filteredContractors.length)} of{" "}
-            {filteredContractors.length} results
-            {contractorSearchTerm && (
-              <span className="text-[#286BBD] ml-2">
-                (filtered from {contractors.length} total)
-              </span>
-            )}
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePreviousPage}
-              disabled={currentPage === 1}
-              className="flex items-center space-x-1"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              <span>Previous</span>
-            </Button>
-
-            <div className="flex items-center space-x-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (page) => (
-                  <Button
-                    key={page}
-                    variant={currentPage === page ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 p-0 ${
-                      currentPage === page
-                        ? "bg-[#286BBD] text-white"
-                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {page}
-                  </Button>
-                )
-              )}
-            </div>
-
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className="flex items-center space-x-1"
-            >
-              <span>Next</span>
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredContractors.length}
+        itemsPerPage={itemsPerPage}
+        onPageChange={handlePageChange}
+        onPreviousPage={handlePreviousPage}
+        onNextPage={handleNextPage}
+        startIndex={startIndex}
+        endIndex={endIndex}
+      />
 
       {/* No Results Message */}
       {filteredContractors.length === 0 && (
@@ -368,7 +325,7 @@ export const Contractors = () => {
               </div>
 
               {/* Contractor Information */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Full Name
@@ -410,7 +367,7 @@ export const Contractors = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Business Address
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                  <p className="text-gray-900 break-all bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
                     <MapPin className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedContractor.businessAddress}
                   </p>
@@ -535,7 +492,7 @@ export const Contractors = () => {
       {/* Assign Lead Modal */}
       {showAssignModal && selectedLead && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[100vh] overflow-hidden">
+          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-auto">
             {/* Close Button */}
             <button
               onClick={handleCloseAssignModal}
@@ -657,7 +614,7 @@ export const Contractors = () => {
                   className={`px-4 py-2 text-sm ${
                     selectedLeads.length === 0
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+                      : "bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
                   }`}
                 >
                   <Target className="h-4 w-4 mr-2" />

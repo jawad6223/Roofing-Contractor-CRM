@@ -77,7 +77,7 @@ export const Setting = () => {
           </CardHeader>
           <CardContent className="space-y-6 p-6">
             <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-[#286BBD] rounded-full flex items-center justify-center mx-auto mb-3">
+              <div className="w-20 h-20 bg-[#122E5F] rounded-full flex items-center justify-center mx-auto mb-3">
                 <User className="h-10 w-10 text-white" />
               </div>
               <h3 className="font-semibold text-gray-900 capitalize">
@@ -155,7 +155,7 @@ export const Setting = () => {
             {!isEditing ? (
               <Button 
                 onClick={handleEdit}
-                className="w-full h-11 bg-[#286BBD] hover:bg-[#1d4ed8] font-semibold"
+                className="w-full h-11 bg-[#122E5F] hover:bg-[#0f2347]/80 font-semibold"
               >
                 <Edit3 className="h-4 w-4 mr-2" />
                 Edit Profile
@@ -172,7 +172,7 @@ export const Setting = () => {
                 </Button>
                 <Button 
                   onClick={handleUpdate}
-                  className="flex-1 h-11 bg-[#286BBD] hover:bg-[#1d4ed8] font-semibold"
+                  className="flex-1 h-11 bg-[#122E5F] hover:bg-[#0f2347]/80 font-semibold"
                 >
                   <Save className="h-4 w-4 mr-2" />
                   Update Profile
