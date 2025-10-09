@@ -17,6 +17,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { teamMembers } from './Data'
 import { teamMemberType } from '@/types/DashboardTypes'
+import { toast } from "react-toastify";
 
 
 export const Team = () => {
@@ -35,15 +36,37 @@ export const Team = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setNewMember(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+    if (name === 'phone') {
+      const phoneNumber = value.replace(/\D/g, '');
+      let formattedValue = '';
+      
+      if (phoneNumber.length === 0) {
+        formattedValue = '';
+      } else if (phoneNumber.length <= 3) {
+        formattedValue = `(${phoneNumber}`;
+      } else if (phoneNumber.length <= 6) {
+        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+      } else {
+        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+      }
+      
+      setNewMember(prev => ({
+        ...prev,
+        phoneno: formattedValue
+      }));
+    } else {
+      setNewMember(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('New team member data:', newMember);
+    toast.success("Team member added successfully");
     // TODO: Add team member submission logic here
     handleCloseModal();
   };
@@ -68,6 +91,7 @@ export const Team = () => {
 
   const handleSaveClick = (index: number) => {
     console.log('Saving member data:', editedMember);
+    toast.success("Team member updated successfully");
     // TODO: Add save logic here
     setEditingMember(null);
     setEditedMember({
@@ -95,6 +119,7 @@ export const Team = () => {
 
   const handleDeleteMember = (index: number) => {
     console.log('Deleting team member at index:', index);
+    toast.success("Team member deleted successfully");
   };
 
   return (
@@ -279,11 +304,12 @@ export const Team = () => {
                       </label>
                       <Input
                         name="phone"
-                        type="tel"
+                        type="text"
                         value={newMember.phoneno}
                         onChange={handleInputChange}
                         placeholder="(555) 123-4567"
                         className="h-10 text-sm"
+                        maxLength={14}
                       />
                     </div>
                   </div>

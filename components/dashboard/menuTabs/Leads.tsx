@@ -15,6 +15,8 @@ import {
   ChevronDown,
   CheckCircle,
   Calendar,
+  Hash,
+  User,
   DollarSign,
   MoreHorizontal,
   Search,
@@ -513,7 +515,7 @@ export const Leads = () => {
               {/* Header */}
               <div className="text-center mb-5">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#286BBD]" />
+                  <FileText className="h-6 w-6 text-[#122E5F]" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-2">Lead Details</h2>
                 <p className="text-sm text-gray-600">Complete information for this purchased lead</p>
@@ -523,37 +525,57 @@ export const Leads = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.firstName} {selectedLead.lastName}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Zip Code</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.zipCode}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.zipCode}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.phoneno}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.phoneno}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 break-all rounded-md text-sm">{selectedLead.email}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 break-all rounded-md text-sm flex items-center">
+                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.email}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Location</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.location}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.location}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Insurance Company</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.company}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <FileText className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.company}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Policy Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.policy}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.policy}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Purchase Date</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Calendar className="h-3 w-3 mr-1 text-gray-400" />
                     {new Date(selectedLead.purchaseDate).toLocaleDateString()}
                   </p>
                 </div>

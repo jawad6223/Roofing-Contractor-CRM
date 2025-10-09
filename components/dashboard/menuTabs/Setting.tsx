@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { settingType, paymentMethodType } from "@/types/DashboardTypes";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "react-toastify";
 
 export const Setting = () => {
   const { user, getCurrentUserFullName } = useAuth();
@@ -53,6 +54,7 @@ export const Setting = () => {
 
   const handleUpdate = () => {
     console.log("Updating profile with:", formData);
+    toast.success("Profile updated successfully");
     setIsEditing(false);
   };
 
@@ -113,6 +115,7 @@ export const Setting = () => {
 
   const handleSavePaymentMethod = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    toast.success("Payment method saved successfully");
     console.log("Saving payment method:", paymentForm);
     // TODO: Add payment method save logic here
     setIsPaymentModalOpen(false);
@@ -184,7 +187,7 @@ export const Setting = () => {
               </div>
             </div>
             {!isEditing ? (
-              <Button onClick={handleEdit} className="w-full h-11 bg-[#286BBD] hover:bg-[#1d4ed8] font-semibold">
+              <Button onClick={handleEdit} className="w-full h-11 bg-[#122E5F] hover:bg-[#0f2347] font-semibold">
                 <Edit3 className="h-4 w-4 mr-2" />
                 Edit Profile
               </Button>
@@ -198,7 +201,7 @@ export const Setting = () => {
                   <X className="h-4 w-4 mr-2" />
                   Cancel
                 </Button>
-                <Button onClick={handleUpdate} className="flex-1 h-11 bg-[#286BBD] hover:bg-[#1d4ed8] font-semibold">
+                <Button onClick={handleUpdate} className="flex-1 h-11 bg-[#122E5F] hover:bg-[#0f2347] font-semibold">
                   <Save className="h-4 w-4 mr-2" />
                   Update Profile
                 </Button>

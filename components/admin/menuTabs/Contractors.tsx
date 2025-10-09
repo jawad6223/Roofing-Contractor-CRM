@@ -6,14 +6,30 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { MapPin, Eye, Target, X, Globe, ChevronLeft, ChevronRight, Phone, Mail, Search, FileText } from "lucide-react";
+import {
+  MapPin,
+  Eye,
+  Target,
+  X,
+  Globe,
+  ChevronLeft,
+  ChevronRight,
+  Phone,
+  Mail,
+  Search,
+  FileText,
+  User,
+  Building,
+} from "lucide-react";
 import { UserCheck } from "lucide-react";
 import { contractors } from "./Data";
 import { ContractorType, LeadType } from "@/types/AdminTypes";
 import { allLeads } from "./Data";
+import { toast } from "react-toastify";
 
 export const Contractors = () => {
-  const [selectedContractor, setSelectedContractor] = useState<ContractorType>();
+  const [selectedContractor, setSelectedContractor] =
+    useState<ContractorType>();
   const [showModal, setShowModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<LeadType>();
@@ -25,9 +41,15 @@ export const Contractors = () => {
   // Filter contractors based on search term
   const filteredContractors = contractors.filter(
     (contractor) =>
-      contractor.fullName.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.phoneno.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.businessAddress.toLowerCase().includes(contractorSearchTerm.toLowerCase())
+      contractor.fullName
+        .toLowerCase()
+        .includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.phoneno
+        .toLowerCase()
+        .includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.businessAddress
+        .toLowerCase()
+        .includes(contractorSearchTerm.toLowerCase())
   );
 
   // Filter assigned leads based on search term
@@ -35,12 +57,20 @@ export const Contractors = () => {
     .slice(0, 3)
     .filter(
       (lead) =>
-        lead.firstName.toLowerCase().includes(assignedLeadsSearchTerm.toLowerCase()) ||
-        lead.lastName.toLowerCase().includes(assignedLeadsSearchTerm.toLowerCase()) ||
+        lead.firstName
+          .toLowerCase()
+          .includes(assignedLeadsSearchTerm.toLowerCase()) ||
+        lead.lastName
+          .toLowerCase()
+          .includes(assignedLeadsSearchTerm.toLowerCase()) ||
         lead.zipCode.includes(assignedLeadsSearchTerm) ||
         lead.phoneno.includes(assignedLeadsSearchTerm) ||
-        lead.email.toLowerCase().includes(assignedLeadsSearchTerm.toLowerCase()) ||
-        lead.company.toLowerCase().includes(assignedLeadsSearchTerm.toLowerCase())
+        lead.email
+          .toLowerCase()
+          .includes(assignedLeadsSearchTerm.toLowerCase()) ||
+        lead.company
+          .toLowerCase()
+          .includes(assignedLeadsSearchTerm.toLowerCase())
     );
 
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -86,11 +116,21 @@ export const Contractors = () => {
   };
 
   const handleLeadCheckbox = (leadId: string) => {
-    setSelectedLeads((prev) => (prev.includes(leadId) ? prev.filter((id) => id !== leadId) : [...prev, leadId]));
+    setSelectedLeads((prev) =>
+      prev.includes(leadId)
+        ? prev.filter((id) => id !== leadId)
+        : [...prev, leadId]
+    );
   };
 
   const handleAssignToContractor = () => {
-    console.log("Assigning leads:", selectedLeads, "to contractor:", selectedLead?.id);
+    console.log(
+      "Assigning leads:",
+      selectedLeads,
+      "to contractor:",
+      selectedLead?.id
+    );
+    toast.success("Leads assigned successfully");
     handleCloseAssignModal();
   };
 
@@ -98,7 +138,9 @@ export const Contractors = () => {
     setSearchTerm(e.target.value);
   };
 
-  const handleContractorSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleContractorSearchChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setContractorSearchTerm(e.target.value);
     setCurrentPage(1);
   };
@@ -118,8 +160,12 @@ export const Contractors = () => {
       {/* Header */}
       <div className="flex flex-col justify-center md:justify-start gap-4">
         <div>
-          <h2 className="text-2xl text-center md:text-start font-bold text-gray-900">Contractors Management</h2>
-          <p className="text-gray-600 text-center md:text-start">Monitor contractor performance and manage accounts</p>
+          <h2 className="text-2xl text-center md:text-start font-bold text-gray-900">
+            Contractors Management
+          </h2>
+          <p className="text-gray-600 text-center md:text-start">
+            Monitor contractor performance and manage accounts
+          </p>
         </div>
       </div>
 
@@ -165,13 +211,22 @@ export const Contractors = () => {
                 {currentData.map((contractor: ContractorType) => (
                   <tr key={contractor.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-bold text-[#122E5F]">{contractor.fullName}</span>
+                      <span className="text-sm font-bold text-[#122E5F] flex items-center">
+                        <User className="h-3 w-3 mr-1 text-gray-600" />
+                        {contractor.fullName}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">{contractor.phoneno}</span>
+                      <span className="text-sm text-gray-900 flex items-center">
+                        <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                        {contractor.phoneno}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-[#286BBD]">{contractor.email}</span>
+                      <span className="text-sm font-medium text-[#286BBD] flex items-center">
+                        <Mail className="h-3 w-3 mr-1 text-gray-400" />
+                        {contractor.email}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900 flex items-center">
@@ -193,7 +248,9 @@ export const Contractors = () => {
                         size="sm"
                         variant="outline"
                         className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
-                        onClick={() => handleAssignLead(contractor as unknown as LeadType)}
+                        onClick={() =>
+                          handleAssignLead(contractor as unknown as LeadType)
+                        }
                       >
                         <Target className="h-4 w-4 mr-1" />
                         Assign
@@ -211,10 +268,13 @@ export const Contractors = () => {
       {filteredContractors.length > 0 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Showing {startIndex + 1} to {Math.min(endIndex, filteredContractors.length)} of {filteredContractors.length}{" "}
-            results
+            Showing {startIndex + 1} to{" "}
+            {Math.min(endIndex, filteredContractors.length)} of{" "}
+            {filteredContractors.length} results
             {contractorSearchTerm && (
-              <span className="text-[#286BBD] ml-2">(filtered from {contractors.length} total)</span>
+              <span className="text-[#286BBD] ml-2">
+                (filtered from {contractors.length} total)
+              </span>
             )}
           </div>
           <div className="flex items-center space-x-2">
@@ -230,19 +290,23 @@ export const Contractors = () => {
             </Button>
 
             <div className="flex items-center space-x-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 p-0 ${
-                    currentPage === page ? "bg-[#286BBD] text-white" : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {page}
-                </Button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 p-0 ${
+                      currentPage === page
+                        ? "bg-[#286BBD] text-white"
+                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </Button>
+                )
+              )}
             </div>
 
             <Button
@@ -265,9 +329,13 @@ export const Contractors = () => {
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Search className="h-8 w-8 text-gray-400" />
           </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No contractors found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No contractors found
+          </h3>
           <p className="text-sm text-gray-500">
-            {contractorSearchTerm ? `No contractors match "${contractorSearchTerm}"` : "No contractors available"}
+            {contractorSearchTerm
+              ? `No contractors match "${contractorSearchTerm}"`
+              : "No contractors available"}
           </p>
         </div>
       )}
@@ -289,45 +357,68 @@ export const Contractors = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <UserCheck className="h-6 w-6 text-[#286BBD]" />
+                  <UserCheck className="h-6 w-6 text-[#122E5F]" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Contractor Details</h2>
-                <p className="text-sm text-gray-600">Complete information for this contractor</p>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Contractor Details
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Complete information for this contractor
+                </p>
               </div>
 
               {/* Contractor Information */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">{selectedContractor.fullName}</p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Full Name
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedContractor.fullName}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Title</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">{selectedContractor.title}</p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Title
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedContractor.title}
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Phone Number
+                  </label>
                   <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
                     <Phone className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedContractor.phoneno}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 break-all rounded-md text-sm">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Email Address
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 break-all rounded-md text-sm flex items-center">
+                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedContractor.email}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Business Address</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Business Address
+                  </label>
                   <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
                     <MapPin className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedContractor.businessAddress}
                   </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Service Radius</label>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Service Radius
+                  </label>
                   <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
                     <Globe className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedContractor.serviceRadius}
@@ -350,7 +441,9 @@ export const Contractors = () => {
                       type="text"
                       placeholder="Search assigned leads..."
                       value={assignedLeadsSearchTerm}
-                      onChange={(e) => setAssignedLeadsSearchTerm(e.target.value)}
+                      onChange={(e) =>
+                        setAssignedLeadsSearchTerm(e.target.value)
+                      }
                       className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#286BBD] focus:border-transparent"
                     />
                   </div>
@@ -379,38 +472,45 @@ export const Contractors = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredAssignedLeads.map((lead: LeadType, index: number) => (
-                          <tr key={lead.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div>
-                                <div className="text-sm font-bold text-[#122E5F]">
-                                  {lead.firstName} {lead.lastName}
+                        {filteredAssignedLeads.map(
+                          (lead: LeadType, index: number) => (
+                            <tr key={lead.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div>
+                                  <div className="text-sm font-bold text-[#122E5F]">
+                                    {lead.firstName} {lead.lastName}
+                                  </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                                <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">
-                              <div className="space-y-1 flex items-center">
-                                <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                {lead.phoneno}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-black">
-                              <div className="space-y-1 flex items-center">
-                                <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                                {lead.email}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm font-medium text-gray-900">{lead.company}</span>
-                            </td>
-                          </tr>
-                        ))}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                                  <span className="text-sm font-medium text-gray-900">
+                                    {lead.zipCode}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-black">
+                                <div className="space-y-1 flex items-center">
+                                  <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                  {lead.phoneno}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-black">
+                                <div className="space-y-1 flex items-center">
+                                  <Mail className="h-3 w-3 text-gray-400 mr-1" />
+                                  {lead.email}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm font-medium text-gray-900 flex items-center">
+                                  <Building className="h-3 w-3 text-gray-400 mr-1" />
+                                  {lead.company}
+                                </span>
+                              </td>
+                            </tr>
+                          )
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -419,7 +519,11 @@ export const Contractors = () => {
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                <Button variant="outline" onClick={handleCloseModal} className="px-3 py-1.5 text-sm">
+                <Button
+                  variant="outline"
+                  onClick={handleCloseModal}
+                  className="px-3 py-1.5 text-sm"
+                >
                   Close
                 </Button>
               </div>
@@ -445,10 +549,14 @@ export const Contractors = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#286BBD]" />
+                  <FileText className="h-6 w-6 text-[#122E5F]" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Available Leads</h2>
-                <p className="text-sm text-gray-600">Select a lead to assign to this contractor</p>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Available Leads
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Select a lead to assign to this contractor
+                </p>
               </div>
 
               {/* Search Bar */}
@@ -477,8 +585,12 @@ export const Contractors = () => {
                         <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
                           <div className="flex items-center space-x-4">
                             <Checkbox
-                              checked={selectedLeads.includes(lead.id.toString())}
-                              onCheckedChange={() => handleLeadCheckbox(lead.id.toString())}
+                              checked={selectedLeads.includes(
+                                lead.id.toString()
+                              )}
+                              onCheckedChange={() =>
+                                handleLeadCheckbox(lead.id.toString())
+                              }
                             />
                             <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
                               <span className="text-sm font-semibold text-[#286BBD]">
@@ -497,11 +609,15 @@ export const Contractors = () => {
                           </div>
                           <div className="flex justify-between space-x-16 md:space-x-4 mt-4 md:mt-0">
                             <div className="text-end">
-                              <p className="text-sm font-medium text-[#286BBD]">{lead.policy}</p>
+                              <p className="text-sm font-medium text-[#286BBD]">
+                                {lead.policy}
+                              </p>
                               <p className="text-xs text-gray-500">Policy</p>
                             </div>
                             <div className="text-end">
-                              <p className="text-sm font-medium text-green-600">{lead.phoneno}</p>
+                              <p className="text-sm font-medium text-green-600">
+                                {lead.phoneno}
+                              </p>
                               <p className="text-xs text-gray-500">Phone</p>
                             </div>
                           </div>
@@ -513,9 +629,13 @@ export const Contractors = () => {
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Search className="h-8 w-8 text-gray-400" />
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No leads found</h3>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No leads found
+                      </h3>
                       <p className="text-sm text-gray-500">
-                        {searchTerm ? `No leads match "${searchTerm}"` : "No leads available"}
+                        {searchTerm
+                          ? `No leads match "${searchTerm}"`
+                          : "No leads available"}
                       </p>
                     </div>
                   )}
@@ -524,7 +644,11 @@ export const Contractors = () => {
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                <Button variant="outline" onClick={handleCloseAssignModal} className="px-4 py-2 text-sm">
+                <Button
+                  variant="outline"
+                  onClick={handleCloseAssignModal}
+                  className="px-4 py-2 text-sm"
+                >
                   Close
                 </Button>
                 <Button

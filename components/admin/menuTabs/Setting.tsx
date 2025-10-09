@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { settingType } from "@/types/AdminTypes";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "react-toastify";
 
 export const Setting = () => {
   const { user } = useAuth();
@@ -53,6 +54,7 @@ export const Setting = () => {
 
   const handleUpdate = () => {
     console.log('Updating profile with:', formData);
+    toast.success("Profile updated successfully");
     setIsEditing(false);
   };
 

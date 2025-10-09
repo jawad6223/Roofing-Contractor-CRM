@@ -19,6 +19,7 @@ import {
   ExternalLink,
   X,
   Eye,
+  Hash,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -293,37 +294,57 @@ export const DashBoard = () => {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.firstName} {selectedLead.lastName}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Zip Code</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.zipCode}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.zipCode}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.phoneno}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.phoneno}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.email}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.email}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Location</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.location}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.location}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Insurance Company</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.company}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <FileText className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.company}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Policy Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">{selectedLead.policy}</p>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.policy}
+                  </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">Purchase Date</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Calendar className="h-3 w-3 mr-1 text-gray-400" />
                     {new Date(selectedLead.purchaseDate).toLocaleDateString()}
                   </p>
                 </div>

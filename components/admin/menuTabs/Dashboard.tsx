@@ -1,28 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  BarChart3,
-  Activity,
-  X,
-  Phone,
-  Mail,
-  MapPin,
-  User,
-  ExternalLink,
-  Users,
-} from "lucide-react";
+import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Calendar, Building, } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { dashboardCard, allLeads, contractors, requestLeads } from "./Data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
+import { dashboardCard, allLeads, requestLeads } from "./Data";
 import Link from "next/link";
-import {dashboardCardType, LeadType, ContractorType, requestLeadType } from "@/types/AdminTypes";
+import {dashboardCardType, LeadType, requestLeadType } from "@/types/AdminTypes";
 
 export const Dashboard = () => {
   const [selectedLead, setSelectedLead] = useState<LeadType>();
@@ -224,7 +209,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Name
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.firstName} {selectedLead.lastName}
                   </p>
                 </div>
@@ -232,7 +218,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Zip Code
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.zipCode}
                   </p>
                 </div>
@@ -240,7 +227,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Phone Number
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.phoneno}
                   </p>
                 </div>
@@ -248,7 +236,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Email Address
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.email}
                   </p>
                 </div>
@@ -256,15 +245,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Insurance Company
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedLead.company}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Insurance Company
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Building className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.company}
                   </p>
                 </div>
@@ -272,7 +254,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Policy Number
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.policy}
                   </p>
                 </div>
@@ -280,7 +263,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Purchase Date
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Calendar className="h-3 w-3 mr-1 text-gray-400" />
                     {new Date(selectedLead.purchaseDate).toLocaleDateString()}
                   </p>
                 </div>
@@ -331,7 +315,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Name
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedRequestLead.firstName} {selectedRequestLead.lastName}
                   </p>
                 </div>
@@ -339,7 +324,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Phone Number
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedRequestLead.phoneno}
                   </p>
                 </div>
@@ -347,7 +333,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Zip Code
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedRequestLead.zipCode}
                   </p>
                 </div>
@@ -355,7 +342,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Price
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <DollarSign className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedRequestLead.price}
                   </p>
                 </div>
@@ -363,7 +351,8 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Date
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Calendar className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedRequestLead.date}
                   </p>
                 </div>
@@ -371,7 +360,7 @@ export const Dashboard = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     No of Leads
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
                     {selectedRequestLead.noOfLeads}
                   </p>
                 </div>

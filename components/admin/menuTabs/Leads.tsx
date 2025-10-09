@@ -19,7 +19,11 @@ import {
   Check,
   FileText,
   MoreHorizontal,
-  MapPin, Phone, Mail
+  MapPin,
+  Phone,
+  Mail,
+  Hash,
+  User,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -32,6 +36,7 @@ import {
 import { contractors } from "./Data";
 import { LeadType } from "@/types/AdminTypes";
 import { allLeads } from "./Data";
+import { toast } from "react-toastify";
 import * as ExcelJS from "exceljs";
 
 export const Leads = () => {
@@ -45,7 +50,9 @@ export const Leads = () => {
   const [leadToAssign, setLeadToAssign] = useState<LeadType | null>(null);
   const [selectedContractor, setSelectedContractor] = useState<string>("");
   const [contractorSearchTerm, setContractorSearchTerm] = useState("");
-  const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>({});
+  const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>(
+    {}
+  );
   const [newLead, setNewLead] = useState({
     firstName: "",
     lastName: "",
@@ -74,7 +81,9 @@ export const Leads = () => {
       lead.policy.includes(searchTerm);
 
     const leadStatus = leadStatuses[lead.id.toString()] || "Open";
-    const matchesStatus = statusFilter === "All" || leadStatus.toLowerCase() === statusFilter.toLowerCase();
+    const matchesStatus =
+      statusFilter === "All" ||
+      leadStatus.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
@@ -82,7 +91,10 @@ export const Leads = () => {
   // Filter leads for Open tab (shows leads with "Open" and "Cancel" status)
   const openLeads = filteredLeads.filter((lead) => {
     const leadStatus = leadStatuses[lead.id.toString()] || "Open";
-    return leadStatus.toLowerCase() === "open" || leadStatus.toLowerCase() === "cancel";
+    return (
+      leadStatus.toLowerCase() === "open" ||
+      leadStatus.toLowerCase() === "cancel"
+    );
   });
 
   // Filter leads for Close tab (shows leads with "Close" status)
@@ -166,7 +178,11 @@ export const Leads = () => {
 
   const handleSelectContractor = () => {
     if (selectedContractor && leadToAssign) {
-      console.log(`Assigning lead ${leadToAssign.id} to contractor:`, selectedContractor);
+      console.log(
+        `Assigning lead ${leadToAssign.id} to contractor:`,
+        selectedContractor
+      );
+      toast.success("Lead assigned successfully");
       // TODO: Add assignment logic here
       handleCloseAssignModal();
     }
@@ -202,15 +218,23 @@ export const Leads = () => {
     }
   };
 
-  const handleContractorSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleContractorSearchChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setContractorSearchTerm(e.target.value);
   };
 
   const filteredContractors = contractors.filter(
     (contractor) =>
-      contractor.fullName.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.phoneno.toLowerCase().includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.businessAddress.toLowerCase().includes(contractorSearchTerm.toLowerCase())
+      contractor.fullName
+        .toLowerCase()
+        .includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.phoneno
+        .toLowerCase()
+        .includes(contractorSearchTerm.toLowerCase()) ||
+      contractor.businessAddress
+        .toLowerCase()
+        .includes(contractorSearchTerm.toLowerCase())
   );
 
   const handleExportToExcel = async () => {
@@ -250,7 +274,9 @@ export const Leads = () => {
 
       // Download the file
       const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -264,18 +290,46 @@ export const Leads = () => {
       alert("Error exporting data to Excel. Please try again.");
     }
   };
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setNewLead((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    if (name === "phoneno") {
+      const phoneNumber = value.replace(/\D/g, "");
+      let formattedValue = "";
+
+      if (phoneNumber.length === 0) {
+        formattedValue = "";
+      } else if (phoneNumber.length <= 3) {
+        formattedValue = `(${phoneNumber}`;
+      } else if (phoneNumber.length <= 6) {
+        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+      } else {
+        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(
+          3,
+          6
+        )}-${phoneNumber.slice(6, 10)}`;
+      }
+
+      setNewLead((prev) => ({
+        ...prev,
+        [name]: formattedValue,
+      }));
+    } else {
+      setNewLead((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmitLead = (e: React.FormEvent) => {
     e.preventDefault();
     // TODO: Add lead submission logic here
     console.log("New lead data:", newLead);
+    toast.success("Lead added successfully");
     handleCloseAddModal();
   };
 
@@ -285,10 +339,15 @@ export const Leads = () => {
       <div className="flex flex-col sm:flex-row justify-between items-center sm:items-center gap-4">
         <div className="text-center md:text-start">
           <h2 className="text-2xl font-bold text-gray-900">Leads Management</h2>
-          <p className="text-gray-600">Manage and assign leads to contractors</p>
+          <p className="text-gray-600">
+            Manage and assign leads to contractors
+          </p>
         </div>
         <div className="flex gap-3">
-          <Button onClick={handleAddLead} className="bg-[#122E5F] hover:bg-[#0f2347] text-white">
+          <Button
+            onClick={handleAddLead}
+            className="bg-[#122E5F] hover:bg-[#0f2347] text-white"
+          >
             <Plus className="h-4 w-4 mr-2" />
             Add Lead
           </Button>
@@ -338,7 +397,11 @@ export const Leads = () => {
       {/* Leads Table with Tabs */}
       <Card className="border-0 shadow-lg">
         <CardContent className="p-0">
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <Tabs
+            value={activeTab}
+            onValueChange={handleTabChange}
+            className="w-full"
+          >
             <div className="border-b border-gray-200">
               <TabsList className="grid w-full grid-cols-2 bg-transparent h-auto p-0">
                 <TabsTrigger
@@ -393,23 +456,33 @@ export const Leads = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.zipCode}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">{lead.phoneno}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.phoneno}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <Mail className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">{lead.email}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.email}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <Badge className={getStatusBadgeColor(lead.id.toString())}>
+                            <Badge
+                              className={getStatusBadgeColor(
+                                lead.id.toString()
+                              )}
+                            >
                               {getLeadStatus(lead.id.toString())}
                             </Badge>
                           </td>
@@ -425,12 +498,17 @@ export const Leads = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleViewLead(lead)} className="cursor-pointer">
+                                <DropdownMenuItem
+                                  onClick={() => handleViewLead(lead)}
+                                  className="cursor-pointer"
+                                >
                                   <Eye className="h-4 w-4 mr-2" />
                                   View
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => handleCloseLead(lead.id.toString())}
+                                  onClick={() =>
+                                    handleCloseLead(lead.id.toString())
+                                  }
                                   className="cursor-pointer text-red-600 hover:text-red-700"
                                 >
                                   <X className="h-4 w-4 mr-2" />
@@ -456,7 +534,9 @@ export const Leads = () => {
                           <div className="flex flex-col items-center justify-center space-y-3">
                             <Search className="h-12 w-12 text-gray-300" />
                             <div>
-                              <p className="text-lg font-medium text-gray-900">No leads found</p>
+                              <p className="text-lg font-medium text-gray-900">
+                                No leads found
+                              </p>
                               <p className="text-sm text-gray-500">
                                 {searchTerm || statusFilter !== "All"
                                   ? `No results for current filters`
@@ -509,23 +589,33 @@ export const Leads = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.zipCode}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">{lead.phoneno}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.phoneno}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <Mail className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">{lead.email}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead.email}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <Badge className={getStatusBadgeColor(lead.id.toString())}>
+                            <Badge
+                              className={getStatusBadgeColor(
+                                lead.id.toString()
+                              )}
+                            >
                               {getLeadStatus(lead.id.toString())}
                             </Badge>
                           </td>
@@ -541,12 +631,17 @@ export const Leads = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleViewLead(lead)} className="cursor-pointer">
+                                <DropdownMenuItem
+                                  onClick={() => handleViewLead(lead)}
+                                  className="cursor-pointer"
+                                >
                                   <Eye className="h-4 w-4 mr-2" />
                                   View
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
-                                  onClick={() => handleCloseLead(lead.id.toString())}
+                                  onClick={() =>
+                                    handleCloseLead(lead.id.toString())
+                                  }
                                   className="cursor-pointer text-red-600 hover:text-red-700"
                                 >
                                   <X className="h-4 w-4 mr-2" />
@@ -572,7 +667,9 @@ export const Leads = () => {
                           <div className="flex flex-col items-center justify-center space-y-3">
                             <Search className="h-12 w-12 text-gray-300" />
                             <div>
-                              <p className="text-lg font-medium text-gray-900">No closed leads found</p>
+                              <p className="text-lg font-medium text-gray-900">
+                                No closed leads found
+                              </p>
                               <p className="text-sm text-gray-500">
                                 {searchTerm || statusFilter !== "All"
                                   ? `No results for current filters`
@@ -595,7 +692,9 @@ export const Leads = () => {
       {currentTabData.length > 0 && (
         <div className="flex items-center justify-between">
           <div className="text-sm text-gray-700">
-            Showing {startIndex + 1} to {Math.min(endIndex, currentTabData.length)} of {currentTabData.length} results
+            Showing {startIndex + 1} to{" "}
+            {Math.min(endIndex, currentTabData.length)} of{" "}
+            {currentTabData.length} results
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -610,19 +709,23 @@ export const Leads = () => {
             </Button>
 
             <div className="flex items-center space-x-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 p-0 ${
-                    currentPage === page ? "bg-[#286BBD] text-white" : "border-gray-300 text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {page}
-                </Button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (page) => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 p-0 ${
+                      currentPage === page
+                        ? "bg-[#286BBD] text-white"
+                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {page}
+                  </Button>
+                )
+              )}
             </div>
 
             <Button
@@ -658,52 +761,89 @@ export const Leads = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#286BBD]" />
+                  <FileText className="h-6 w-6 text-[#122E5F]" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Lead Details</h2>
-                <p className="text-sm text-gray-600">Complete information for this lead</p>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Lead Details
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Complete information for this lead
+                </p>
               </div>
 
               {/* Lead Information */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">First Name</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">{selectedLead.firstName}</p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    First Name
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.firstName}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Last Name</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">{selectedLead.lastName}</p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Last Name
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.lastName}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">{selectedLead.phoneno}</p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.phoneno}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 flex break-all rounded-md text-sm">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Email Address
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 flex break-all rounded-md text-sm flex items-center">
+                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.email}
                   </p>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Zip Code <span className="text-xs text-gray-500">(Address)</span>
+                    Zip Code{" "}
+                    <span className="text-xs text-gray-500">(Address)</span>
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.zipCode}, {selectedLead.address}
                   </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Insurance Company</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">{selectedLead.company}</p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Insurance Company
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <FileText className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.company}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Policy Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">{selectedLead.policy}</p>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Policy Number
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead.policy}
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Assigned To</label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm">
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Assigned To
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.assignedTo || "Unassigned"}
                   </p>
                 </div>
@@ -711,7 +851,11 @@ export const Leads = () => {
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 mt-4 pt-3 border-t border-gray-200">
-                <Button variant="outline" onClick={handleCloseModal} className="px-3 py-1.5 text-sm">
+                <Button
+                  variant="outline"
+                  onClick={handleCloseModal}
+                  className="px-3 py-1.5 text-sm"
+                >
                   Close
                 </Button>
               </div>
@@ -739,17 +883,24 @@ export const Leads = () => {
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
                   <FileText className="h-6 w-6 text-[#286BBD]" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Add New Lead</h2>
-                <p className="text-sm text-gray-600">Enter lead information to add to the system</p>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Add New Lead
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Enter lead information to add to the system
+                </p>
               </div>
 
               {/* Add Lead Form */}
               <form onSubmit={handleSubmitLead} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">First Name *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      First Name *
+                    </label>
                     <Input
                       name="firstName"
+                      type="text"
                       value={newLead.firstName}
                       onChange={handleInputChange}
                       placeholder="John"
@@ -758,9 +909,12 @@ export const Leads = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Last Name *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Last Name *
+                    </label>
                     <Input
                       name="lastName"
+                      type="text"
                       value={newLead.lastName}
                       onChange={handleInputChange}
                       placeholder="Doe"
@@ -769,18 +923,24 @@ export const Leads = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Phone Number *
+                    </label>
                     <Input
                       name="phoneno"
+                      type="text"
                       value={newLead.phoneno}
                       onChange={handleInputChange}
-                      placeholder="1234567890"
+                      placeholder="(555) 123-4567"
                       required
                       className="h-9 text-sm"
+                      maxLength={14}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Email Address *
+                    </label>
                     <Input
                       name="email"
                       type="email"
@@ -792,9 +952,12 @@ export const Leads = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Zip Code *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Zip Code *
+                    </label>
                     <Input
                       name="zipCode"
+                      type="number"
                       value={newLead.zipCode}
                       onChange={handleInputChange}
                       placeholder="75201"
@@ -803,9 +966,12 @@ export const Leads = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Insurance Company *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Insurance Company *
+                    </label>
                     <Input
                       name="company"
+                      type="text"
                       value={newLead.company}
                       onChange={handleInputChange}
                       placeholder="ABC Insurance"
@@ -814,9 +980,12 @@ export const Leads = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">Policy Number *</label>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Policy Number *
+                    </label>
                     <Input
                       name="policy"
+                      type="text"
                       value={newLead.policy}
                       onChange={handleInputChange}
                       placeholder="POL123456789"
@@ -828,10 +997,18 @@ export const Leads = () => {
 
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                  <Button type="button" variant="outline" onClick={handleCloseAddModal} className="px-4 py-2 text-sm">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCloseAddModal}
+                    className="px-4 py-2 text-sm"
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" className="px-4 py-2 text-sm bg-[#286BBD] hover:bg-[#1d4ed8] text-white">
+                  <Button
+                    type="submit"
+                    className="px-4 py-2 text-sm bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+                  >
                     Add Lead
                   </Button>
                 </div>
@@ -859,9 +1036,11 @@ export const Leads = () => {
               <div className="flex items-center justify-between mb-6">
                 <div className="text-center flex-1">
                   <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FileText className="h-6 w-6 text-[#286BBD]" />
+                    <FileText className="h-6 w-6 text-[#122E5F]" />
                   </div>
-                  <h2 className="text-xl font-bold text-gray-900 mb-1">Assign Lead to Contractor</h2>
+                  <h2 className="text-xl font-bold text-gray-900 mb-1">
+                    Assign Lead to Contractor
+                  </h2>
                   <p className="text-sm text-gray-600">
                     Select contractors to assign lead:{" "}
                     <span className="font-semibold text-[#286BBD]">
@@ -897,7 +1076,9 @@ export const Leads = () => {
                         <div className="flex items-center space-x-4">
                           <Checkbox
                             checked={selectedContractor === contractor.id}
-                            onCheckedChange={() => handleContractorSelect(contractor.id)}
+                            onCheckedChange={() =>
+                              handleContractorSelect(contractor.id)
+                            }
                             className="data-[state=checked]:bg-[#286BBD] data-[state=checked]:border-[#286BBD]"
                           />
                           <div className="flex items-center space-x-2">
@@ -905,20 +1086,30 @@ export const Leads = () => {
                               <UserPlus className="h-5 w-5 text-[#286BBD]" />
                             </div>
                             <div>
-                              <h3 className="font-semibold text-gray-900">{contractor.fullName}</h3>
-                              <p className="text-sm text-gray-600">{contractor.phoneno}</p>
+                              <h3 className="font-semibold text-gray-900">
+                                {contractor.fullName}
+                              </h3>
+                              <p className="text-sm text-gray-600">
+                                {contractor.phoneno}
+                              </p>
                             </div>
                           </div>
                         </div>
                         <div className="">
                           <div className="flex justify-between space-x-4 mt-4 md:mt-0">
                             <div className="text-start md:text-end">
-                              <p className="text-sm font-medium text-[#286BBD]">{contractor.businessAddress}</p>
+                              <p className="text-sm font-medium text-[#286BBD]">
+                                {contractor.businessAddress}
+                              </p>
                               <p className="text-xs text-gray-500">Location</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-sm font-medium text-green-600">{contractor.serviceRadius}</p>
-                              <p className="text-xs text-gray-500">Service Radius</p>
+                              <p className="text-sm font-medium text-green-600">
+                                {contractor.serviceRadius}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Service Radius
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -929,7 +1120,9 @@ export const Leads = () => {
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <Search className="h-8 w-8 text-gray-400" />
                       </div>
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No contractors found</h3>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">
+                        No contractors found
+                      </h3>
                       <p className="text-sm text-gray-500">
                         {contractorSearchTerm
                           ? `No contractors match "${contractorSearchTerm}"`
@@ -942,7 +1135,11 @@ export const Leads = () => {
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                <Button variant="outline" onClick={handleCloseAssignModal} className="px-4 py-2 text-sm">
+                <Button
+                  variant="outline"
+                  onClick={handleCloseAssignModal}
+                  className="px-4 py-2 text-sm"
+                >
                   Cancel
                 </Button>
                 <Button

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShoppingCart, CheckCircle, Calendar, DollarSign, X, Eye, FileText } from "lucide-react";
+import { ShoppingCart, CheckCircle, Calendar, DollarSign, X, Eye, FileText, MapPin, User, Phone, Mail, Hash } from "lucide-react";
 import { LeadsInfo, purchasedLeads } from "./Data";
 import { Button } from "@/components/ui/button";
 import { leadsInfoType, purchasedLeadType } from "@/types/DashboardTypes";
@@ -97,6 +97,7 @@ export const LeadPurchaseInfo = () => {
                   <tr key={lead.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
+                        <MapPin className="h-3 w-3 text-gray-400 mr-1" />
                         <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
                       </div>
                     </td>
@@ -155,7 +156,7 @@ export const LeadPurchaseInfo = () => {
             <div className="p-6">
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#286BBD]" />
+                  <FileText className="h-6 w-6 text-[#122E5F]" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">Lead Details</h2>
                 <p className="text-sm text-gray-600">
@@ -198,19 +199,34 @@ export const LeadPurchaseInfo = () => {
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm text-gray-900">{lead.phoneno}</span>
+                              <span className="text-sm text-gray-900 flex items-center">
+                                <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.phoneno}
+                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm text-gray-900">{lead.email}</span>
+                              <span className="text-sm text-gray-900 flex items-center">
+                                <Mail className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.email}
+                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm text-gray-900">{lead.location}</span>
+                              <span className="text-sm text-gray-900 flex items-center">
+                                <MapPin className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.location}
+                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm text-gray-900">{lead.company}</span>
+                              <span className="text-sm text-gray-900 flex items-center">
+                                <FileText className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.company}
+                              </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm text-gray-900">{lead.policy}</span>
+                              <span className="text-sm text-gray-900 flex items-center">
+                                <Hash className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead.policy}
+                              </span>
                             </td>
                           </tr>
                         ))}
@@ -221,7 +237,7 @@ export const LeadPurchaseInfo = () => {
               </Card>
 
               <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
-                <Button onClick={handleCloseModal} className="px-6 py-2 bg-[#286BBD] hover:bg-[#1d4ed8] text-white">
+                <Button onClick={handleCloseModal} className="px-6 py-2 bg-[#122E5F] hover:bg-[#0f2347] text-white">
                   Close
                 </Button>
               </div>

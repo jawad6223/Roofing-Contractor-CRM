@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
+import { toast } from "react-toastify";
 
 const PurchaseLeads = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -29,6 +30,7 @@ const PurchaseLeads = () => {
 
   async function handlePurchaseSubmitStripe(e: React.FormEvent) {
     e.preventDefault();
+    toast.success("Leads purchased successfully");
     setIsLoading(true);
     try {
       const response = await fetch("/api/create-checkout-session", {
@@ -70,7 +72,7 @@ const PurchaseLeads = () => {
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <ShoppingCart className="h-6 w-6 text-[#286BBD]" />
-            <span>Purchase New Leads</span>
+            <span className="text-[#286BBD]">Purchase New Leads</span>
           </CardTitle>
           <CardDescription>Specify your target area and quantity to get started</CardDescription>
         </CardHeader>
@@ -131,7 +133,7 @@ const PurchaseLeads = () => {
               <Button
                 disabled={isLoading}
                 type="submit"
-                className="px-6 py-2 text-sm bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+                className="px-6 py-2 text-sm bg-[#122E5F] hover:bg-[#0f2347] text-white"
                 onClick={handlePurchaseSubmitStripe}
               >
                 {isLoading ? (

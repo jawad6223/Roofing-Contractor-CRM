@@ -11,12 +11,15 @@ import {
   Building,
   Search,
   UserPlus,
+  Hash,
+  User,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { crmDataType } from "@/types/DashboardTypes";
 import { crmData } from "./Data";
+import { toast } from "react-toastify";
 
 export const CRM = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -89,15 +92,37 @@ export const CRM = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNewMember(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+    if (name === 'phoneno') {
+      const phoneNumber = value.replace(/\D/g, '');
+      let formattedValue = '';
+      
+      if (phoneNumber.length === 0) {
+        formattedValue = '';
+      } else if (phoneNumber.length <= 3) {
+        formattedValue = `(${phoneNumber}`;
+      } else if (phoneNumber.length <= 6) {
+        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+      } else {
+        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+      }
+      
+      setNewMember(prev => ({
+        ...prev,
+        [name]: formattedValue
+      }));
+    } else {
+      setNewMember(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmitMember = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('New member data:', newMember);
+    toast.success("Member added successfully");
     handleCloseAddMemberModal();
   };
 
@@ -175,12 +200,14 @@ export const CRM = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">
+                      <span className="text-sm text-gray-900 flex items-center">
+                        <Phone className="h-3 w-3 mr-1 text-gray-400" />
                         {lead.phoneno}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900">
+                      <span className="text-sm text-gray-900 flex items-center">
+                        <Mail className="h-3 w-3 mr-1 text-gray-400" />
                         {lead.email}
                       </span>
                     </td>
@@ -323,7 +350,7 @@ export const CRM = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#286BBD]" />
+                  <FileText className="h-6 w-6 text-[#122E5F]" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">
                   Lead Details
@@ -337,7 +364,8 @@ export const CRM = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Full Name
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.name}
                   </p>
                 </div>
@@ -381,7 +409,8 @@ export const CRM = () => {
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Policy Number
                   </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
+                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
                     {selectedLead.policy}
                   </p>
                 </div>
@@ -447,12 +476,13 @@ export const CRM = () => {
                     </label>
                     <Input
                       name="phoneno"
-                      type="tel"
+                      type="text"
                       value={newMember.phoneno}
                       onChange={handleInputChange}
                       placeholder="(555) 123-4567"
                       required
                       className="h-10 text-sm"
+                      maxLength={14}
                     />
                   </div>
                 </div>

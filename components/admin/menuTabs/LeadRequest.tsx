@@ -149,7 +149,7 @@ export const LeadRequest = () => {
   };
 
   return (
-    <div className="p-6">
+    <div className="">
       {/* Header */}
       <div className="text-center mb-6">
         <div className="w-12 h-12 bg-[#122E5F]/10 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -198,9 +198,9 @@ export const LeadRequest = () => {
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Zip Code
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Phone
-                      </th>
+                      </th> */}
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Price
                       </th>
@@ -227,10 +227,14 @@ export const LeadRequest = () => {
                       .map((lead: requestLeadType) => (
                         <tr key={lead.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
+                            <div className="flex flex-col items-center">
                               <div className="text-sm font-bold text-[#122E5F]">
                                 {lead.firstName} {lead.lastName}
                               </div>
+                              <div className="flex items-center text-sm text-gray-400">
+                              <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                              {lead.phoneno}
+                            </div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -239,12 +243,9 @@ export const LeadRequest = () => {
                               <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-black">
-                            <div className="flex items-center">
-                              <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                              {lead.phoneno}
-                            </div>
-                          </td>
+                          {/* <td className="px-6 py-4 whitespace-nowrap text-black">
+                           
+                          </td> */}
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <div className="flex items-center">
                               <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
@@ -301,9 +302,6 @@ export const LeadRequest = () => {
                         Zip Code
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Phone
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Price
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -328,52 +326,51 @@ export const LeadRequest = () => {
                       .filter((lead) => lead.status === "Pending")
                       .map((lead: requestLeadType) => (
                         <tr key={lead.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="text-sm font-bold text-[#122E5F]">
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <div className="flex flex-col items-start">
+                              <div className="flex items-center text-sm text-start font-bold text-[#122E5F]">
+                                <User className="h-3 w-3 text-gray-400 mr-1" />
                                 {lead.firstName} {lead.lastName}
                               </div>
+                              <div className="flex items-center text-sm text-gray-400">
+                              <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                              {lead.phoneno}
+                            </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-2 py-2 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-black">
-                            <div className="flex items-center">
-                              <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                              {lead.phoneno}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <td className="px-2 py-2 whitespace-nowrap text-center">
                             <div className="flex items-center">
                               <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
                               <span className="text-sm font-medium text-gray-900">{lead.price}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <td className="px-2 py-2 whitespace-nowrap text-center">
                             <div className="flex items-center">
                               <Calendar className="h-3 w-3 text-gray-400 mr-1" />
                               <span className="text-sm font-medium text-gray-900">{lead.date}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <td className="py-2 whitespace-nowrap text-center">
                             <span className="text-sm font-medium text-gray-900">{lead.noOfLeads}</span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-center">
+                          <td className="py-2 whitespace-nowrap text-center">
                             <span className="text-sm font-medium text-gray-900">{lead.pendingLeads}</span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="py-2 whitespace-nowrap">
                             <span className="text-sm font-bold text-yellow-500">{lead.status}</span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center gap-2">
+                          <td className="px-3 py-2 whitespace-nowrap">
+                            <div className="flex flex-row items-center gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                                className="border-[#286BBD] w-full text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
                                 onClick={() => handleViewPendingLead(lead)}
                               >
                                 <Eye className="h-4 w-4 mr-1" />
@@ -382,7 +379,7 @@ export const LeadRequest = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
+                                className="border-[#286BBD] w-full text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
                                 onClick={() => handleOpenAssignModal(lead)}
                               >
                                 <Target className="h-4 w-4 mr-1" />
@@ -403,7 +400,7 @@ export const LeadRequest = () => {
       {/* Assigned Lead Details Modal */}
       {showAssignedModal && selectedAssignedLead && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-auto">
             <button
               onClick={handleCloseAssignedModal}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
@@ -513,7 +510,7 @@ export const LeadRequest = () => {
       {/* Pending Lead Details Modal */}
       {showPendingModal && selectedPendingLead && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-auto">
             <button
               onClick={handleClosePendingModal}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
@@ -528,7 +525,7 @@ export const LeadRequest = () => {
                 <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <FileText className="h-6 w-6 text-yellow-600" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Pending Lead Details</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">Lead Details</h2>
                 <p className="text-sm text-gray-600">Complete information about this pending lead</p>
               </div>
 
@@ -623,7 +620,7 @@ export const LeadRequest = () => {
       {/* Assign Leads Modal */}
       {showAssignModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-auto">
             <button
               onClick={handleCloseAssignModal}
               className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
