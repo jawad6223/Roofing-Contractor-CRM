@@ -743,6 +743,7 @@ export const LeadRequest = () => {
                       {selectedAssignLeads.size} lead{selectedAssignLeads.size !== 1 ? "s" : ""} selected
                     </span>
                   )}
+                  {/* Exceeds pending limit */}
                   {selectedContractorRequest && selectedAssignLeads.size > selectedContractorRequest.pendingLeads && (
                     <span className="font-medium text-red-600 ml-2">
                       (Exceeds pending limit: {selectedContractorRequest.pendingLeads})
