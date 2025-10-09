@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShoppingCart, CheckCircle, Calendar, DollarSign, X, Eye } from "lucide-react";
+import { ShoppingCart, CheckCircle, Calendar, DollarSign, X, Eye, FileText } from "lucide-react";
 import { LeadsInfo, purchasedLeads } from "./Data";
 import { Button } from "@/components/ui/button";
 import { leadsInfoType, purchasedLeadType } from "@/types/DashboardTypes";
@@ -155,7 +155,7 @@ export const LeadPurchaseInfo = () => {
             <div className="p-6">
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Eye className="h-6 w-6 text-[#286BBD]" />
+                  <FileText className="h-6 w-6 text-[#286BBD]" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">Lead Details</h2>
                 <p className="text-sm text-gray-600">

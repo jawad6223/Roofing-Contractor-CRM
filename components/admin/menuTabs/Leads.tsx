@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Phone, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -20,6 +19,7 @@ import {
   Check,
   FileText,
   MoreHorizontal,
+  MapPin, Phone, Mail
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -737,7 +737,7 @@ export const Leads = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <UserPlus className="h-6 w-6 text-[#286BBD]" />
+                  <FileText className="h-6 w-6 text-[#286BBD]" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">Add New Lead</h2>
                 <p className="text-sm text-gray-600">Enter lead information to add to the system</p>

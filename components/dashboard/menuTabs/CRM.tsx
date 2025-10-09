@@ -7,7 +7,7 @@ import {
   X,
   Phone,
   Mail,
-  User,
+  FileText,
   Building,
   Search,
   UserPlus,
@@ -323,7 +323,7 @@ export const CRM = () => {
               {/* Header */}
               <div className="text-center mb-6">
                 <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <User className="h-6 w-6 text-[#286BBD]" />
+                  <FileText className="h-6 w-6 text-[#286BBD]" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">
                   Lead Details

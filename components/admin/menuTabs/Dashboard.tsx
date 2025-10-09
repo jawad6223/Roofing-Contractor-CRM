@@ -159,7 +159,7 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-            {requestLeads.slice(0, 3).map((reqLead: requestLeadType) => (
+            {requestLeads.filter(reqLead => reqLead.status === "Pending").slice(0, 3).map((reqLead: requestLeadType) => (
                 <div
                   key={reqLead.id}
                   onClick={() => handleRequestLeadClick(reqLead)}
@@ -353,14 +353,6 @@ export const Dashboard = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    No of Leads
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedRequestLead.noOfLeads}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
                     Price
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
@@ -373,6 +365,14 @@ export const Dashboard = () => {
                   </label>
                   <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
                     {selectedRequestLead.date}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    No of Leads
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
+                    {selectedRequestLead.noOfLeads}
                   </p>
                 </div>
                 <div>
