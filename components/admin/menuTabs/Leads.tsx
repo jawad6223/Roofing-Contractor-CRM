@@ -939,7 +939,7 @@ export const Leads = () => {
                 <Button
                   onClick={handleSelectContractor}
                   disabled={!selectedContractor}
-                  className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   <Check className="h-4 w-4 mr-2" />
                   Select Contractor

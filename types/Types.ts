@@ -70,3 +70,31 @@ export interface PaginationProps {
     initialValues?: Record<string, any>;
     validationSchema?: yup.ObjectSchema<any>;
   }
+
+  export interface TableColumn {
+    key: string;
+    label: string;
+    className?: string;
+  }
+  
+  export interface TableRow {
+    [key: string]: any;
+  }
+  
+  export interface TablePopupProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    subtitle: string;
+    titleIcon: React.ComponentType<{ className?: string }>;
+    columns: TableColumn[];
+    data: TableRow[];
+    searchTerm: string;
+    onSearchChange: (value: string) => void;
+    searchPlaceholder?: string;
+    itemsPerPage?: number;
+    showPagination?: boolean;
+    closeButtonText?: string;
+    closeButtonClassName?: string;
+    renderCell?: (column: TableColumn, row: TableRow, index: number) => React.ReactNode;
+  }

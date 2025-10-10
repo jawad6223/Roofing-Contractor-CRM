@@ -22,6 +22,7 @@ import { Pagination } from "@/components/ui/pagination";
 import { requestLeads, allLeads } from "./Data";
 import { requestLeadType, LeadType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
+import { TablePopup } from "@/components/ui/TablePopup";
 
 export const LeadRequest = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -121,6 +122,40 @@ export const LeadRequest = () => {
         lead.company.toLowerCase().includes(pendingModalSearchTerm.toLowerCase()) ||
         lead.policy.includes(pendingModalSearchTerm)
     );
+
+  // Define columns for pending leads table
+  const pendingLeadsColumns = [
+    { key: "name", label: "Name" },
+    { key: "zipCode", label: "Zip Code" },
+    { key: "phoneno", label: "Phone No" },
+    { key: "email", label: "Email" },
+    { key: "assignedDate", label: "Assigned Date" },
+    { key: "company", label: "Company" },
+    { key: "policy", label: "Policy" }
+  ];
+
+  // Transform pending leads data for table
+  const pendingLeadsTableData = filteredPendingLeads.map(lead => ({
+    ...lead,
+    name: `${lead.firstName} ${lead.lastName}`
+  }));
+
+  // Define columns for assigned leads table
+  const assignedLeadsColumns = [
+    { key: "name", label: "Name" },
+    { key: "zipCode", label: "Zip Code" },
+    { key: "phoneno", label: "Phone No" },
+    { key: "email", label: "Email" },
+    { key: "assignedDate", label: "Assigned Date" },
+    { key: "company", label: "Company" },
+    { key: "policy", label: "Policy" }
+  ];
+
+  // Transform assigned leads data for table
+  const assignedLeadsTableData = filteredAssignedLeads.map(lead => ({
+    ...lead,
+    name: `${lead.firstName} ${lead.lastName}`
+  }));
 
   // Filter leads for assign modal
   const filteredAssignLeads = allLeads.filter(
@@ -511,224 +546,22 @@ export const LeadRequest = () => {
       </Tabs>
 
       {/* Assigned Lead Details Modal */}
-      {showAssignedModal && selectedAssignedLead && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-auto">
-            <button
-              onClick={handleCloseAssignedModal}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
-              aria-label="Close modal"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="p-6">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-green-600" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Assigned Lead Details</h2>
-                <p className="text-sm text-gray-600">Complete information about this assigned lead</p>
-              </div>
-
-              {/* Search Bar */}
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    type="text"
-                    placeholder="Search leads..."
-                    value={assignedModalSearchTerm}
-                    onChange={(e) => setAssignedModalSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Leads Data Table */}
-              <div className="overflow-auto max-h-64">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zip Code
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Phone No
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Assigned Date
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Company
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Policy
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredAssignedLeads.map((lead: LeadType, index: number) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="text-sm font-bold text-[#122E5F]">
-                            {lead.firstName} {lead.lastName}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="text-sm font-bold text-[#122E5F]">{lead.zipCode}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="text-sm text-gray-900">{lead.phoneno}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.email}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.assignedDate}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.company}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.policy}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Close Button */}
-              <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
-                <Button
-                  onClick={handleCloseAssignedModal}
-                  className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Pending Lead Details Modal */}
-      {showPendingModal && selectedPendingLead && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-auto">
-            <button
-              onClick={handleClosePendingModal}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
-              aria-label="Close modal"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="p-6">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-yellow-600" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Lead Details</h2>
-                <p className="text-sm text-gray-600">Complete information about this pending lead</p>
-              </div>
-
-              {/* Search Bar */}
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    type="text"
-                    placeholder="Search leads..."
-                    value={pendingModalSearchTerm}
-                    onChange={(e) => setPendingModalSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Leads Data Table */}
-              <div className="overflow-auto max-h-64">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zip Code
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Phone No
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Email
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Assigned Date
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Company
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Policy
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredPendingLeads.map((lead: LeadType, index: number) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="text-sm font-bold text-[#122E5F]">
-                            {lead.firstName} {lead.lastName}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="text-sm font-bold text-[#122E5F]">{lead.zipCode}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="text-sm text-gray-900">{lead.phoneno}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.email}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.assignedDate}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.company}</span>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.policy}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Close Button */}
-              <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
-                <Button
-                  onClick={handleClosePendingModal}
-                  className="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <TablePopup
+        isOpen={showAssignedModal}
+        onClose={handleCloseAssignedModal}
+        title="Assigned Lead Details"
+        subtitle="Complete information about assigned leads"
+        titleIcon={FileText}
+        columns={assignedLeadsColumns}
+        data={assignedLeadsTableData}
+        searchTerm={assignedModalSearchTerm}
+        onSearchChange={setAssignedModalSearchTerm}
+        searchPlaceholder="Search leads..."
+        itemsPerPage={10}
+        showPagination={true}
+        closeButtonText="Close"
+        closeButtonClassName="px-3 py-1.5 text-sm"
+      />
 
       {/* Assign Leads Modal */}
       {showAssignModal && (
@@ -863,7 +696,7 @@ export const LeadRequest = () => {
                 <div className="flex gap-3">
                   <Button
                     onClick={handleCloseAssignModal}
-                    className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white"
+                    variant="outline"
                   >
                     Close
                   </Button>
@@ -888,6 +721,24 @@ export const LeadRequest = () => {
           </div>
         </div>
       )}
+
+      {/* Pending Leads Table Popup */}
+      <TablePopup
+        isOpen={showPendingModal}
+        onClose={handleClosePendingModal}
+        title="Lead Details"
+        subtitle="Complete information about pending leads"
+        titleIcon={FileText}
+        columns={pendingLeadsColumns}
+        data={pendingLeadsTableData}
+        searchTerm={pendingModalSearchTerm}
+        onSearchChange={setPendingModalSearchTerm}
+        searchPlaceholder="Search leads..."
+        itemsPerPage={10}
+        showPagination={true}
+        closeButtonText="Close"
+        closeButtonClassName="px-3 py-1.5 text-sm"
+      />
     </div>
   );
 };

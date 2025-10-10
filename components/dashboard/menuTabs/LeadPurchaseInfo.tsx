@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { ShoppingCart, CheckCircle, Calendar, DollarSign, X, Eye, FileText, MapPin, Phone, Mail, Hash, Search, } from "lucide-react";
+import { ShoppingCart, CheckCircle, Calendar, DollarSign, X, Eye, FileText, MapPin, Phone, Mail, Hash, Search, Building, } from "lucide-react";
 import { LeadsInfo, purchasedLeads } from "./Data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { leadsInfoType, purchasedLeadType } from "@/types/DashboardTypes";
 import { Pagination } from "@/components/ui/pagination";
+import { TablePopup } from "@/components/ui/TablePopup";
 
 export const LeadPurchaseInfo = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedLeadData, setSelectedLeadData] = useState<leadsInfoType | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [modalSearchTerm, setModalSearchTerm] = useState("");
   const itemsPerPage = 10;
 
   const totalLeads = LeadsInfo.reduce((sum, lead) => sum + lead.noOfLeads, 0);
@@ -49,6 +51,90 @@ export const LeadPurchaseInfo = () => {
 
   const getLeadsForZipCode = (zipCode: string) => {
     return purchasedLeads.filter((lead) => lead.zipCode === zipCode);
+  };
+
+  // Define columns for lead details table
+  const leadDetailsColumns = [
+    { key: "name", label: "Name" },
+    { key: "phoneno", label: "Phone" },
+    { key: "email", label: "Email" },
+    { key: "location", label: "Location" },
+    { key: "company", label: "Insurance Company" },
+    { key: "policy", label: "Policy Number" },
+  ];
+
+  // Get filtered leads for modal with search
+  const getFilteredLeadsForModal = (zipCode: string) => {
+    const leads = getLeadsForZipCode(zipCode);
+    if (!modalSearchTerm) return leads;
+    
+    const searchLower = modalSearchTerm.toLowerCase();
+    return leads.filter((lead) =>
+      lead.firstName.toLowerCase().includes(searchLower) ||
+      lead.lastName.toLowerCase().includes(searchLower) ||
+      lead.phoneno.includes(modalSearchTerm) ||
+      lead.email.toLowerCase().includes(searchLower) ||
+      lead.location.toLowerCase().includes(searchLower) ||
+      lead.company.toLowerCase().includes(searchLower) ||
+      lead.policy.includes(modalSearchTerm)
+    );
+  };
+
+  // Transform leads data for table
+  const getLeadDetailsTableData = (zipCode: string) => {
+    return getFilteredLeadsForModal(zipCode).map(lead => ({
+      ...lead,
+      name: `${lead.firstName} ${lead.lastName}`
+    }));
+  };
+
+  // Custom render function for lead details table
+  const renderLeadDetailsCell = (column: any, row: any, index: number) => {
+    switch (column.key) {
+      case "name":
+        return (
+          <span className="text-sm font-bold text-[#122E5F]">
+            {row.name}
+          </span>
+        );
+      case "phoneno":
+        return (
+          <span className="text-sm text-gray-900 flex items-center">
+            <Phone className="h-3 w-3 text-gray-400 mr-1" />
+            {row.phoneno}
+          </span>
+        );
+      case "email":
+        return (
+          <span className="text-sm text-gray-900 flex items-center">
+            <Mail className="h-3 w-3 text-gray-400 mr-1" />
+            {row.email}
+          </span>
+        );
+      case "location":
+        return (
+          <span className="text-sm text-gray-900 flex items-center">
+            <MapPin className="h-3 w-3 text-gray-400 mr-1" />
+            {row.location}
+          </span>
+        );
+      case "company":
+        return (
+          <span className="text-sm text-gray-900 flex items-center">
+            <Building className="h-3 w-3 text-gray-400 mr-1" />
+            {row.company}
+          </span>
+        );
+      case "policy":
+        return (
+          <span className="text-sm text-gray-900 flex items-center">
+            <Hash className="h-3 w-3 text-gray-400 mr-1" />
+            {row.policy}
+          </span>
+        );
+      default:
+        return <span className="text-sm text-gray-900">{row[column.key]}</span>;
+    }
   };
 
   const handlePageChange = (page: number) => {
@@ -266,117 +352,24 @@ export const LeadPurchaseInfo = () => {
       />
 
       {/* Lead Details Modal */}
-      {showModal && selectedLeadData && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-6xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[80vh] md:h-auto overflow-auto">
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-all duration-200 z-50 border border-gray-200"
-              aria-label="Close modal"
-            >
-              <X className="h-4 w-4" />
-            </button>
-
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#122E5F]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Lead Details
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Zip Code: {selectedLeadData.zipCode} | Date:{" "}
-                  {selectedLeadData.date}
-                </p>
-              </div>
-
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-0">
-                  <div className="overflow-auto max-h-64">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Phone
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Email
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Location
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Insurance Company
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Policy Number
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {getLeadsForZipCode(selectedLeadData.zipCode).map(
-                          (lead: purchasedLeadType, index: number) => (
-                            <tr key={lead.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm font-bold text-[#122E5F]">
-                                  {lead.firstName} {lead.lastName}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm text-gray-900 flex items-center">
-                                  <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead.phoneno}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm text-gray-900 flex items-center">
-                                  <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead.email}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm text-gray-900 flex items-center">
-                                  <MapPin className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead.location}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm text-gray-900 flex items-center">
-                                  <FileText className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead.company}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm text-gray-900 flex items-center">
-                                  <Hash className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead.policy}
-                                </span>
-                              </td>
-                            </tr>
-                          )
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="flex justify-end mt-6 pt-4 border-t border-gray-200">
-                <Button
-                  onClick={handleCloseModal}
-                  className="px-6 py-2 bg-[#122E5F] hover:bg-[#0f2347] text-white"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Lead Details Table Popup */}
+      <TablePopup
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        title="Lead Details"
+        subtitle={selectedLeadData ? `Zip Code: ${selectedLeadData.zipCode} | Date: ${selectedLeadData.date}` : "Lead information"}
+        titleIcon={FileText}
+        columns={leadDetailsColumns}
+        data={selectedLeadData ? getLeadDetailsTableData(selectedLeadData.zipCode) : []}
+        searchTerm={modalSearchTerm}
+        onSearchChange={setModalSearchTerm}
+        searchPlaceholder="Search leads..."
+        itemsPerPage={10}
+        showPagination={true}
+        closeButtonText="Close"
+        closeButtonClassName="px-3 py-1.5 text-sm"
+        renderCell={renderLeadDetailsCell}
+      />
     </div>
   );
 };
