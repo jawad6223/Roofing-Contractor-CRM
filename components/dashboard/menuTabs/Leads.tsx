@@ -307,7 +307,7 @@ export const Leads = () => {
                         <Button
                           disabled={loadingLeads.has(lead.id)}
                           size="sm"
-                          className={`text-white text-xs px-3 py-1`}
+                          className={`text-white bg-[#122E5F] hover:bg-[#0f2347]/80 text-xs px-3 py-1`}
                           onClick={() => handleBuyNow(lead)}
                         >
                           {loadingLeads.has(lead.id) ? (

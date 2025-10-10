@@ -16,10 +16,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DetailPopup } from "@/components/ui/DetailPopup";
+import { FormPopup } from "@/components/ui/FormPopup";
 import { Pagination } from "@/components/ui/pagination";
 import { crmDataType } from "@/types/DashboardTypes";
 import { crmData } from "./Data";
 import { toast } from "react-toastify";
+import * as yup from "yup";
+import { FormField } from "@/types/Types";
 
 export const CRM = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -27,14 +30,6 @@ export const CRM = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [newMember, setNewMember] = useState<crmDataType>({
-    name: '',
-    phoneno: '',
-    email: '',
-    location: '',
-    insuranceCompany: '',
-    policy: ''
-  });
   const itemsPerPage = 10;
 
   // Filter data based on search term
@@ -51,6 +46,29 @@ export const CRM = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredData.slice(startIndex, endIndex);
+
+  // Validation schema for CRM member form
+  const crmMemberSchema = yup.object().shape({
+    name: yup.string()
+      .required('Full name is required')
+      .min(2, 'Name must be at least 2 characters')
+      .max(50, 'Name must be less than 50 characters'),
+    phoneno: yup.string()
+      .required('Phone number is required')
+      .matches(/^\(\d{3}\) \d{3}-\d{4}$/, 'Please enter a valid phone number in format (555) 123-4567'),
+    email: yup.string()
+      .required('Email is required')
+      .email('Please enter a valid email address'),
+    location: yup.string()
+      .required('Location is required')
+      .min(2, 'Location must be at least 2 characters'),
+    insuranceCompany: yup.string()
+      .required('Insurance company is required')
+      .min(2, 'Insurance company must be at least 2 characters'),
+    policy: yup.string()
+      .required('Policy number is required')
+      .min(2, 'Policy number must be at least 2 characters')
+  });
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -108,6 +126,51 @@ export const CRM = () => {
     }
   ] : [];
 
+  const addMemberFields = [
+    {
+      name: "name",
+      label: "Full Name",
+      type: "text",
+      placeholder: "John Smith",
+      required: true
+    },
+    {
+      name: "phoneno",
+      label: "Phone Number",
+      type: "tel",
+      placeholder: "(555) 123-4567",
+      required: true
+    },
+    {
+      name: "email",
+      label: "Email Address",
+      type: "email",
+      placeholder: "john@company.com",
+      required: true
+    },
+    {
+      name: "location",
+      label: "Location",
+      type: "text",
+      placeholder: "Houston, TX",
+      required: true
+    },
+    {
+      name: "insuranceCompany",
+      label: "Insurance Company",
+      type: "text",
+      placeholder: "State Farm",
+      required: true
+    },
+    {
+      name: "policy",
+      label: "Policy Number",
+      type: "text",
+      placeholder: "SF123456789",
+      required: true
+    }
+  ]
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1); // Reset to first page when searching
@@ -119,48 +182,10 @@ export const CRM = () => {
 
   const handleCloseAddMemberModal = () => {
     setShowAddMemberModal(false);
-    setNewMember({
-      name: '',
-      phoneno: '',
-      email: '',
-      location: '',
-      insuranceCompany: '',
-      policy: ''
-    });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    if (name === 'phoneno') {
-      const phoneNumber = value.replace(/\D/g, '');
-      let formattedValue = '';
-      
-      if (phoneNumber.length === 0) {
-        formattedValue = '';
-      } else if (phoneNumber.length <= 3) {
-        formattedValue = `(${phoneNumber}`;
-      } else if (phoneNumber.length <= 6) {
-        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-      } else {
-        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
-      }
-      
-      setNewMember(prev => ({
-        ...prev,
-        [name]: formattedValue
-      }));
-    } else {
-      setNewMember(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-
-  const handleSubmitMember = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('New member data:', newMember);
+  const handleFormSubmit = (formData: Record<string, any>) => {
+    console.log('New member data:', formData);
     toast.success("Member added successfully");
     handleCloseAddMemberModal();
   };
@@ -316,144 +341,18 @@ export const CRM = () => {
       />
 
       {/* Add Member Modal */}
-      {showAddMemberModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in h-[80vh] md:h-auto overflow-auto zoom-in-95 duration-300">
-            <button
-              onClick={handleCloseAddMemberModal}
-              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
-              aria-label="Close modal"
-            >
-              <X className="h-3 w-3" />
-            </button>
-
-            <div className="p-6">
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-[#122E5F]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <UserPlus className="h-6 w-6 text-[#122E5F]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Add Member
-                </h2>
-                <p className="text-sm text-gray-600">Add a new member to your CRM team</p>
-              </div>
-
-              <form onSubmit={handleSubmitMember} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <Input
-                      name="name"
-                      value={newMember.name}
-                      onChange={handleInputChange}
-                      placeholder="John Smith"
-                      required
-                      className="h-10 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Phone *
-                    </label>
-                    <Input
-                      name="phoneno"
-                      type="text"
-                      value={newMember.phoneno}
-                      onChange={handleInputChange}
-                      placeholder="(555) 123-4567"
-                      required
-                      className="h-10 text-sm"
-                      maxLength={14}
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Email *
-                    </label>
-                    <Input
-                      name="email"
-                      type="email"
-                      value={newMember.email}
-                      onChange={handleInputChange}
-                      placeholder="john@company.com"
-                      required
-                      className="h-10 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Location *
-                    </label>
-                    <Input
-                      name="location"
-                      value={newMember.location}
-                      onChange={handleInputChange}
-                      placeholder="Houston, TX"
-                      required
-                      className="h-10 text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Insurance Company *
-                    </label>
-                    <Input
-                      name="insuranceCompany"
-                      value={newMember.insuranceCompany}
-                      onChange={handleInputChange}
-                      placeholder="State Farm"
-                      required
-                      className="h-10 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Policy Number *
-                    </label>
-                    <Input
-                      name="policy"
-                      value={newMember.policy}
-                      onChange={handleInputChange}
-                      placeholder="SF123456789"
-                      required
-                      className="h-10 text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCloseAddMemberModal}
-                    className="px-4 py-2 text-sm"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="px-4 py-2 text-sm bg-[#122E5F] hover:bg-[#0f2347] text-white"
-                  >
-                    <UserPlus className="h-4 w-4 mr-1" />
-                    Add Member
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      <FormPopup
+        isOpen={showAddMemberModal}
+        onClose={handleCloseAddMemberModal}
+        title="Add Member"
+        subtitle="Add a new member to your CRM team"
+        titleIcon={UserPlus}
+        submitButtonText="Add Member"
+        submitButtonIcon={UserPlus}
+        onSubmit={handleFormSubmit}
+        validationSchema={crmMemberSchema}
+        fields={addMemberFields as FormField[]}
+      />
     </div>
   );
 };

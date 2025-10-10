@@ -1,3 +1,5 @@
+import * as yup from "yup";
+
 export interface ContractorType {
     fullName: string;
     title: string;
@@ -41,4 +43,30 @@ export interface PaginationProps {
       text: string;
       href: string;
     };
+  }
+
+  export interface FormField {
+    name: string;
+    label: string;
+    type: "text" | "email" | "password" | "number" | "tel" | "select" | "textarea";
+    placeholder?: string;
+    required?: boolean;
+    options?: { value: string; label: string }[];
+    maxLength?: number;
+    className?: string;
+    validation?: yup.StringSchema | yup.NumberSchema;
+  }
+  
+  export interface FormPopupProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    subtitle: string;
+    titleIcon: React.ComponentType<{ className?: string }>;
+    fields: FormField[];
+    onSubmit: (formData: Record<string, any>) => void;
+    submitButtonText?: string;
+    submitButtonIcon?: React.ComponentType<{ className?: string }>;
+    initialValues?: Record<string, any>;
+    validationSchema?: yup.ObjectSchema<any>;
   }

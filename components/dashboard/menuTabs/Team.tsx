@@ -15,9 +15,12 @@ import {
 import { UserPlus, User, X, Save, Trash2, Pencil } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { FormPopup } from '@/components/ui/FormPopup'
 import { teamMembers } from './Data'
 import { teamMemberType } from '@/types/DashboardTypes'
 import { toast } from "react-toastify";
+import * as yup from "yup";
+import { FormField } from '@/types/Types';
 
 
 export const Team = () => {
@@ -34,43 +37,6 @@ export const Team = () => {
     phoneno: ''
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-
-    if (name === 'phone') {
-      const phoneNumber = value.replace(/\D/g, '');
-      let formattedValue = '';
-      
-      if (phoneNumber.length === 0) {
-        formattedValue = '';
-      } else if (phoneNumber.length <= 3) {
-        formattedValue = `(${phoneNumber}`;
-      } else if (phoneNumber.length <= 6) {
-        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-      } else {
-        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
-      }
-      
-      setNewMember(prev => ({
-        ...prev,
-        phoneno: formattedValue
-      }));
-    } else {
-      setNewMember(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('New team member data:', newMember);
-    toast.success("Team member added successfully");
-    // TODO: Add team member submission logic here
-    handleCloseModal();
-  };
-
   const handleCloseModal = () => {
     setShowAddModal(false);
     setNewMember({
@@ -78,6 +44,28 @@ export const Team = () => {
       email: '',
       phoneno: '',
     });
+  };
+
+  // Custom validation schema
+      const teamMemberSchema = yup.object().shape({
+        name: yup.string()
+          .required('Full name is required')
+          .min(2, 'Name must be at least 2 characters')
+          .max(50, 'Name must be less than 50 characters'),
+        email: yup.string()
+          .required('Email is required')
+          .email('Please enter a valid email address'),
+        phoneno: yup.string()
+          .required('Phone number is required')
+          .matches(/^\(\d{3}\) \d{3}-\d{4}$/, 'Please enter a valid phone number in format (555) 123-4567')
+      });
+
+  const handleFormSubmit = (formData: Record<string, any>) => {
+    console.log('Form submitted with data:', formData);
+    // Here you can process the form data
+    // For example: add to team members, send to API, etc.
+    toast.success('Team member added successfully!');
+    handleCloseModal();
   };
 
   const handleEditClick = (index: number, member: any) => {
@@ -121,6 +109,31 @@ export const Team = () => {
     console.log('Deleting team member at index:', index);
     toast.success("Team member deleted successfully");
   };
+
+  const addTeamMemberFields = [
+    {
+      name: "name",
+      label: "Full Name",
+      type: "text",
+      placeholder: "John Smith",
+      required: true
+    },
+    {
+      name: "email",
+      label: "Email Address",
+      type: "email",
+      placeholder: "john@company.com",
+      required: true
+    },
+    {
+      name: "phoneno",
+      label: "Phone Number",
+      type: "tel",
+      placeholder: "(555) 123-4567",
+      maxLength: 15,
+      required: true
+    }
+  ]
 
   return (
     <>
@@ -240,106 +253,18 @@ export const Team = () => {
             </div>
 
       {/* Add Team Member Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300">
-            {/* Close Button */}
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
-              aria-label="Close modal"
-            >
-              <X className="h-3 w-3" />
-            </button>
-
-            <div className="p-6">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <UserPlus className="h-6 w-6 text-[#286BBD]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Add Team Member
-                </h2>
-                <p className="text-sm text-gray-600">Invite a new team member to join your organization</p>
-              </div>
-
-              {/* Add Team Member Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <Input
-                      name="name"
-                      value={newMember.name}
-                      onChange={handleInputChange}
-                      placeholder="John Smith"
-                      required
-                      className="h-10 text-sm"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Email Address *
-                    </label>
-                    <Input
-                      name="email"
-                      type="email"
-                      value={newMember.email}
-                      onChange={handleInputChange}
-                      placeholder="john@company.com"
-                      required
-                      className="h-10 text-sm"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3">
-                    
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Phone Number
-                      </label>
-                      <Input
-                        name="phone"
-                        type="text"
-                        value={newMember.phoneno}
-                        onChange={handleInputChange}
-                        placeholder="(555) 123-4567"
-                        className="h-10 text-sm"
-                        maxLength={14}
-                      />
-                    </div>
-                  </div>
-
-                </div>
-
-
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCloseModal}
-                    className="px-4 py-2 text-sm"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="px-4 py-2 text-sm bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
-                  >
-                    <UserPlus className="h-4 w-4 mr-1" />
-                    Add Member
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      <FormPopup
+        isOpen={showAddModal}
+        onClose={handleCloseModal}
+        title="Add Team Member"
+        subtitle="Invite a new team member to join your organization"
+        titleIcon={UserPlus}
+        submitButtonText="Add Member"
+        submitButtonIcon={UserPlus}
+        onSubmit={handleFormSubmit}
+        validationSchema={teamMemberSchema}
+        fields={addTeamMemberFields as FormField[]}
+      />
     </>
   )
 }

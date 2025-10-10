@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FormField } from "@/types/Types";
 import { Pagination } from "@/components/ui/pagination";
 import {
   Search,
@@ -28,6 +29,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DetailPopup } from "@/components/ui/DetailPopup";
+import { FormPopup } from "@/components/ui/FormPopup";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +41,7 @@ import { LeadType } from "@/types/AdminTypes";
 import { allLeads } from "./Data";
 import { toast } from "react-toastify";
 import * as ExcelJS from "exceljs";
+import * as yup from "yup";
 
 export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,6 +66,35 @@ export const Leads = () => {
     company: "",
     policy: "",
     status: "Available",
+  });
+
+  // Validation schema for new lead form
+  const newLeadSchema = yup.object().shape({
+    firstName: yup.string()
+      .required('First name is required')
+      .min(2, 'First name must be at least 2 characters')
+      .max(50, 'First name must be less than 50 characters'),
+    lastName: yup.string()
+      .required('Last name is required')
+      .min(2, 'Last name must be at least 2 characters')
+      .max(50, 'Last name must be less than 50 characters'),
+    phoneno: yup.string()
+      .required('Phone number is required')
+      .matches(/^\(\d{3}\) \d{3}-\d{4}$/, 'Please enter a valid phone number in format (555) 123-4567'),
+    email: yup.string()
+      .required('Email is required')
+      .email('Please enter a valid email address'),
+    zipCode: yup.string()
+      .required('Zip code is required')
+      .matches(/^\d{5}(-\d{4})?$/, 'Please enter a valid zip code'),
+    company: yup.string()
+      .required('Insurance company is required')
+      .min(2, 'Company name must be at least 2 characters')
+      .max(100, 'Company name must be less than 100 characters'),
+    policy: yup.string()
+      .required('Policy number is required')
+      .min(2, 'Policy number must be at least 2 characters')
+      .max(50, 'Policy number must be less than 50 characters')
   });
 
   // Pagination state
@@ -151,16 +183,6 @@ export const Leads = () => {
 
   const handleCloseAddModal = () => {
     setShowAddModal(false);
-    setNewLead({
-      firstName: "",
-      lastName: "",
-      phoneno: "",
-      email: "",
-      zipCode: "",
-      company: "",
-      policy: "",
-      status: "Available",
-    });
   };
 
   const handleAssignLead = (lead: LeadType) => {
@@ -296,44 +318,8 @@ export const Leads = () => {
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    if (name === "phoneno") {
-      const phoneNumber = value.replace(/\D/g, "");
-      let formattedValue = "";
-
-      if (phoneNumber.length === 0) {
-        formattedValue = "";
-      } else if (phoneNumber.length <= 3) {
-        formattedValue = `(${phoneNumber}`;
-      } else if (phoneNumber.length <= 6) {
-        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
-      } else {
-        formattedValue = `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(
-          3,
-          6
-        )}-${phoneNumber.slice(6, 10)}`;
-      }
-
-      setNewLead((prev) => ({
-        ...prev,
-        [name]: formattedValue,
-      }));
-    } else {
-    setNewLead((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    }
-  };
-
-  const handleSubmitLead = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Add lead submission logic here
-    console.log("New lead data:", newLead);
+  const handleFormSubmit = (formData: Record<string, any>) => {
+    console.log("New lead data:", formData);
     toast.success("Lead added successfully");
     handleCloseAddModal();
   };
@@ -381,6 +367,58 @@ export const Leads = () => {
       icon: User
     }
   ] : []
+
+  const addLeadFields = [
+    {
+      name: "firstName",
+      label: "First Name",
+      type: "text",
+      placeholder: "John",
+      required: true
+    },
+    {
+      name: "lastName",
+      label: "Last Name",
+      type: "text",
+      placeholder: "Doe",
+      required: true
+    },
+    {
+      name: "phoneno",
+      label: "Phone Number",
+      type: "tel",
+      placeholder: "(555) 123-4567",
+      required: true
+    },
+    {
+      name: "email",
+      label: "Email Address",
+      type: "email",
+      placeholder: "john@example.com",
+      required: true
+    },
+    {
+      name: "zipCode",
+      label: "Zip Code",
+      type: "text",
+      placeholder: "75201",
+      required: true
+    },
+    {
+      name: "company",
+      label: "Insurance Company",
+      type: "text",
+      placeholder: "ABC Insurance",
+      required: true
+    },
+    {
+      name: "policy",
+      label: "Policy Number",
+      type: "text",
+      placeholder: "POL123456789",
+      required: true
+    }
+  ]
 
   return (
     <div className="space-y-6">
@@ -760,159 +798,19 @@ export const Leads = () => {
         fields={leadFields}
       />
 
-      {/* Add Lead Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative h-[80vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
-            {/* Close Button */}
-            <button
-              onClick={handleCloseAddModal}
-              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
-              aria-label="Close modal"
-            >
-              <X className="h-3 w-3" />
-            </button>
-
-            <div className="p-6">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#286BBD]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Add New Lead
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Enter lead information to add to the system
-                </p>
-              </div>
-
-              {/* Add Lead Form */}
-              <form onSubmit={handleSubmitLead} className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      First Name *
-                    </label>
-                    <Input
-                      name="firstName"
-                      type="text"
-                      value={newLead.firstName}
-                      onChange={handleInputChange}
-                      placeholder="John"
-                      required
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Last Name *
-                    </label>
-                    <Input
-                      name="lastName"
-                      type="text"
-                      value={newLead.lastName}
-                      onChange={handleInputChange}
-                      placeholder="Doe"
-                      required
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Phone Number *
-                    </label>
-                    <Input
-                      name="phoneno"
-                      type="text"
-                      value={newLead.phoneno}
-                      onChange={handleInputChange}
-                      placeholder="(555) 123-4567"
-                      required
-                      className="h-9 text-sm"
-                      maxLength={14}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Email Address *
-                    </label>
-                    <Input
-                      name="email"
-                      type="email"
-                      value={newLead.email}
-                      onChange={handleInputChange}
-                      placeholder="john@example.com"
-                      required
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Zip Code *
-                    </label>
-                    <Input
-                      name="zipCode"
-                      type="number"
-                      value={newLead.zipCode}
-                      onChange={handleInputChange}
-                      placeholder="75201"
-                      required
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Insurance Company *
-                    </label>
-                    <Input
-                      name="company"
-                      type="text"
-                      value={newLead.company}
-                      onChange={handleInputChange}
-                      placeholder="ABC Insurance"
-                      required
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-1">
-                      Policy Number *
-                    </label>
-                    <Input
-                      name="policy"
-                      type="text"
-                      value={newLead.policy}
-                      onChange={handleInputChange}
-                      placeholder="POL123456789"
-                      required
-                      className="h-9 text-sm"
-                    />
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCloseAddModal}
-                    className="px-4 py-2 text-sm"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    className="px-4 py-2 text-sm bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
-                  >
-                    Add Lead
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Add New Lead Modal */}
+      <FormPopup
+        isOpen={showAddModal}
+        onClose={handleCloseAddModal}
+        title="Add New Lead"
+        subtitle="Enter lead information to add to the system"
+        titleIcon={FileText}
+        submitButtonText="Add Lead"
+        submitButtonIcon={Plus}
+        onSubmit={handleFormSubmit}
+        validationSchema={newLeadSchema as yup.ObjectSchema<any>}
+        fields={addLeadFields as FormField[]}
+      />
 
       {/* Assign Lead Modal */}
       {showAssignModal && leadToAssign && (
