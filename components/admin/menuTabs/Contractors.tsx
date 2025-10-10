@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -73,12 +73,19 @@ export const Contractors = () => {
     );
 
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [assignedLeadsCurrentPage, setAssignedLeadsCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
+  const assignedLeadsItemsPerPage = 10; // Smaller page size for modal table
   const totalPages = Math.ceil(filteredContractors.length / itemsPerPage);
+  const assignedLeadsTotalPages = Math.ceil(filteredAssignedLeads.length / assignedLeadsItemsPerPage);
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredContractors.slice(startIndex, endIndex);
+
+  const assignedLeadsStartIndex = (assignedLeadsCurrentPage - 1) * assignedLeadsItemsPerPage;
+  const assignedLeadsEndIndex = assignedLeadsStartIndex + assignedLeadsItemsPerPage;
+  const currentAssignedLeadsData = filteredAssignedLeads.slice(assignedLeadsStartIndex, assignedLeadsEndIndex);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -92,14 +99,32 @@ export const Contractors = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
+  const handleAssignedLeadsPageChange = (page: number) => {
+    setAssignedLeadsCurrentPage(page);
+  };
+
+  const handleAssignedLeadsPreviousPage = () => {
+    setAssignedLeadsCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleAssignedLeadsNextPage = () => {
+    setAssignedLeadsCurrentPage((prev) => Math.min(prev + 1, assignedLeadsTotalPages));
+  };
+
   const handleViewContractor = (contractor: ContractorType): void => {
     setSelectedContractor(contractor);
+    setAssignedLeadsCurrentPage(1); // Reset pagination when opening modal
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
   };
+
+  // Reset assigned leads pagination when search term changes
+  useEffect(() => {
+    setAssignedLeadsCurrentPage(1);
+  }, [assignedLeadsSearchTerm]);
 
   const handleAssignLeads = () => {
     handleCloseModal();
@@ -299,7 +324,7 @@ export const Contractors = () => {
 
       {/* View Contractor Modal */}
       {showModal && selectedContractor && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0 -top-5 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white  shadow-2xl w-full relative animate-in zoom-in-95 duration-300 h-full overflow-y-auto">
             {/* Close Button */}
             <button
@@ -429,7 +454,7 @@ export const Contractors = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {filteredAssignedLeads.map(
+                        {currentAssignedLeadsData.map(
                           (lead: LeadType, index: number) => (
                             <tr key={lead.id} className="hover:bg-gray-50">
                               <td className="px-6 py-4 whitespace-nowrap">
@@ -472,6 +497,23 @@ export const Contractors = () => {
                     </table>
                   </div>
                 </div>
+
+                {/* Assigned Leads Pagination */}
+                {assignedLeadsTotalPages > 0 && (
+                  <div className="mt-4">
+                    <Pagination
+                      currentPage={assignedLeadsCurrentPage}
+                      totalPages={assignedLeadsTotalPages}
+                      totalItems={filteredAssignedLeads.length}
+                      itemsPerPage={assignedLeadsItemsPerPage}
+                      onPageChange={handleAssignedLeadsPageChange}
+                      onPreviousPage={handleAssignedLeadsPreviousPage}
+                      onNextPage={handleAssignedLeadsNextPage}
+                      startIndex={assignedLeadsStartIndex}
+                      endIndex={assignedLeadsEndIndex}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Action Buttons */}
