@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Calendar, Building, } from "lucide-react";
+import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Calendar, Building, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
+import { DetailPopup } from "@/components/ui/DetailPopup";
 import { dashboardCard, allLeads, requestLeads } from "./Data";
 import Link from "next/link";
 import {dashboardCardType, LeadType, requestLeadType } from "@/types/AdminTypes";
@@ -24,6 +24,96 @@ export const Dashboard = () => {
     setSelectedRequestLead(reqLead);
     setIsRequestLeadModalOpen(true);
   };
+
+  const handleCloseLeadModal = () => {
+    setIsLeadModalOpen(false);
+    setSelectedLead(undefined);
+  };
+
+  const handleCloseRequestLeadModal = () => {
+    setIsRequestLeadModalOpen(false);
+    setSelectedRequestLead(undefined);
+  };
+
+   const leadFields = selectedLead ? [
+    {
+      label: "Full Name",
+      value: `${selectedLead.firstName} ${selectedLead.lastName}`,
+      icon: User
+    },
+    {
+      label: "Phone",
+      value: selectedLead.phoneno,
+      icon: Phone
+    },
+    {
+      label: "Email",
+      value: selectedLead.email,
+      icon: Mail,
+      breakAll: true
+    },
+    {
+      label: "Zip Code",
+      value: selectedLead.zipCode,
+      icon: MapPin
+    },
+    {
+      label: "Insurance Company",
+      value: selectedLead.company,
+      icon: Building,
+      whitespaceNowrap: true
+    },
+    {
+      label: "Policy Number",
+      value: selectedLead.policy,
+      icon: Hash
+    },
+    {
+      label: "Purchase Date",
+      value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
+      icon: Calendar
+    }
+  ] : [];
+
+  const requestLeadFields = selectedRequestLead ? [
+    {
+      label: "Full Name",
+      value: `${selectedRequestLead.firstName} ${selectedRequestLead.lastName}`,
+      icon: User
+    },
+    {
+      label: "Phone",
+      value: selectedRequestLead.phoneno,
+      icon: Phone
+    },
+    {
+      label: "Zip Code",
+      value: selectedRequestLead.zipCode,
+      icon: MapPin
+    },
+    {
+      label: "Price",
+      value: selectedRequestLead.price,
+      icon: DollarSign
+    },
+    {
+      label: "Date",
+      value: selectedRequestLead.date,
+      icon: Calendar
+    },
+    {
+      label: "No of Leads",
+      value: selectedRequestLead.noOfLeads
+    },
+    {
+      label: "Pending Leads",
+      value: selectedRequestLead.pendingLeads
+    },
+    {
+      label: "Status",
+      value: selectedRequestLead.status
+    }
+  ] : [];
 
   return (
     <div className="space-y-6">
@@ -180,222 +270,32 @@ export const Dashboard = () => {
       </div>
 
       {/* Lead Details Modal */}
-      <Dialog open={isLeadModalOpen} onOpenChange={setIsLeadModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-bold text-[#286BBD]">
-                Lead Details
-              </DialogTitle>
-              <Link href="/admin/leads">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsLeadModalOpen(false)}
-                  className="text-[#286BBD] mr-6 border-[#286BBD] hover:bg-[#286BBD] hover:text-white flex items-center space-x-1"
-                >
-                  <span className="text-sm">View All Leads</span>
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </DialogHeader>
+      <DetailPopup
+        isOpen={isLeadModalOpen}
+        onClose={handleCloseLeadModal}
+        title="Lead Details"
+        subtitle="Complete information for this lead"
+        titleIcon={FileText}
+        viewAllButton={{
+          text: "View All Leads",
+          href: "/admin/leads"
+        }}
+        fields={selectedLead ? leadFields : []}
+      />
 
-          {selectedLead && (
-            <div className="p-5">
-              {/* Lead Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Name
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <User className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.firstName} {selectedLead.lastName}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Zip Code
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.zipCode}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Phone Number
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.phoneno}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <p className="text-gray-900 break-all bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.email}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Insurance Company
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Building className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.company}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Policy Number
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.policy}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Purchase Date
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Calendar className="h-3 w-3 mr-1 text-gray-400" />
-                    {new Date(selectedLead.purchaseDate).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsLeadModalOpen(false)}
-                  className="px-4 py-2 text-sm"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Contractor Details Modal */}
-      <Dialog open={isRequestLeadModalOpen} onOpenChange={setIsRequestLeadModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex flex-col md:flex-row items-start md:items-center gap-3 justify-between">
-              <DialogTitle className="text-xl font-bold text-[#286BBD]">
-                Request Lead Details
-              </DialogTitle>
-              <Link href="/admin/leads-request">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsRequestLeadModalOpen(false)}
-                  className="text-[#286BBD] mr-6 border-[#286BBD] hover:bg-[#286BBD] hover:text-white flex items-center space-x-1"
-                >
-                  <span className="text-sm">View All Request Leads</span>
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </DialogHeader>
-
-          {selectedRequestLead && (
-            <div className="p-5">
-              {/* Lead Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Name
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <User className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedRequestLead.firstName} {selectedRequestLead.lastName}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Phone Number
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedRequestLead.phoneno}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Zip Code
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedRequestLead.zipCode}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Price
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <DollarSign className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedRequestLead.price}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Date
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Calendar className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedRequestLead.date}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    No of Leads
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    {selectedRequestLead.noOfLeads}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Pending Leads
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedRequestLead.pendingLeads}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Status
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm">
-                    {selectedRequestLead.status}
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  onClick={() => setIsRequestLeadModalOpen(false)}
-                  className="px-4 py-2 text-sm"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Request Lead Details Modal */}
+      <DetailPopup
+        isOpen={isRequestLeadModalOpen}
+        onClose={handleCloseRequestLeadModal}
+        title="Request Lead Details"
+        subtitle="Complete information for this lead request"
+        titleIcon={FileText}
+        viewAllButton={{
+          text: "View All Request Leads",
+          href: "/admin/leads-request"
+        }}
+        fields={requestLeadFields}
+      />
     </div>
   );
 };

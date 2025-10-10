@@ -21,3 +21,24 @@ export interface PaginationProps {
     endIndex: number;
     className?: string;
   }
+
+  export interface DetailField {
+    label: string;
+    value: string | number;
+    icon?: React.ComponentType<{ className?: string }>;
+    breakAll?: boolean;
+    whitespaceNowrap?: boolean;
+  }
+  
+  export interface DetailPopupProps {
+    isOpen: boolean;
+    onClose: () => void;
+    title: string;
+    subtitle: string;
+    titleIcon: React.ComponentType<{ className?: string }>;
+    fields: DetailField[];
+    viewAllButton?: {
+      text: string;
+      href: string;
+    };
+  }

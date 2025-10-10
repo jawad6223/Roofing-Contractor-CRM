@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { User, Bell, CreditCard, Edit3, Save, X, Calendar, Lock, Trash } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -257,138 +256,145 @@ export const Setting = () => {
       </div>
 
       {/* Add Payment Method Modal */}
-      <Dialog open={isPaymentModalOpen} onOpenChange={setIsPaymentModalOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto max-w-md mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-bold text-[#286BBD] flex items-center">
-              <CreditCard className="h-5 w-5 mr-2" />
-              Add Payment Method
-            </DialogTitle>
-          </DialogHeader>
+      {isPaymentModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 relative h-[80vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
+            <button
+              onClick={handleClosePaymentModal}
+              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+              aria-label="Close modal"
+            >
+              <X className="h-3 w-3" />
+            </button>
 
-          <div className="p-4">
-            <form onSubmit={handleSavePaymentMethod} className="space-y-4">
-              {/* Card Number */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Card Number *</label>
-                <div className="relative">
-                  <CreditCard className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
+            <div className="p-6">
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <CreditCard className="h-6 w-6 text-[#122E5F]" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Add Payment Method
+                </h2>
+                <p className="text-sm text-gray-600">Enter your payment details securely</p>
+              </div>
+
+              <form onSubmit={handleSavePaymentMethod} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Card Number *</label>
+                  <div className="relative">
+                    <CreditCard className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
+                    <Input
+                      value={paymentForm.cardNumber}
+                      onChange={(e) => handlePaymentInputChange("cardNumber", e.target.value)}
+                      placeholder="1234 5678 9012 3456"
+                      className="pl-8 h-9 text-sm"
+                      maxLength={19}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Cardholder Name *</label>
                   <Input
-                    value={paymentForm.cardNumber}
-                    onChange={(e) => handlePaymentInputChange("cardNumber", e.target.value)}
-                    placeholder="1234 5678 9012 3456"
-                    className="pl-8 h-9 text-sm"
-                    maxLength={19}
+                    value={paymentForm.cardholderName}
+                    onChange={(e) => handlePaymentInputChange("cardholderName", e.target.value)}
+                    placeholder="John Doe"
+                    className="h-9 text-sm"
                   />
                 </div>
-              </div>
 
-              {/* Cardholder Name */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Cardholder Name *</label>
-                <Input
-                  value={paymentForm.cardholderName}
-                  onChange={(e) => handlePaymentInputChange("cardholderName", e.target.value)}
-                  placeholder="John Doe"
-                  className="h-9 text-sm"
-                />
-              </div>
-
-              {/* Expiry Date and CVV */}
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">Expiry Date *</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
-                    <Input
-                      value={paymentForm.expiryDate}
-                      onChange={(e) => handlePaymentInputChange("expiryDate", e.target.value)}
-                      placeholder="MM/YY"
-                      className="pl-8 h-9 text-sm"
-                      maxLength={5}
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1">CVV *</label>
-                  <div className="relative">
-                    <Lock className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
-                    <Input
-                      value={paymentForm.cvv}
-                      onChange={(e) => handlePaymentInputChange("cvv", e.target.value)}
-                      placeholder="123"
-                      className="pl-8 h-9 text-sm"
-                      maxLength={4}
-                      type="password"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Card Type */}
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1">Card Type *</label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handlePaymentInputChange("cardType", "visa")}
-                    className={`p-3 border-2 rounded-lg flex items-center justify-center space-x-1 transition-all ${
-                      paymentForm.cardType === "visa"
-                        ? "border-[#286BBD] bg-[#286BBD]/5"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="w-6 h-4 bg-blue-600 rounded flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">VISA</span>
-                    </div>
-                    <span className="text-xs font-medium">Visa</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handlePaymentInputChange("cardType", "mastercard")}
-                    className={`p-3 border-2 rounded-lg flex items-center justify-center space-x-1 transition-all ${
-                      paymentForm.cardType === "mastercard"
-                        ? "border-[#286BBD] bg-[#286BBD]/5"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                  >
-                    <div className="w-6 h-4 bg-red-600 rounded flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">MC</span>
-                    </div>
-                    <span className="text-xs font-medium">Mastercard</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Security Notice */}
-              <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-start space-x-2">
-                  <Lock className="h-4 w-4 text-blue-600 mt-0.5" />
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <h4 className="font-semibold text-blue-900 mb-1 text-sm">Secure Payment</h4>
-                    <p className="text-xs text-blue-700">
-                      Your payment information is encrypted and secure. We use industry-standard security measures to
-                      protect your data.
-                    </p>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">Expiry Date *</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
+                      <Input
+                        value={paymentForm.expiryDate}
+                        onChange={(e) => handlePaymentInputChange("expiryDate", e.target.value)}
+                        placeholder="MM/YY"
+                        className="pl-8 h-9 text-sm"
+                        maxLength={5}
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1">CVV *</label>
+                    <div className="relative">
+                      <Lock className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
+                      <Input
+                        value={paymentForm.cvv}
+                        onChange={(e) => handlePaymentInputChange("cvv", e.target.value)}
+                        placeholder="123"
+                        className="pl-8 h-9 text-sm"
+                        maxLength={4}
+                        type="password"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-2 pt-3 border-t border-gray-200">
-                <Button type="button" variant="outline" onClick={handleClosePaymentModal} className="px-4 py-2 text-sm">
-                  <X className="h-3 w-3 mr-1" />
-                  Cancel
-                </Button>
-                <Button type="submit" className="px-4 py-2 bg-[#122E5F] hover:bg-[#0f2347] text-white text-sm">
-                  <Save className="h-3 w-3 mr-1" />
-                  Save
-                </Button>
-              </div>
-            </form>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1">Card Type *</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handlePaymentInputChange("cardType", "visa")}
+                      className={`p-3 border-2 rounded-lg flex items-center justify-center space-x-1 transition-all ${
+                        paymentForm.cardType === "visa"
+                          ? "border-[#286BBD] bg-[#286BBD]/5"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="w-6 h-4 bg-blue-600 rounded flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">VISA</span>
+                      </div>
+                      <span className="text-xs font-medium">Visa</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handlePaymentInputChange("cardType", "mastercard")}
+                      className={`p-3 border-2 rounded-lg flex items-center justify-center space-x-1 transition-all ${
+                        paymentForm.cardType === "mastercard"
+                          ? "border-[#286BBD] bg-[#286BBD]/5"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="w-6 h-4 bg-red-600 rounded flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">MC</span>
+                      </div>
+                      <span className="text-xs font-medium">Mastercard</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex items-start space-x-2">
+                    <Lock className="h-4 w-4 text-blue-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-blue-900 mb-1 text-sm">Secure Payment</h4>
+                      <p className="text-xs text-blue-700">
+                        Your payment information is encrypted and secure. We use industry-standard security measures to
+                        protect your data.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end space-x-2 pt-3 border-t border-gray-200">
+                  <Button type="button" variant="outline" onClick={handleClosePaymentModal} className="px-4 py-2 text-sm">
+                    <X className="h-3 w-3 mr-1" />
+                    Cancel
+                  </Button>
+                  <Button type="submit" className="px-4 py-2 bg-[#122E5F] hover:bg-[#0f2347] text-white text-sm">
+                    <Save className="h-3 w-3 mr-1" />
+                    Save
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 };

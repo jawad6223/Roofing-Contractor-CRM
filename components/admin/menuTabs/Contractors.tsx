@@ -600,7 +600,7 @@ export const Contractors = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+              <div className="flex flex-col md:flex-row gap-3 justify-end md:space-x-3 mt-6 pt-4 border-t border-gray-200">
                 <Button
                   variant="outline"
                   onClick={handleCloseAssignModal}

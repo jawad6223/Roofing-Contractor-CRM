@@ -2,17 +2,24 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
-import { Plus, X, ShoppingCart, Eye, MapPin, Phone, Mail, ChevronDown, Calendar, Hash, User, Search, Info, FileText, } from "lucide-react";
+import { Plus, X, ShoppingCart, Eye, MapPin, Phone, Mail, ChevronDown, Calendar, Hash, User, Search, Info, FileText, Building } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
+import { DetailPopup } from "@/components/ui/DetailPopup";
 import { useState } from "react";
 import { purchasedLeadType, sampleLeadType } from "@/types/DashboardTypes";
 import { purchasedLeads, sampleLeads } from "./Data";
 
 export const Leads = () => {
   const router = useRouter();
-  const [leadStatuses, setLeadStatuses] = useState<Record<string, string>>({});
+  
+  const defaultStatuses: Record<string, string> = {};
+  purchasedLeads.forEach(lead => {
+    defaultStatuses[lead.id] = "open";
+  });
+  
+  const [leadStatuses, setLeadStatuses] = useState<Record<string, string>>(defaultStatuses);
 
   const handleStatusChange = (leadId: string, status: string) => {
     setLeadStatuses((prev) => ({
@@ -20,9 +27,10 @@ export const Leads = () => {
       [leadId]: status,
     }));
   };
+  console.log('leadStatuses', leadStatuses);
 
   const getLeadStatus = (leadId: string) => {
-    return leadStatuses[leadId] || "open";
+    return leadStatuses[leadId];
   };
 
   const [loadingLeads, setLoadingLeads] = useState<Set<number>>(new Set());
@@ -81,6 +89,50 @@ export const Leads = () => {
     setShowViewModal(false);
   };
 
+  const leadFields = selectedLead ? [
+    {
+      label: "Name",
+      value: `${selectedLead.firstName} ${selectedLead.lastName}`,
+      icon: User
+    },
+    {
+      label: "Zip Code",
+      value: selectedLead.zipCode,
+      icon: MapPin
+    },
+    {
+      label: "Phone Number",
+      value: selectedLead.phoneno,
+      icon: Phone
+    },
+    {
+      label: "Email Address",
+      value: selectedLead.email,
+      icon: Mail,
+      breakAll: true
+    },
+    {
+      label: "Location",
+      value: selectedLead.location,
+      icon: MapPin
+    },
+    {
+      label: "Insurance Company",
+      value: selectedLead.company,
+      icon: Building
+    },
+    {
+      label: "Policy Number",
+      value: selectedLead.policy,
+      icon: Hash
+    },
+    {
+      label: "Purchase Date",
+      value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
+      icon: Calendar
+    }
+  ] : [];
+
   async function handleBuyNow(lead: sampleLeadType) {
     // Add this lead to loading set
     setLoadingLeads((prev) => new Set(prev).add(lead.id));
@@ -120,12 +172,12 @@ export const Leads = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setStatusFilter(e.target.value);
-    setCurrentPage(1); // Reset to first page when filtering
+    setCurrentPage(1);
   };
 
   return (
@@ -272,18 +324,6 @@ export const Leads = () => {
                   </tr>
                 ))}
 
-                {/* Divider */}
-                {/* <tr>
-                  <td colSpan={5} className="px-6 py-2">
-                    <div className="border-t border-gray-200"></div>
-                    <div className="text-center py-2">
-                      <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                        Your Purchased Leads
-                      </span>
-                    </div>
-                  </td>
-                </tr> */}
-
                 {currentData.length > 0 ? (
                   currentData.map((lead: purchasedLeadType, index: number) => (
                     <tr key={index} className="hover:bg-gray-50">
@@ -321,7 +361,7 @@ export const Leads = () => {
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="open">Open</SelectItem>
+                            <SelectItem value="open" disabled>Open</SelectItem>
                             <SelectItem value="hot">Hot Lead</SelectItem>
                             <SelectItem value="warm">Warm Lead</SelectItem>
                             <SelectItem value="cold">Cold Lead</SelectItem>
@@ -379,98 +419,14 @@ export const Leads = () => {
       />
 
       {/* View Lead Modal */}
-      {showViewModal && selectedLead && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full mx-4 relative h-[80vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
-            {/* Close Button */}
-            <button
-              onClick={handleCloseViewModal}
-              className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
-              aria-label="Close modal"
-            >
-              <X className="h-3 w-3" />
-            </button>
-
-            <div className="p-5">
-              {/* Header */}
-              <div className="text-center mb-5">
-                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#122E5F]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Lead Details</h2>
-                <p className="text-sm text-gray-600">Complete information for this purchased lead</p>
-              </div>
-
-              {/* Lead Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <User className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.firstName} {selectedLead.lastName}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Zip Code</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.zipCode}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.phoneno}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 break-all rounded-md text-sm flex items-center">
-                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.email}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Location</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.location}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Insurance Company</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <FileText className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.company}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Policy Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.policy}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Purchase Date</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Calendar className="h-3 w-3 mr-1 text-gray-400" />
-                    {new Date(selectedLead.purchaseDate).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200">
-                <Button variant="outline" onClick={handleCloseViewModal} className="px-4 py-2 text-sm">
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DetailPopup
+        isOpen={showViewModal}
+        onClose={handleCloseViewModal}
+        title="Lead Details"
+        subtitle="Complete information for this purchased lead"
+        titleIcon={FileText}
+        fields={leadFields}
+      />
     </div>
   );
 };

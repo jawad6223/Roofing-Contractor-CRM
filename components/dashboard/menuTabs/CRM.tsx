@@ -15,6 +15,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DetailPopup } from "@/components/ui/DetailPopup";
 import { Pagination } from "@/components/ui/pagination";
 import { crmDataType } from "@/types/DashboardTypes";
 import { crmData } from "./Data";
@@ -71,6 +72,41 @@ export const CRM = () => {
   const handleCloseModal = () => {
     setShowModal(false);
   };
+
+  const leadFields = selectedLead ? [
+    {
+      label: "Full Name",
+      value: selectedLead.name,
+      icon: User
+    },
+    {
+      label: "Phone",
+      value: selectedLead.phoneno,
+      icon: Phone
+    },
+    {
+      label: "Email",
+      value: selectedLead.email,
+      icon: Mail,
+      breakAll: true
+    },
+    {
+      label: "Location",
+      value: selectedLead.location,
+      icon: MapPin
+    },
+    {
+      label: "Insurance Company",
+      value: selectedLead.insuranceCompany,
+      icon: Building,
+      whitespaceNowrap: true
+    },
+    {
+      label: "Policy Number",
+      value: selectedLead.policy,
+      icon: Hash
+    }
+  ] : [];
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -270,102 +306,14 @@ export const CRM = () => {
       />
 
       {/* Lead Details Modal */}
-      {showModal && selectedLead && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 relative h-[80vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
-            {/* Close Button */}
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
-              aria-label="Close modal"
-            >
-              <X className="h-3 w-3" />
-            </button>
-
-            <div className="p-6">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#122E5F]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Lead Details
-                </h2>
-                <p className="text-sm text-gray-600">Complete information for this lead</p>
-              </div>
-
-              {/* Lead Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Full Name
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <User className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.name}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Phone
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.phoneno}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Email
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md break-all text-sm flex items-center">
-                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.email}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Location
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.location}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm whitespace-nowrap font-semibold text-gray-700 mb-1">
-                    Insurance Company
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Building className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.insuranceCompany}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Policy Number
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.policy}
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  onClick={handleCloseModal}
-                  className="px-4 py-2 text-sm"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DetailPopup
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        title="Lead Details"
+        subtitle="Complete information for this lead"
+        titleIcon={FileText}
+        fields={leadFields}
+      />
 
       {/* Add Member Modal */}
       {showAddMemberModal && (

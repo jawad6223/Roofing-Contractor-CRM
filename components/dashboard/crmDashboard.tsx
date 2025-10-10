@@ -157,7 +157,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
       {/* Main content */}
       <div className="flex-1 lg:ml-0 flex flex-col h-full overflow-hidden">
         {/* Top header */}
-        <div className="bg-white shadow-sm border-b px-4 sm:px-6 py-1 flex-shrink-0">
+        <div className="bg-white shadow-sm border-b px-4 sm:px-6 flex-shrink-0">
             <div className="flex justify-start items-center gap-4 h-16">
                 <button
                   onClick={() => setSidebarOpen(true)}

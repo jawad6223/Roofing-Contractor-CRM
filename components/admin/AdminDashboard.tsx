@@ -68,7 +68,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
   };
 
   const activeTab = getActiveTab();
-  console.log('activeTab', activeTab);
+  console.log("activeTab", activeTab);
 
   return (
     <div className="h-screen bg-gray-50 flex overflow-hidden">
@@ -135,10 +135,10 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {loading ? 'Loading...' : getCurrentAdminName()}
+                  {loading ? "Loading..." : getCurrentAdminName()}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {loading ? 'Loading...' : admin}
+                  {loading ? "Loading..." : admin}
                 </p>
               </div>
             </div>
@@ -155,13 +155,18 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-[#286BBD]">Confirm Logout</AlertDialogTitle>
+                  <AlertDialogTitle className="text-[#286BBD]">
+                    Confirm Logout
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to logout? You will need to sign in again to access your admin account.
+                    Are you sure you want to logout? You will need to sign in
+                    again to access your admin account.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="text-[#286BBD]">Cancel</AlertDialogCancel>
+                  <AlertDialogCancel className="text-[#286BBD]">
+                    Cancel
+                  </AlertDialogCancel>
                   <AlertDialogAction onClick={handleLogout}>
                     Yes, Logout
                   </AlertDialogAction>
@@ -175,25 +180,18 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
       {/* Main Content */}
       <div className="flex-1 lg:ml-0 flex flex-col h-full overflow-hidden">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200 flex-shrink-0">
-          <div className="px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
-              <div className="flex items-center">
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 mr-2"
-                  aria-label="Open sidebar"
-                >
-                  <Menu className="h-5 w-5" />
-                </button>
-                <div>
-                  {/* title */}
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    Admin Dashboard
-                  </h1>
-                </div>
-              </div>
-            </div>
+        <div className="bg-white shadow-sm border-b">
+          <div className="flex justify-start px-4 items-center gap-4 h-16">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+              aria-label="Open sidebar"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
           </div>
         </div>
 

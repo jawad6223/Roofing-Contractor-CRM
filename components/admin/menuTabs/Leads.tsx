@@ -23,9 +23,11 @@ import {
   Mail,
   Hash,
   User,
+  Building,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DetailPopup } from "@/components/ui/DetailPopup";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -335,6 +337,50 @@ export const Leads = () => {
     toast.success("Lead added successfully");
     handleCloseAddModal();
   };
+
+  const leadFields = selectedLead ? [
+    {
+      label: "First Name",
+      value: selectedLead.firstName,
+      icon: User
+    },
+    {
+      label: "Last Name",
+      value: selectedLead.lastName,
+      icon: User
+    },
+    {
+      label: "Phone Number",
+      value: selectedLead.phoneno,
+      icon: Phone
+    },
+    {
+      label: "Email Address",
+      value: selectedLead.email,
+      icon: Mail,
+      breakAll: true
+    },
+    {
+      label: "Zip Code (Address)",
+      value: `${selectedLead.zipCode}, ${selectedLead.address}`,
+      icon: MapPin
+    },
+    {
+      label: "Insurance Company",
+      value: selectedLead.company,
+      icon: Building
+    },
+    {
+      label: "Policy Number",
+      value: selectedLead.policy,
+      icon: Hash
+    },
+    {
+      label: "Assigned To",
+      value: selectedLead.assignedTo || "Unassigned",
+      icon: User
+    }
+  ] : []
 
   return (
     <div className="space-y-6">
@@ -705,129 +751,19 @@ export const Leads = () => {
       />
 
       {/* View Lead Modal */}
-      {showModal && selectedLead && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300 h-[90vh] md:h-auto overflow-auto">
-            {/* Close Button */}
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
-              aria-label="Close modal"
-            >
-              <X className="h-3 w-3" />
-            </button>
-
-            <div className="p-6">
-              {/* Header */}
-              <div className="text-center mb-6">
-                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <FileText className="h-6 w-6 text-[#122E5F]" />
-                </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Lead Details
-                </h2>
-                <p className="text-sm text-gray-600">
-                  Complete information for this lead
-                </p>
-              </div>
-
-              {/* Lead Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    First Name
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
-                    <User className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.firstName}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Last Name
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
-                    <User className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.lastName}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Phone Number
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
-                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.phoneno}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 flex break-all rounded-md text-sm flex items-center">
-                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.email}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Zip Code{" "}
-                    <span className="text-xs text-gray-500">(Address)</span>
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.zipCode}, {selectedLead.address}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Insurance Company
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
-                    <FileText className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.company}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Policy Number
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
-                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.policy}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Assigned To
-                  </label>
-                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
-                    <User className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.assignedTo || "Unassigned"}
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 mt-4 pt-3 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  onClick={handleCloseModal}
-                  className="px-3 py-1.5 text-sm"
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <DetailPopup
+        isOpen={showModal}
+        onClose={handleCloseModal}
+        title="Lead Details"
+        subtitle="Complete information for this lead"
+        titleIcon={FileText}
+        fields={leadFields}
+      />
 
       {/* Add Lead Modal */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl shadow-2xl max-w-lg w-full mx-4 relative h-[80vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
             {/* Close Button */}
             <button
               onClick={handleCloseAddModal}
@@ -981,7 +917,7 @@ export const Leads = () => {
       {/* Assign Lead Modal */}
       {showAssignModal && leadToAssign && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-4xl h-[90vh] w-full mx-4 relative animate-in zoom-in-95 duration-300 overflow-auto">
+          <div className="bg-white rounded-xl shadow-2xl max-w-4xl h-[80vh] md:h-auto w-full mx-4 relative animate-in zoom-in-95 duration-300 overflow-auto">
             {/* Close Button */}
             <button
               onClick={handleCloseAssignModal}

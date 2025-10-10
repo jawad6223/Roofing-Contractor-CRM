@@ -20,10 +20,11 @@ import {
   X,
   Eye,
   Hash,
+  Building,
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { DetailPopup } from "@/components/ui/DetailPopup";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { purchasedLeads, sampleLeads } from "./Data";
@@ -36,6 +37,56 @@ export const DashBoard = () => {
   const [loadingLeads, setLoadingLeads] = useState<Set<number>>(new Set());
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
+
+  const handleCloseModal = () => {
+    setIsLeadModalOpen(false);
+    setSelectedLead(null);
+  };
+
+  const leadFields = selectedLead ? [
+    {
+      label: "Full Name",
+      value: `${selectedLead.firstName} ${selectedLead.lastName}`,
+      icon: User
+    },
+    {
+      label: "Phone",
+      value: selectedLead.phoneno,
+      icon: Phone
+    },
+    {
+      label: "Email",
+      value: selectedLead.email,
+      icon: Mail,
+      breakAll: true
+    },
+    {
+      label: "Location",
+      value: selectedLead.location,
+      icon: MapPin
+    },
+    {
+      label: "Insurance Company",
+      value: selectedLead.company,
+      icon: Building,
+      whitespaceNowrap: true
+    },
+    {
+      label: "Policy Number",
+      value: selectedLead.policy,
+      icon: Hash
+    },
+    {
+      label: "Purchase Date",
+      value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
+      icon: Calendar
+    },
+    {
+      label: "Zip Code",
+      value: selectedLead.zipCode,
+      icon: MapPin
+    }
+  ] : [];
 
   async function handleBuyNow(lead: sampleLeadType) {
     // Add this lead to loading set
@@ -269,97 +320,14 @@ export const DashBoard = () => {
         </Card>
       </div>
 
-      <Dialog open={isLeadModalOpen} onOpenChange={setIsLeadModalOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <div className="flex items-center justify-between">
-              <DialogTitle className="text-xl font-bold text-[#286BBD]">Lead Details</DialogTitle>
-              <Link href="/dashboard/leads">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsLeadModalOpen(false)}
-                  className="text-[#286BBD] mr-6 border-[#286BBD] hover:bg-[#286BBD] hover:text-white flex items-center space-x-1"
-                >
-                  <span className="text-sm">View All Leads</span>
-                  <ExternalLink className="h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-          </DialogHeader>
-
-          {selectedLead && (
-            <div className="p-5">
-              {/* Lead Information */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <User className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.firstName} {selectedLead.lastName}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Zip Code</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.zipCode}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.phoneno}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md break-all text-sm flex items-center">
-                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.email}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Location</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.location}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Insurance Company</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <FileText className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.company}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Policy Number</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead.policy}
-                  </p>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Purchase Date</label>
-                  <p className="text-gray-900 bg-gray-50 p-2 rounded-md text-sm flex items-center">
-                    <Calendar className="h-3 w-3 mr-1 text-gray-400" />
-                    {new Date(selectedLead.purchaseDate).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex justify-end space-x-3 mt-5 pt-4 border-t border-gray-200">
-                <Button variant="outline" onClick={() => setIsLeadModalOpen(false)} className="px-4 py-2 text-sm">
-                  Close
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <DetailPopup
+        isOpen={isLeadModalOpen}
+        onClose={handleCloseModal}
+        title="Lead Details"
+        subtitle="Complete information for this lead"
+        titleIcon={FileText}
+        fields={leadFields}
+      />
     </>
   );
 };
