@@ -381,7 +381,7 @@ export const Leads = () => {
       {/* View Lead Modal */}
       {showViewModal && selectedLead && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full mx-4 relative h-[90vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
+          <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full mx-4 relative h-[80vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
             {/* Close Button */}
             <button
               onClick={handleCloseViewModal}
