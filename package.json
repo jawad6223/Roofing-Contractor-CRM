@@ -43,6 +43,7 @@
     "@radix-ui/react-toggle-group": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@stripe/stripe-js": "^7.9.0",
+    "@supabase/supabase-js": "^2.75.0",
     "@types/node": "20.6.2",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
@@ -56,6 +57,7 @@
     "embla-carousel-react": "^8.3.0",
     "eslint": "8.49.0",
     "eslint-config-next": "^15.5.4",
+    "exceljs": "^4.4.0",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.446.0",
     "next": "^15.5.4",
@@ -76,7 +78,6 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.2.2",
     "vaul": "^1.1.1",
-    "exceljs": "^4.4.0",
     "yup": "^1.7.0",
     "zod": "^3.23.8"
   }

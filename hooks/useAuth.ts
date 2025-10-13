@@ -92,17 +92,13 @@ export const useAuth = () => {
       return 'Loading...';
     }
     
-    try {
-      const userInfo = JSON.parse(localStorage.getItem("userInfo") || "[]");
-      const currentUserInfo = userInfo.find(
-        (info: { emailAddress: string; fullName: string }) =>
-          info.emailAddress === user
-      );
-      const currentUserFullName = currentUserInfo?.fullName || user;
-      return currentUserFullName;
-    } catch (error) {
-      return user || 'User';
-    }
+      try {
+        const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+        console.log("userInfo", userInfo);
+        return userInfo["Full Name"] || user || 'User';
+      } catch (error) {
+        return user || 'User';
+      }
   };
 
   // Get the admin name

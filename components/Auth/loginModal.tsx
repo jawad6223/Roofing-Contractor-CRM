@@ -4,11 +4,11 @@ import {useState} from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { User, EyeOff, Eye, CheckCircle } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
+import { User, EyeOff, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormDataType } from "@/types/AuthType";
 import { toast } from "react-toastify";
+import { supabase } from "@/lib/supabase";
 
 // 1. Define validation schema
 const schema = yup.object().shape({
@@ -35,7 +35,6 @@ const schema = yup.object().shape({
 export default function LoginModal() {
 
   const router = useRouter();
-  const { login } = useAuth();
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // 3. Setup react-hook-form
@@ -43,32 +42,72 @@ export default function LoginModal() {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm<FormDataType>({
     resolver: yupResolver(schema),
   });
 
   // 4. On form submit
-  const onSubmit = (data: FormDataType) => {
+  // const onSubmit = (data: FormDataType) => {
 
-    const validCredentials = [
-      { emailAddress: "contractor1", password: "pass123" },
-      { emailAddress: "contractor2", password: "pass456" },
-    ];
+  //   const existingUsers = JSON.parse(localStorage.getItem("userInfo") || "[]");
+  //   const isValid = existingUsers.some(
+  //     (user: FormDataType) =>
+  //       user.emailAddress.toLowerCase() === data.emailAddress.toLowerCase() && user.password === data.password
+  //   );
 
-    const existingUsers = JSON.parse(localStorage.getItem("userInfo") || "[]");
-    const isValid = existingUsers.some(
-      (user: FormDataType) =>
-        user.emailAddress.toLowerCase() === data.emailAddress.toLowerCase() && user.password === data.password
-    );
+  //   if (!isValid) {
+  //     toast.error("Invalid credentials. Please use the Correct credentials.");
+  //     return;
+  //   }
+  //   toast.success("Login successful.");
+  //   login(data.emailAddress);
+  //   reset();
+  // };
 
-    if (!isValid) {
-      toast.error("Invalid credentials. Please use the Correct credentials.");
-      return;
+  const onSubmit = async (data: FormDataType) => {
+    try {
+      // 1️⃣ Try to sign in user using Supabase Auth
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email: data.emailAddress.toLowerCase(),
+        password: data.password,
+      });
+  
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast.error("Invalid email or password.");
+        } else if (error.message.includes("Email not confirmed")) {
+          toast.error("Please confirm your email before logging in.");
+        } else {
+          toast.error(error.message);
+        }
+        return;
+      }
+  
+      // 2️⃣ Successfully logged in
+      toast.success("Login successful!");
+  
+      // 3️⃣ Optionally fetch the user's Roofing_Auth record
+      const { data: userRecord, error: recordError } = await supabase
+        .from("Roofing_Auth")
+        .select("*")
+        .eq("user_id", authData.user?.id)
+        .single();
+  
+      if (recordError) {
+        console.warn("No Roofing_Auth data found for this user:", recordError);
+      } else {
+        console.log("User Roofing_Auth data:", userRecord);
+        // you can save this to context, localStorage, or global state
+        localStorage.setItem("userInfo", JSON.stringify(userRecord));
+        localStorage.setItem("loggedInUser", authData.user?.email || "");
+      }
+  
+      // 4️⃣ Redirect to dashboard or thank-you page
+      router.push("/dashboard");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      toast.error("Login failed. Please try again.");
     }
-    toast.success("Login successful.");
-    login(data.emailAddress);
-    reset();
   };
 
   return (
@@ -143,8 +182,19 @@ export default function LoginModal() {
               )}
             </div>
 
+            {/* Forgot Password Link */}
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => router.push("/forget-password")}
+                className="text-sm text-[#286BBD] hover:text-[#1d4ed8] font-medium transition-colors duration-200"
+              >
+                Forgot Password?
+              </button>
+            </div>
+
             {/* Buttons */}
-            <div className="flex space-x-3 pt-4">
+            <div className="flex space-x-3">
               <button
                 type="submit"
                 className="flex-1 bg-[#122E5F] hover:bg-[#0f2347] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"

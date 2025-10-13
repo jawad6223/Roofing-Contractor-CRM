@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { PlacePrediction } from "@/types/AuthType";
 import { ContractorType } from "@/types/Types";
+import { supabase } from "@/lib/supabase";
 
 // Google Places API configuration
 const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY || "";
@@ -29,6 +30,7 @@ export function ContractorForm() {
   const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const addressInputRef = useRef<HTMLInputElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   const [userInfo, setUserInfo] = useState<ContractorType | null>(null);
   useEffect(() => {
@@ -59,7 +61,6 @@ export function ContractorForm() {
     }
   }, [])
 
-  console.log('isMobile', isMobile);
 
   const [formData, setFormData] = useState<ContractorType>({
     fullName: "",
@@ -124,7 +125,6 @@ export function ContractorForm() {
       });
     }
   };
-
   // Close suggestions when clicking outside
   useEffect(() => {
     setIsMounted(true);
@@ -164,11 +164,10 @@ export function ContractorForm() {
       }
     }
 
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: processedValue,
-    });
-
+    }));
     // Handle address autocomplete
     if (name === "businessAddress") {
       // Clear previous timer
@@ -264,49 +263,83 @@ export function ContractorForm() {
     setErrors({});
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (validateStep2()) {
+  //     // Convert email to lowercase before saving
+  //     const formDataWithLowerEmail = {
+  //       ...formData,
+  //       emailAddress: formData.emailAddress.toLowerCase(),
+  //     };
+
+  //     const existingUsers = JSON.parse(localStorage.getItem("userInfo") || "[]");
+
+  //     const usersArray = Array.isArray(existingUsers) ? existingUsers : [];
+  //     usersArray.push(formDataWithLowerEmail);
+
+  //     localStorage.setItem("userInfo", JSON.stringify(usersArray));
+
+  //     if (validateStep2()) {
+  //       toast.success("Form submitted successfully.");
+        
+  //       if(isMobile){
+  //         router.push(`/thank-you`);
+  //       }else{
+  //         setShowSuccessModal(true);
+  //       }
+  //     } else {
+  //       const firstErrorField = document.querySelector(".border-red-500");
+  //       if (firstErrorField) {
+  //         firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+  //       }
+  //     }
+  //   } else {
+  //     // Scroll to first error field
+  //     const firstErrorField = document.querySelector(".border-red-500");
+  //     if (firstErrorField) {
+  //       firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+  //     }
+  //   }
+  // };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateStep2()) {
-      // Convert email to lowercase before saving
-      const formDataWithLowerEmail = {
-        ...formData,
-        emailAddress: formData.emailAddress.toLowerCase(),
-      };
-
-      const existingUsers = JSON.parse(localStorage.getItem("userInfo") || "[]");
-
-      const usersArray = Array.isArray(existingUsers) ? existingUsers : [];
-      usersArray.push(formDataWithLowerEmail);
-
-      localStorage.setItem("userInfo", JSON.stringify(usersArray));
-
-      const params = new URLSearchParams({
-        name: formDataWithLowerEmail.fullName,
-        email: formDataWithLowerEmail.emailAddress,
+    setIsSubmitting(true);
+  
+    try {
+      // 1️⃣ Create Supabase Auth user (email confirmation enabled)
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.emailAddress.toLowerCase(),
+        password: formData.password,
       });
-
-      if (validateStep2()) {
-        toast.success("Form submitted successfully.");
-        if(isMobile){
-          router.push(`/thank-you`);
-        }else{
-          setShowSuccessModal(true);
-        }
-      } else {
-        const firstErrorField = document.querySelector(".border-red-500");
-        if (firstErrorField) {
-          firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }
-      // router.push(`/crmContractor?${params.toString()}`);
-    } else {
-      // Scroll to first error field
-      const firstErrorField = document.querySelector(".border-red-500");
-      if (firstErrorField) {
-        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
+  
+      if (error) throw error;
+      if (!data.user) throw new Error("User not created");
+  
+      // 2️⃣ Send data to your backend API route
+      await fetch("/api/register-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: data.user.id,
+          fullName: formData.fullName,
+          title: formData.title,
+          phoneNumber: formData.phoneNumber,
+          emailAddress: formData.emailAddress.toLowerCase(),
+          businessAddress: formData.businessAddress,
+          serviceRadius: formData.serviceRadius,
+        }),
+      });
+  
+      toast.success("Check your email to confirm your account!");
+    } catch (err: any) {
+      console.error("Registration error:", err);
+      toast.error(`Registration failed: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
+  
 
   const handleCloseModal = () => {
     setShowSuccessModal(false);
