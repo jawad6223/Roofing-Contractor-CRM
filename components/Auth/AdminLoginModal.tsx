@@ -29,6 +29,7 @@ const schema = yup.object().shape({
 });
 
 export default function AdminLoginModal() {
+  const router = useRouter();
   const { loginAdmin } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,22 +43,52 @@ export default function AdminLoginModal() {
     resolver: yupResolver(schema),
   });
 
-  const onSubmit = (data: FormDataType) => {
+  // const onSubmit = (data: FormDataType) => {
+  //   setIsLoading(true);
+  //   try{
+  //   if (data.emailAddress === process.env.NEXT_PUBLIC_ADMIN_EMAIL && data.password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
+  //     toast.success("Login successful");
+  //     loginAdmin(data.emailAddress);
+  //     reset();
+  //     return;
+  //   }
+  //   toast.error("Invalid credentials");
+  //   } catch (error) {
+  //     toast.error("Invalid credentials");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  const onSubmit = async (data: FormDataType) => {
     setIsLoading(true);
-    try{
-    if (data.emailAddress === "admin@gmail.com" && data.password === "@Admin123") {
-      toast.success("Login successful");
-      loginAdmin(data.emailAddress);
-      reset();
-      return;
-    }
-    toast.error("Invalid credentials");
+    try {
+      const response = await fetch("/api/admin-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: data.emailAddress,
+          password: data.password,
+        }),
+      });
+  
+      const result = await response.json();
+  
+      if (result.success) {
+        toast.success("Admin login successful!");
+        loginAdmin(data.emailAddress);
+      } else {
+        toast.error(result.message);
+      }
     } catch (error) {
-      toast.error("Invalid credentials");
+      console.error("Login error:", error);
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
   };
+  
+  
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
@@ -117,6 +148,17 @@ export default function AdminLoginModal() {
                   Password must be 8 characters, include 1 uppercase, 1 number & 1 special character
                 </p>
               )}
+            </div>
+
+            {/* Forgot Password Link */}
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => router.push("/forget-password")}
+                className="text-sm text-[#286BBD] hover:text-[#1d4ed8] font-medium transition-colors duration-200"
+              >
+                Forgot Password?
+              </button>
             </div>
 
             <Button 
