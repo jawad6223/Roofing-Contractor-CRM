@@ -311,6 +311,9 @@ export function ContractorForm() {
       const { data, error } = await supabase.auth.signUp({
         email: formData.emailAddress.toLowerCase(),
         password: formData.password,
+        options: {
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+        },
       });
   
       if (error) throw error;
