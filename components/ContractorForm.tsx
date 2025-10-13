@@ -335,6 +335,11 @@ export function ContractorForm() {
       });
   
       toast.success("Check your email to confirm your account!");
+      if(isMobile){
+        router.push(`/thank-you`);
+      }else{
+        setShowSuccessModal(true);
+      }
     } catch (err: any) {
       console.error("Registration error:", err);
       toast.error(`Registration failed: ${err.message}`);
