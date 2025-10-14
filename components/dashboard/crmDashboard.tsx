@@ -64,9 +64,6 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
     { icon: UserPlus, label: "Teams", path: "/dashboard/teams" },
   ];
 
-  // Debug: Log menu items to console
-  console.log("Menu items:", menuItems);
-
   const handleLogout = () => {
     logout();
   };

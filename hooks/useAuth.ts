@@ -94,7 +94,6 @@ export const useAuth = () => {
     
       try {
         const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-        console.log("userInfo", userInfo);
         return userInfo["Full Name"] || user || 'User';
       } catch (error) {
         return user || 'User';

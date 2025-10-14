@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -13,27 +13,22 @@ import { supabase } from "@/lib/supabase";
 // 1. Define validation schema
 const schema = yup.object().shape({
   emailAddress: yup
-  .string()
-  .email('Invalid email address')
-  .matches(
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    'Please enter a valid email address'
-  )
-  .required('Email is required'),
+    .string()
+    .email("Invalid email address")
+    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address")
+    .required("Email is required"),
   password: yup
-  .string()
-  .matches(
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/,
-    'Password must be 8 characters, 1 uppercase, 1 number & 1 special character'
-  )
-  .required("Password is required"),
+    .string()
+    .matches(
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/,
+      "Password must be 8 characters, 1 uppercase, 1 number & 1 special character"
+    )
+    .required("Password is required"),
 });
 
 // 2. Form data type
 
-
 export default function LoginModal() {
-
   const router = useRouter();
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -71,7 +66,7 @@ export default function LoginModal() {
         email: data.emailAddress.toLowerCase(),
         password: data.password,
       });
-  
+
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
           toast.error("Invalid email or password.");
@@ -82,17 +77,24 @@ export default function LoginModal() {
         }
         return;
       }
-  
+
       // 2️⃣ Successfully logged in
+
+      const user = authData.user;
+      if (!user) {
+        toast.error("User not found after login.");
+        return;
+      }
+      localStorage.setItem("user_id", user.id);
       toast.success("Login successful!");
-  
+
       // 3️⃣ Optionally fetch the user's Roofing_Auth record
       const { data: userRecord, error: recordError } = await supabase
         .from("Roofing_Auth")
         .select("*")
         .eq("user_id", authData.user?.id)
         .single();
-  
+
       if (recordError) {
         console.warn("No Roofing_Auth data found for this user:", recordError);
       } else {
@@ -101,7 +103,7 @@ export default function LoginModal() {
         localStorage.setItem("userInfo", JSON.stringify(userRecord));
         localStorage.setItem("loggedInUser", authData.user?.email || "");
       }
-  
+
       // 4️⃣ Redirect to dashboard or thank-you page
       router.push("/dashboard");
     } catch (err: any) {
@@ -122,7 +124,6 @@ export default function LoginModal() {
       `}</style>
       <div className="relative my-auto w-full flex justify-center">
         <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 border border-gray-200">
-
           <div className="text-center mb-8">
             <div className="relative inline-block mb-6">
               <div className="w-16 h-16 bg-[#122E5F] rounded-2xl flex items-center justify-center shadow-lg mx-auto">
@@ -161,20 +162,24 @@ export default function LoginModal() {
                 Password
               </label>
               <div className="relative">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Enter password"
-                {...register("password")}
-                className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] text-gray-900 placeholder-gray-500 transition-all duration-300"
-              />
-              <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                  </button>
-                </div>
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  {...register("password")}
+                  className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-[#2563eb] focus:border-[#2563eb] text-gray-900 placeholder-gray-500 transition-all duration-300"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </button>
+              </div>
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.password.message}
@@ -223,7 +228,6 @@ export default function LoginModal() {
               </button>
             </span>
           </div>
-
         </div>
       </div>
     </div>

@@ -115,15 +115,15 @@ export default function ForgetPasswordPage() {
             </div>
 
             {/* Buttons */}
-            <div className="flex space-x-3 pt-4">
-              <button
+            <div className="flex space-x-3">
+              {/* <button
                 type="button"
                 onClick={() => router.push("/login")}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back to Login
-              </button>
+              </button> */}
               <button
                 type="submit"
                 disabled={isSubmitting}

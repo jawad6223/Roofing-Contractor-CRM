@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { PlacePrediction } from "@/types/AuthType";
 import { ContractorType } from "@/types/Types";
 import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/hooks/useAuth";
 
 // Google Places API configuration
 const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY || "";
@@ -31,7 +32,7 @@ export function ContractorForm() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const addressInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
+  const { login } = useAuth();
   const [userInfo, setUserInfo] = useState<ContractorType | null>(null);
   useEffect(() => {
     const userInfo = localStorage.getItem("userInfo");
@@ -264,64 +265,9 @@ export function ContractorForm() {
   };
 
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-    
-  //   if (!validateStep2()) {
-  //     const firstErrorField = document.querySelector(".border-red-500");
-  //     if (firstErrorField) {
-  //       firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-  //     }
-  //     return;
-  //   }
-
-  //   setIsSubmitting(true);
-  
-  //   try {
-  //     // 1️⃣ Create Supabase Auth user (email confirmation enabled)
-  //     const { data, error } = await supabase.auth.signUp({
-  //       email: formData.emailAddress.toLowerCase(),
-  //       password: formData.password,
-  //       options: {
-  //         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
-  //       },
-  //     });
-  
-  //     if (error) throw error;
-  //     if (!data.user) throw new Error("User not created");
-  
-  //     // 2️⃣ Send data to your backend API route
-  //     await fetch("/api/register-user", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         user_id: data.user.id,
-  //         fullName: formData.fullName,
-  //         title: formData.title,
-  //         phoneNumber: formData.phoneNumber,
-  //         emailAddress: formData.emailAddress.toLowerCase(),
-  //         businessAddress: formData.businessAddress,
-  //         serviceRadius: formData.serviceRadius,
-  //       }),
-  //     });
-  
-  //     toast.success("Check your email to confirm your account!");
-  //     if(isMobile){
-  //       router.push(`/thank-you`);
-  //     }else{
-  //       setShowSuccessModal(true);
-  //     }
-  //   } catch (err: any) {
-  //     console.error("Registration error:", err);
-  //     toast.error(`Registration failed: ${err.message}`);
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+    
     if (!validateStep2()) {
       const firstErrorField = document.querySelector(".border-red-500");
       if (firstErrorField) {
@@ -329,10 +275,11 @@ export function ContractorForm() {
       }
       return;
     }
-  
+
     setIsSubmitting(true);
   
     try {
+
       const email = formData.emailAddress.toLowerCase();
   
       // 1️⃣ Check if email already exists
@@ -347,22 +294,21 @@ export function ContractorForm() {
         toast.error("This email is already in use");
         return;
       }
-  
-      // 2️⃣ Create Supabase Auth user
+
+      // 1️⃣ Create Supabase Auth user (email confirmation enabled)
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: formData.emailAddress.toLowerCase(),
         password: formData.password,
         options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
         },
       });
-      localStorage.setItem("loggedInUser", email);
   
       if (error) throw error;
       if (!data.user) throw new Error("User not created");
   
-      // 3️⃣ Insert full data into Roofing_Auth table
-      const insertRes = await fetch("/api/register-user", {
+      // 2️⃣ Send data to your backend API route
+      await fetch("/api/register-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -370,22 +316,18 @@ export function ContractorForm() {
           fullName: formData.fullName,
           title: formData.title,
           phoneNumber: formData.phoneNumber,
-          emailAddress: email,
+          emailAddress: formData.emailAddress.toLowerCase(),
           businessAddress: formData.businessAddress,
           serviceRadius: formData.serviceRadius,
         }),
       });
   
-      const insertData = await insertRes.json();
-      if (!insertData.success) throw new Error(insertData.message);
-  
       toast.success("Check your email to confirm your account!");
-      if (isMobile) {
+      if(isMobile){
         router.push(`/thank-you`);
-      } else {
+      }else{
         setShowSuccessModal(true);
       }
-
     } catch (err: any) {
       console.error("Registration error:", err);
       toast.error(`Registration failed: ${err.message}`);
@@ -393,6 +335,82 @@ export function ContractorForm() {
       setIsSubmitting(false);
     }
   };
+  
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  
+  //   if (!validateStep2()) {
+  //     const firstErrorField = document.querySelector(".border-red-500");
+  //     if (firstErrorField) {
+  //       firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+  //     }
+  //     return;
+  //   }
+  
+  //   setIsSubmitting(true);
+  
+  //   try {
+  //     const email = formData.emailAddress.toLowerCase();
+  
+  //     // 1️⃣ Check if email already exists
+  //     const checkRes = await fetch("/api/check-email", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ email }),
+  //     });
+  
+  //     const checkData = await checkRes.json();
+  //     if (checkData.exists) {
+  //       toast.error("This email is already in use");
+  //       return;
+  //     }
+  
+  //     // 2️⃣ Create Supabase Auth user
+  //     const { data, error } = await supabase.auth.signUp({
+  //       email,
+  //       password: formData.password,
+  //       options: {
+  //         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
+  //       },
+  //     });
+  //     localStorage.setItem("loggedInUser", email);
+  //     login(email);
+  
+  //     if (error) throw error;
+  //     if (!data.user) throw new Error("User not created");
+  
+  //     // 3️⃣ Insert full data into Roofing_Auth table
+  //     const insertRes = await fetch("/api/register-user", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         user_id: data.user.id,
+  //         fullName: formData.fullName,
+  //         title: formData.title,
+  //         phoneNumber: formData.phoneNumber,
+  //         emailAddress: email,
+  //         businessAddress: formData.businessAddress,
+  //         serviceRadius: formData.serviceRadius,
+  //       }),
+  //     });
+  
+  //     const insertData = await insertRes.json();
+  //     if (!insertData.success) throw new Error(insertData.message);
+  
+  //     toast.success("Check your email to confirm your account!");
+  //     if (isMobile) {
+  //       router.push(`/thank-you`);
+  //     } else {
+  //       setShowSuccessModal(true);
+  //     }
+
+  //   } catch (err: any) {
+  //     console.error("Registration error:", err);
+  //     toast.error(`Registration failed: ${err.message}`);
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
   
   
 
@@ -778,28 +796,26 @@ export function ContractorForm() {
 
             <div className="p-8 text-center">
               {/* Success Icon */}
-              <div className="relative z-20 text-center mb-10">
+              <div className="relative z-20 text-center mb-5">
                 <div className="w-20 h-20 bg-[#122E5F] rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg animate-bounce-slow">
                   <Mail className="h-10 w-10 text-white drop-shadow-lg" />
                 </div>
                 <p className="text-gray-500 mb-2">
                   We&apos;ve sent a verification email to{" "}
-                  <span className="font-semibold text-[#286BBD]">{formData.emailAddress}</span>.<br />
+                  <span className="font-semibold text-[#286BBD] my-2">{formData.emailAddress}</span>.<br />
                   Please check your email and click the verification link to activate your account.
                 </p>
               </div>
 
               {/* Action Buttons */}
               <div className="relative z-10 flex flex-col items-center">
-                <span className="text-gray-700 font-semibold mb-2 text-base">Next step: Verify your email</span>
                 <button
                   type="button"
-                  className="bg-gradient-to-r from-[#122E5F] to-[#041738] hover:from-[#183B7A] hover:to-[#122E5F] transition-colors duration-200 text-white px-6 py-3 font-semibold rounded-xl shadow-md text-lg flex items-center gap-2 mb-3"
+                  className="bg-gradient-to-r from-[#122E5F] to-[#041738] hover:from-[#183B7A] hover:to-[#122E5F] transition-colors duration-200 text-white px-6 py-3 font-semibold rounded-xl shadow-md text-lg flex items-center gap-2"
                 >
                   <Mail className="h-5 w-5 text-white" />
-                  <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer">Check Your Email</a>
+                  <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer">Verify Email</a>
                 </button>
-                <span className="text-xs text-gray-400">Click the verification link in your email to activate your account.</span>
               </div>
             </div>
           </div>
