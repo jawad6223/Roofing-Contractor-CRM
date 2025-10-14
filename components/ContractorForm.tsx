@@ -353,7 +353,7 @@ export function ContractorForm() {
         email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
         },
       });
   
@@ -384,7 +384,8 @@ export function ContractorForm() {
       } else {
         setShowSuccessModal(true);
       }
-  
+
+      localStorage.setItem("loggedInUser", email);
     } catch (err: any) {
       console.error("Registration error:", err);
       toast.error(`Registration failed: ${err.message}`);
