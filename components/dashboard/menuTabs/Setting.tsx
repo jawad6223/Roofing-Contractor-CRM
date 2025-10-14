@@ -185,10 +185,48 @@ export const Setting = () => {
     setIsPaymentModalOpen(false);
   };
 
-  const handleFormSubmit = (formData: Record<string, any>) => {
-    console.log("Saving payment method:", formData);
-    toast.success("Payment method saved successfully");
-    handleClosePaymentModal();
+  // const handleFormSubmit = (formData: Record<string, any>) => {
+  //   console.log("Saving payment method:", formData);
+  //   toast.success("Payment method saved successfully");
+  //   handleClosePaymentModal();
+  // };
+
+  const handleFormSubmit = async (formData: Record<string, any>) => {
+    try {
+      // 1️⃣ Get the logged-in user's ID from localStorage or Supabase session
+      const userId = localStorage.getItem("user_id");
+  
+      if (!userId) {
+        toast.error("User not logged in");
+        return;
+      }
+  
+      // 2️⃣ Extract and prepare card info
+      const cardNumber = formData.cardNumber.trim();
+      const card_last4 = cardNumber.slice(-4); // store only last 4 digits for safety
+      const expiry_date = formData.expiryDate; // e.g. "12/27"
+  
+      // 3️⃣ Insert into Supabase table
+      const { error } = await supabase.from("Payment_Method").insert([
+        {
+          user_id: userId,
+          card_holder_name: formData.cardholderName,
+          card_last4: card_last4,
+          card_brand: formData.cardType,
+          expiry_date: expiry_date,
+        },
+      ]);
+  
+      if (error) throw error;
+  
+      // 4️⃣ Notify user and close modal
+      toast.success("Payment method saved successfully");
+      handleClosePaymentModal();
+  
+    } catch (err: any) {
+      console.error("Error saving payment method:", err);
+      toast.error("Failed to save payment method");
+    }
   };
 
   const addPaymentMethodFields = [
@@ -339,7 +377,7 @@ export const Setting = () => {
                   Cancel
                 </Button>
                 <Button
-                  // onClick={handleUpdate}
+                  onClick={handleUpdate}
                   className="flex-1 h-11 bg-[#122E5F] hover:bg-[#0f2347] font-semibold"
                 >
                   <Save className="h-4 w-4 mr-2" />
@@ -374,7 +412,6 @@ export const Setting = () => {
                   </div>
                 </div>
                 <div className="flex flex-col items-center space-y-3">
-                  <Badge className="bg-green-100 text-green-800">Primary</Badge>
                   <Button
                     variant="outline"
                     className="h-8 text-red-500 hover:bg-red-500 hover:text-white"
