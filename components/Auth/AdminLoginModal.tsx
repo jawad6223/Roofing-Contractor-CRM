@@ -66,10 +66,9 @@ export default function AdminLoginModal() {
     try {
       // 1️⃣ Check against environment variables (you'll need to use NEXT_PUBLIC_ prefix for client-side access)
       const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-      const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-      console.log(adminEmail, adminPassword);
-      console.log(data.emailAddress, data.password);
-      if (data.emailAddress === adminEmail && data.password === adminPassword) {
+      console.log(adminEmail);
+      console.log(data.emailAddress);
+      if (data.emailAddress === adminEmail) {
         // 2️⃣ If credentials match, try to sign in with Supabase Auth
         const { data: authData, error } = await supabase.auth.signInWithPassword({
           email: data.emailAddress.toLowerCase(),
