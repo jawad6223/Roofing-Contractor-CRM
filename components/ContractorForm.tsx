@@ -356,6 +356,7 @@ export function ContractorForm() {
           emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
         },
       });
+      localStorage.setItem("loggedInUser", email);
   
       if (error) throw error;
       if (!data.user) throw new Error("User not created");
@@ -385,7 +386,6 @@ export function ContractorForm() {
         setShowSuccessModal(true);
       }
 
-      localStorage.setItem("loggedInUser", email);
     } catch (err: any) {
       console.error("Registration error:", err);
       toast.error(`Registration failed: ${err.message}`);
