@@ -311,7 +311,6 @@ export function ContractorForm() {
       localStorage.setItem("user_id", user.id);
 
       localStorage.setItem("loggedInUser", formData.emailAddress.toLowerCase());
-      login(formData.emailAddress.toLowerCase());
   
       if (error) throw error;
       if (!data.user) throw new Error("User not created");
