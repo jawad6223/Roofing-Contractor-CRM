@@ -10,6 +10,7 @@ import { User, Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/lib/supabase";
 
 type FormDataType = {
   emailAddress: string;
@@ -63,26 +64,44 @@ export default function AdminLoginModal() {
   const onSubmit = async (data: FormDataType) => {
     setIsLoading(true);
     try {
-      const response = await fetch("/api/admin-login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: data.emailAddress,
+      // 1️⃣ Check against environment variables (you'll need to use NEXT_PUBLIC_ prefix for client-side access)
+      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+      const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+      console.log(adminEmail, adminPassword);
+      console.log(data.emailAddress, data.password);
+      if (data.emailAddress === adminEmail && data.password === adminPassword) {
+        // 2️⃣ If credentials match, try to sign in with Supabase Auth
+        const { data: authData, error } = await supabase.auth.signInWithPassword({
+          email: data.emailAddress.toLowerCase(),
           password: data.password,
-        }),
-      });
-  
-      const result = await response.json();
-  
-      if (result.success) {
+        });
+
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            toast.error("Invalid admin credentials.");
+          } else if (error.message.includes("Email not confirmed")) {
+            toast.error("Please confirm your admin email before logging in.");
+          } else {
+            toast.error(error.message);
+          }
+          return;
+        }
+
+        // 3️⃣ Successfully logged in
         toast.success("Admin login successful!");
         loginAdmin(data.emailAddress);
-      } else {
-        toast.error(result.message);
+        reset();
+        
+        // 4️⃣ Redirect to admin dashboard
+        router.push("/admin");
+        return;
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      toast.error("Something went wrong");
+
+      // 5️⃣ If credentials don't match env vars, show error
+      toast.error("Invalid admin credentials");
+    } catch (err: any) {
+      console.error("Admin login error:", err);
+      toast.error("Admin login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

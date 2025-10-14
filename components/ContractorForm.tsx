@@ -264,9 +264,64 @@ export function ContractorForm() {
   };
 
 
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+    
+  //   if (!validateStep2()) {
+  //     const firstErrorField = document.querySelector(".border-red-500");
+  //     if (firstErrorField) {
+  //       firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+  //     }
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true);
+  
+  //   try {
+  //     // 1️⃣ Create Supabase Auth user (email confirmation enabled)
+  //     const { data, error } = await supabase.auth.signUp({
+  //       email: formData.emailAddress.toLowerCase(),
+  //       password: formData.password,
+  //       options: {
+  //         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+  //       },
+  //     });
+  
+  //     if (error) throw error;
+  //     if (!data.user) throw new Error("User not created");
+  
+  //     // 2️⃣ Send data to your backend API route
+  //     await fetch("/api/register-user", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         user_id: data.user.id,
+  //         fullName: formData.fullName,
+  //         title: formData.title,
+  //         phoneNumber: formData.phoneNumber,
+  //         emailAddress: formData.emailAddress.toLowerCase(),
+  //         businessAddress: formData.businessAddress,
+  //         serviceRadius: formData.serviceRadius,
+  //       }),
+  //     });
+  
+  //     toast.success("Check your email to confirm your account!");
+  //     if(isMobile){
+  //       router.push(`/thank-you`);
+  //     }else{
+  //       setShowSuccessModal(true);
+  //     }
+  //   } catch (err: any) {
+  //     console.error("Registration error:", err);
+  //     toast.error(`Registration failed: ${err.message}`);
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+  
     if (!validateStep2()) {
       const firstErrorField = document.querySelector(".border-red-500");
       if (firstErrorField) {
@@ -274,13 +329,28 @@ export function ContractorForm() {
       }
       return;
     }
-
+  
     setIsSubmitting(true);
   
     try {
-      // 1️⃣ Create Supabase Auth user (email confirmation enabled)
+      const email = formData.emailAddress.toLowerCase();
+  
+      // 1️⃣ Check if email already exists
+      const checkRes = await fetch("/api/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+  
+      const checkData = await checkRes.json();
+      if (checkData.exists) {
+        toast.error("This email is already in use");
+        return;
+      }
+  
+      // 2️⃣ Create Supabase Auth user
       const { data, error } = await supabase.auth.signUp({
-        email: formData.emailAddress.toLowerCase(),
+        email,
         password: formData.password,
         options: {
           emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
@@ -290,8 +360,8 @@ export function ContractorForm() {
       if (error) throw error;
       if (!data.user) throw new Error("User not created");
   
-      // 2️⃣ Send data to your backend API route
-      await fetch("/api/register-user", {
+      // 3️⃣ Insert full data into Roofing_Auth table
+      const insertRes = await fetch("/api/register-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -299,18 +369,22 @@ export function ContractorForm() {
           fullName: formData.fullName,
           title: formData.title,
           phoneNumber: formData.phoneNumber,
-          emailAddress: formData.emailAddress.toLowerCase(),
+          emailAddress: email,
           businessAddress: formData.businessAddress,
           serviceRadius: formData.serviceRadius,
         }),
       });
   
+      const insertData = await insertRes.json();
+      if (!insertData.success) throw new Error(insertData.message);
+  
       toast.success("Check your email to confirm your account!");
-      if(isMobile){
+      if (isMobile) {
         router.push(`/thank-you`);
-      }else{
+      } else {
         setShowSuccessModal(true);
       }
+  
     } catch (err: any) {
       console.error("Registration error:", err);
       toast.error(`Registration failed: ${err.message}`);
@@ -318,6 +392,7 @@ export function ContractorForm() {
       setIsSubmitting(false);
     }
   };
+  
   
 
   const handleCloseModal = () => {
@@ -646,9 +721,10 @@ export function ContractorForm() {
                   </Button>
                   <Button
                     type="submit"
+                    disabled={isSubmitting}
                     className="flex-1 h-11 bg-[#122E5F] hover:bg-[#183B7A] disabled:bg-gray-300 text-white font-bold text-sm rounded-xl transition-colors"
                   >
-                    Create CRM Account
+                    {isSubmitting ? "Creating Account..." : "Create CRM Account"}
                   </Button>
                 </div>
               </>
@@ -702,13 +778,9 @@ export function ContractorForm() {
             <div className="p-8 text-center">
               {/* Success Icon */}
               <div className="relative z-20 text-center mb-10">
-                <div className="w-20 h-20 bg-gradient-to-br from-green-200 via-green-100 to-green-50 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg animate-bounce-slow">
-                  <CheckCircle className="h-10 w-10 text-green-600 drop-shadow-lg" />
+                <div className="w-20 h-20 bg-[#122E5F] rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg animate-bounce-slow">
+                  <Mail className="h-10 w-10 text-white drop-shadow-lg" />
                 </div>
-                <h1 className="text-3xl font-extrabold text-gray-900 mb-3 tracking-tight drop-shadow-sm">
-                  Welcome {formData.fullName ? `${formData.fullName}!` : "to the Pros!"}
-                </h1>
-                <p className="text-lg text-gray-700 mb-2 font-medium">Your registration has been completed successfully.</p>
                 <p className="text-gray-500 mb-2">
                   We&apos;ve sent a verification email to{" "}
                   <span className="font-semibold text-[#286BBD]">{formData.emailAddress}</span>.<br />

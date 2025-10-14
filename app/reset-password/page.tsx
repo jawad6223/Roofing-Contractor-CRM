@@ -47,31 +47,25 @@ function ResetPasswordForm() {
   });
 
   useEffect(() => {
-    // Check if we have the necessary tokens in the URL
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const type = searchParams.get('type');
-    
-    // Also check URL hash for Supabase auth parameters
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const hashAccessToken = hashParams.get('access_token');
-    const hashRefreshToken = hashParams.get('refresh_token');
-    const hashType = hashParams.get('type');
-    
-    console.log('Reset password URL params:', { 
-      searchParams: { accessToken, refreshToken, type },
-      hashParams: { hashAccessToken, hashRefreshToken, hashType }
-    });
-    
-    // Check if we have any auth-related parameters in either search params or hash
-    const hasAuthParams = accessToken || refreshToken || type === 'recovery' || 
-                         hashAccessToken || hashRefreshToken || hashType === 'recovery';
-    
-    if (!hasAuthParams) {
-      toast.error("Invalid reset link. Please request a new password reset.");
-      router.push("/login");
+    const type = hashParams.get("type");
+    const access_token = hashParams.get("access_token");
+    const refresh_token = hashParams.get("refresh_token");
+  
+    if (type === "recovery" && access_token && refresh_token) {
+      supabase.auth
+        .setSession({ access_token, refresh_token })
+        .then(({ error }) => {
+          if (error) {
+            console.error("Session error:", error.message);
+            toast.error("Invalid or expired reset link. Please request a new one.");
+          }
+        });
+    } else {
+      console.log("No recovery token found in URL");
     }
-  }, [searchParams, router]);
+  }, []);
+  
 
   // On form submit
   const onSubmit = async (data: ResetPasswordFormData) => {
