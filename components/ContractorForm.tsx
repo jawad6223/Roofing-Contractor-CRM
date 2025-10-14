@@ -263,8 +263,7 @@ export function ContractorForm() {
     setCurrentStep(1);
     setErrors({});
   };
-
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -303,6 +302,16 @@ export function ContractorForm() {
           emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
         },
       });
+
+      const user = data.user;
+      if (!user) {
+        toast.error("User not found after login.");
+        return;
+      }
+      localStorage.setItem("user_id", user.id);
+
+      localStorage.setItem("loggedInUser", formData.emailAddress.toLowerCase());
+      login(formData.emailAddress.toLowerCase());
   
       if (error) throw error;
       if (!data.user) throw new Error("User not created");
