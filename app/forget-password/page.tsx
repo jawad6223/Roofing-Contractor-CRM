@@ -53,7 +53,7 @@ export default function ForgetPasswordPage() {
       }
 
       toast.success("Password reset email sent! Check your inbox.");
-      router.push("/login");
+      // router.push("/login");
     } catch (err: any) {
       console.error("Password reset error:", err);
       
