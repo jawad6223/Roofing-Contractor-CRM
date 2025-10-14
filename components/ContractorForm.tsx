@@ -300,7 +300,7 @@ export function ContractorForm() {
         email: formData.emailAddress.toLowerCase(),
         password: formData.password,
         options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
         },
       });
   
@@ -335,84 +335,6 @@ export function ContractorForm() {
       setIsSubmitting(false);
     }
   };
-  
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  
-  //   if (!validateStep2()) {
-  //     const firstErrorField = document.querySelector(".border-red-500");
-  //     if (firstErrorField) {
-  //       firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
-  //     }
-  //     return;
-  //   }
-  
-  //   setIsSubmitting(true);
-  
-  //   try {
-  //     const email = formData.emailAddress.toLowerCase();
-  
-  //     // 1️⃣ Check if email already exists
-  //     const checkRes = await fetch("/api/check-email", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ email }),
-  //     });
-  
-  //     const checkData = await checkRes.json();
-  //     if (checkData.exists) {
-  //       toast.error("This email is already in use");
-  //       return;
-  //     }
-  
-  //     // 2️⃣ Create Supabase Auth user
-  //     const { data, error } = await supabase.auth.signUp({
-  //       email,
-  //       password: formData.password,
-  //       options: {
-  //         emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
-  //       },
-  //     });
-  //     localStorage.setItem("loggedInUser", email);
-  //     login(email);
-  
-  //     if (error) throw error;
-  //     if (!data.user) throw new Error("User not created");
-  
-  //     // 3️⃣ Insert full data into Roofing_Auth table
-  //     const insertRes = await fetch("/api/register-user", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         user_id: data.user.id,
-  //         fullName: formData.fullName,
-  //         title: formData.title,
-  //         phoneNumber: formData.phoneNumber,
-  //         emailAddress: email,
-  //         businessAddress: formData.businessAddress,
-  //         serviceRadius: formData.serviceRadius,
-  //       }),
-  //     });
-  
-  //     const insertData = await insertRes.json();
-  //     if (!insertData.success) throw new Error(insertData.message);
-  
-  //     toast.success("Check your email to confirm your account!");
-  //     if (isMobile) {
-  //       router.push(`/thank-you`);
-  //     } else {
-  //       setShowSuccessModal(true);
-  //     }
-
-  //   } catch (err: any) {
-  //     console.error("Registration error:", err);
-  //     toast.error(`Registration failed: ${err.message}`);
-  //   } finally {
-  //     setIsSubmitting(false);
-  //   }
-  // };
-  
-  
 
   const handleCloseModal = () => {
     setShowSuccessModal(false);
