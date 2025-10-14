@@ -11,17 +11,17 @@ import { toast } from "react-toastify";
 
 export const Setting = () => {
   const { user } = useAuth();
-  const userInfo = JSON.parse(localStorage.getItem("userInfo") || "[]");
-  const currentUserInfo = userInfo.find(
+  const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
+  const currentUserInfo = Array.isArray(userInfo) ? userInfo.find(
     (info: { emailAddress: string; fullName: string }) =>
       info.emailAddress === user
-  );
+  ) : userInfo;
   const currentUserFullName = currentUserInfo?.fullName || user;
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [formData, setFormData] = useState<settingType>({
-    fullName: "",
-    email: "",
+    fullName: "Admin",
+    email: "admin@admin.com",
     serviceRadius: "25",
     businessAddress: "123 Main St, Dallas, TX 75201",
     leads: "10"
@@ -29,8 +29,8 @@ export const Setting = () => {
 
   useEffect(() => {
     setFormData({
-      fullName: currentUserFullName || "",
-      email: user || "",
+      fullName: currentUserFullName || "Admin",
+      email: user || "admin@admin.com",
       serviceRadius: "25",
       businessAddress: "123 Main St, Dallas, TX 75201",
       leads: "10"
