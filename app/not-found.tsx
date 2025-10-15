@@ -73,7 +73,7 @@ export default function NotFound() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Link 
-              href="/dashboard" 
+              href="/contractor" 
               className="flex items-center p-4 rounded-lg border border-gray-200 hover:border-[#122E5F] hover:bg-[#122E5F]/5 transition-all duration-200 group"
             >
               <div className="w-10 h-10 bg-[#122E5F]/10 rounded-lg flex items-center justify-center mr-3 group-hover:bg-[#122E5F]/20">

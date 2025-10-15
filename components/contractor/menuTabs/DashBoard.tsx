@@ -3,22 +3,15 @@
 import {
   Home,
   FileText,
-  TrendingUp,
   DollarSign,
   BarChart3,
   Users,
-  UserPlus,
   User,
-  Settings,
-  Package,
   CheckCircle,
   Phone,
   Mail,
   MapPin,
   Calendar,
-  ExternalLink,
-  X,
-  Eye,
   Hash,
   Building,
 } from "lucide-react";
@@ -43,50 +36,52 @@ export const DashBoard = () => {
     setSelectedLead(null);
   };
 
-  const leadFields = selectedLead ? [
-    {
-      label: "Full Name",
-      value: `${selectedLead.firstName} ${selectedLead.lastName}`,
-      icon: User
-    },
-    {
-      label: "Phone",
-      value: selectedLead.phoneno,
-      icon: Phone
-    },
-    {
-      label: "Email",
-      value: selectedLead.email,
-      icon: Mail,
-      breakAll: true
-    },
-    {
-      label: "Location",
-      value: selectedLead.location,
-      icon: MapPin
-    },
-    {
-      label: "Insurance Company",
-      value: selectedLead.company,
-      icon: Building,
-      whitespaceNowrap: true
-    },
-    {
-      label: "Policy Number",
-      value: selectedLead.policy,
-      icon: Hash
-    },
-    {
-      label: "Purchase Date",
-      value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
-      icon: Calendar
-    },
-    {
-      label: "Zip Code",
-      value: selectedLead.zipCode,
-      icon: MapPin
-    }
-  ] : [];
+  const leadFields = selectedLead
+    ? [
+        {
+          label: "Full Name",
+          value: `${selectedLead.firstName} ${selectedLead.lastName}`,
+          icon: User,
+        },
+        {
+          label: "Phone",
+          value: selectedLead.phoneno,
+          icon: Phone,
+        },
+        {
+          label: "Email",
+          value: selectedLead.email,
+          icon: Mail,
+          breakAll: true,
+        },
+        {
+          label: "Location",
+          value: selectedLead.location,
+          icon: MapPin,
+        },
+        {
+          label: "Insurance Company",
+          value: selectedLead.company,
+          icon: Building,
+          whitespaceNowrap: true,
+        },
+        {
+          label: "Policy Number",
+          value: selectedLead.policy,
+          icon: Hash,
+        },
+        {
+          label: "Purchase Date",
+          value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
+          icon: Calendar,
+        },
+        {
+          label: "Zip Code",
+          value: selectedLead.zipCode,
+          icon: MapPin,
+        },
+      ]
+    : [];
 
   async function handleBuyNow(lead: sampleLeadType) {
     // Add this lead to loading set
@@ -139,8 +134,12 @@ export const DashBoard = () => {
               <Home className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold capitalize">Welcome back, {currentUserFullName}! 👋</h1>
-              <p className="text-blue-100 text-lg">Your business performance at a glance</p>
+              <h1 className="text-3xl font-bold capitalize">
+                Welcome back, {currentUserFullName}! 👋
+              </h1>
+              <p className="text-blue-100 text-lg">
+                Your business performance at a glance
+              </p>
             </div>
           </div>
         </div>
@@ -153,7 +152,9 @@ export const DashBoard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-semibold text-[#286BBD]">Total Leads</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#286BBD]">
+              Total Leads
+            </CardTitle>
             <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
               <FileText className="h-5 w-5 text-[#286BBD]" />
             </div>
@@ -165,7 +166,9 @@ export const DashBoard = () => {
 
         <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-green-50 to-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-semibold text-[#286BBD]">Active Leads</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#286BBD]">
+              Active Leads
+            </CardTitle>
             <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
               <DollarSign className="h-5 w-5 text-green-600" />
             </div>
@@ -177,7 +180,9 @@ export const DashBoard = () => {
 
         <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-red-50 to-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-            <CardTitle className="text-sm font-semibold text-[#286BBD]">Closed Leads</CardTitle>
+            <CardTitle className="text-sm font-semibold text-[#286BBD]">
+              Closed Leads
+            </CardTitle>
             <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
               <CheckCircle className="h-5 w-5 text-red-600" />
             </div>
@@ -197,7 +202,7 @@ export const DashBoard = () => {
                 <BarChart3 className="h-6 w-6 mr-2 text-[#286BBD]" />
                 Recent Leads
               </CardTitle>
-              <Link href="/dashboard/leads">
+              <Link href="/contractor/leads">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -260,31 +265,55 @@ export const DashBoard = () => {
               <FileText className="h-6 w-6 mr-2 text-[#286BBD]" />
               Available Premium Leads
             </CardTitle>
-            <p className="text-sm text-gray-600 mt-1">High-quality leads ready for purchase</p>
+            <p className="text-sm text-gray-600 mt-1">
+              High-quality leads ready for purchase
+            </p>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {sampleLeads.map((lead: sampleLeadType) => (
-                <div key={lead.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div
+                  key={lead.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <div className="text-sm font-bold text-gray-400 select-none">
-                          {`${lead.firstName.slice(0, 2)}${'*'.repeat(Math.max(lead.firstName.length - 2, 0))} ${lead.lastName.slice(0, 2)}${'*'.repeat(Math.max(lead.lastName.length - 2, 0))}`}
+                          {`${lead.firstName.slice(0, 2)}${"*".repeat(
+                            Math.max(lead.firstName.length - 2, 0)
+                          )} ${lead.lastName.slice(0, 2)}${"*".repeat(
+                            Math.max(lead.lastName.length - 2, 0)
+                          )}`}
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs text-gray-500">
                         <div className="flex items-center">
                           <MapPin className="h-3 w-3 mr-1" />
-                        <span className="select-none">{`${lead.zipCode.slice(0, 2)}${'*'.repeat(Math.max(lead.zipCode.length - 2, 0))}`}</span>
+                          <span className="select-none">{`${lead.zipCode.slice(
+                            0,
+                            2
+                          )}${"*".repeat(
+                            Math.max(lead.zipCode.length - 2, 0)
+                          )}`}</span>
                         </div>
                         <div className="flex items-center">
                           <Phone className="h-3 w-3 mr-1" />
-                          <span className="select-none">{`${lead.phone.slice(0, 2)}${'*'.repeat(Math.max(lead.phone.length - 2, 0))}`}</span>
+                          <span className="select-none">{`${lead.phone.slice(
+                            0,
+                            2
+                          )}${"*".repeat(
+                            Math.max(lead.phone.length - 2, 0)
+                          )}`}</span>
                         </div>
                         <div className="flex items-center">
                           <Mail className="h-3 w-3 mr-1" />
-                          <span className="select-none">{`${lead.email.slice(0, 2)}${'*'.repeat(Math.max(lead.email.length - 2, 0))}`}</span>
+                          <span className="select-none">{`${lead.email.slice(
+                            0,
+                            2
+                          )}${"*".repeat(
+                            Math.max(lead.email.length - 2, 0)
+                          )}`}</span>
                         </div>
                       </div>
                     </div>
@@ -299,14 +328,16 @@ export const DashBoard = () => {
                         className={`text-white`}
                         disabled={loadingLeads.has(lead.id)}
                       >
-                        {loadingLeads.has(lead.id) ? "Processing..." : "Buy Now"}
+                        {loadingLeads.has(lead.id)
+                          ? "Processing..."
+                          : "Buy Now"}
                       </Button>
                     </div>
                   </div>
                 </div>
               ))}
               <div className="text-center pt-2">
-                <Link href="/dashboard/leads">
+                <Link href="/contractor/leads">
                   <Button
                     variant="outline"
                     className="text-[#122E5F] border-[#122E5F] hover:bg-[#122E5F] hover:text-white"

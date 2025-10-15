@@ -190,14 +190,14 @@ export const Leads = () => {
         </div>
         <div className="flex flex-col w-full lg:w-auto md:flex-row gap-3">
           <Button
-            onClick={() => router.push("/dashboard/purchase-leads")}
+            onClick={() => router.push("/contractor/purchase-leads")}
             className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
             <span>Add Purchase Leads</span>
           </Button>
           <Button
-            onClick={() => router.push("/dashboard/lead-purchase-info")}
+            onClick={() => router.push("/contractor/lead-purchase-info")}
             className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
           >
             <Info className="h-4 w-4 mr-2" />

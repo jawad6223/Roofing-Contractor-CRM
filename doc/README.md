@@ -128,7 +128,7 @@ The project uses Tailwind CSS with custom configuration. Key settings:
 - `/` - Landing page with hero section and features
 - `/login` - User authentication
 - `/crmContractor` - Contractor registration form
-- `/dashboard` - Main business dashboard
+- `/contractor` - Main business contractor
 - `/thank-you` - Success confirmation page
 
 ## 🎨 UI/UX Features

@@ -6,20 +6,13 @@ import { User, Edit3, Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { settingType } from "@/types/AdminTypes";
-import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
 import { supabase } from "@/lib/supabase";
 
 export const Setting = () => {
-  const { user } = useAuth();
-  const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-  const currentUserInfo = Array.isArray(userInfo) ? userInfo.find(
-    (info: { emailAddress: string; fullName: string }) =>
-      info.emailAddress === user
-  ) : userInfo;
-  const currentUserFullName = currentUserInfo?.fullName || user;
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<settingType>({
     fullName: "",
     email: "",
@@ -27,19 +20,9 @@ export const Setting = () => {
     leads: ""
   });
 
-  // useEffect(() => {
-  //   setFormData({
-  //     fullName: currentUserFullName || "Admin",
-  //     email: user || "admin@admin.com",
-  //     serviceRadius: "25",
-  //     businessAddress: "123 Main St, Dallas, TX 75201",
-  //     leads: "10"
-  //   });
-  // }, [currentUserFullName, user]);
   useEffect(() => {
     const fetchAdminData = async () => {
       try {
-        // setIsLoading(true);
 
         const { data, error } = await supabase
           .from("Admin_Data")
@@ -61,8 +44,6 @@ export const Setting = () => {
       } catch (err: any) {
         console.error("Error fetching admin data:", err);
         toast.error("Failed to load admin data");
-      } finally {
-        // setIsLoading(false);
       }
     };
 
@@ -75,53 +56,59 @@ export const Setting = () => {
 
   const handleCancel = () => {
     setIsEditing(false);
-    setFormData({
-      fullName: currentUserFullName || "",
-      email: user || "",
-      businessAddress: "",
-      leads: "10"
-    });
   };
 
-  // const handleUpdate = () => {
-  //   console.log('Updating profile with:', formData);
-  //   toast.success("Profile updated successfully");
-  //   setIsEditing(false);
-  // };
-
-  // const handleUpdate = async () => {
-  //   try {
-  //     const { error } = await supabase
-  //       .from("Admin_Data")
-  //       .update({
-  //         "Full Name": formData.fullName,
-  //         "Email Address": formData.email,
-  //         "Business Address": formData.businessAddress,
-  //         "Price Per Lead": parseFloat(formData.leads) || null,
-  //       })
-  //       .eq("Email Address", formData.email); // use email to identify the record
-
-  //     if (error) throw error;
-
-  //     toast.success("Admin profile updated successfully!");
-  //     setIsEditing(false);
-  //   } catch (err: any) {
-  //     console.error("Update error:", err);
-  //     toast.error("Failed to update admin data");
-  //   }
-  // };
-
   const handleUpdate = async () => {
+    setLoading(true);
     try {
       const oldEmail = localStorage.getItem("adminLoggedInUser");
-      if (!oldEmail) {
+      const adminId = localStorage.getItem("admin_id");
+      
+      if (!oldEmail || !adminId) {
         toast.error("Admin not logged in.");
         return;
       }
-  
+
+      const newEmail = formData.email;
+
+      if (oldEmail !== newEmail) {
+        const response = await fetch("/api/update-admin-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: adminId,
+            oldEmail: oldEmail,
+            newEmail: newEmail,
+            fullName: formData.fullName,
+            businessAddress: formData.businessAddress,
+            pricePerLead: parseFloat(formData.leads) || null,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          if (result.error?.includes("already registered") || result.error?.includes("duplicate")) {
+            toast.error("This email is already registered with another account");
+            return;
+          }
+          throw new Error(result.error || "Failed to update email");
+        }
+
+        toast.success("Email updated successfully! Please log in again with your new email.");
+        
+        await supabase.auth.signOut();
+        localStorage.removeItem("adminLoggedInUser");
+        localStorage.removeItem("admin_id");
+        
+        window.location.href = "/adminLogin";
+        return;
+      }
+
       console.log("🟢 Updating Admin_Data for:", oldEmail, "→", formData.email);
-  
-      // 1️⃣ Update Admin_Data
+
       const { error: updateError } = await supabase
         .from("Admin_Data")
         .update({
@@ -131,22 +118,22 @@ export const Setting = () => {
           "Price Per Lead": parseFloat(formData.leads) || null,
         })
         .eq("Email Address", oldEmail);
-  
+
       if (updateError) {
         console.error("❌ Supabase Admin_Data update error:", updateError);
         toast.error("Error updating Admin_Data table");
         return;
       }
-  
-      console.log("✅ Admin_Data updated, now calling API to update auth email...");
-  
+
       localStorage.setItem("adminLoggedInUser", formData.email);
-  
+
       toast.success("Admin profile updated successfully!");
       setIsEditing(false);
     } catch (err: any) {
       console.error("❌ Update error:", err);
       toast.error("Failed to update admin data");
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -177,9 +164,9 @@ export const Setting = () => {
                 <User className="h-10 w-10 text-white" />
               </div>
               <h3 className="font-semibold text-gray-900 capitalize">
-                {currentUserFullName}
+                {formData.fullName}
               </h3>
-              <p className="text-sm text-gray-600">{user}</p>
+              <p className="text-sm text-gray-600">{formData.email}</p>
             </div>
             <div className="space-y-4">
               <div>
@@ -252,10 +239,11 @@ export const Setting = () => {
                 </Button>
                 <Button 
                   onClick={handleUpdate}
-                  className="flex-1 h-11 bg-[#122E5F] hover:bg-[#0f2347]/80 font-semibold"
+                  className={`flex-1 h-11 bg-[#122E5F] hover:bg-[#0f2347]/80 font-semibold ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={loading}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Update Profile
+                  {loading ? "Updating..." : "Update Profile"}
                 </Button>
               </div>
             )}

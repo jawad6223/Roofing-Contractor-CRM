@@ -1,12 +1,12 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/Auth/ProtectedRoute";
-import { DashBoard, CRM, Leads, Setting, Team, LeadPurchaseInfo } from "@/components/dashboard/menuTabs";
-import PurchaseLeads from "@/components/dashboard/menuTabs/purchase-leads";
+import { DashBoard, CRM, Leads, Setting, Team, LeadPurchaseInfo } from "@/components/contractor/menuTabs";
+import PurchaseLeads from "@/components/contractor/menuTabs/purchase-leads";
 import { notFound } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const validSections = ["crm", "leads", "purchase-leads", "lead-purchase-info", "settings", "teams"];
+const validSections = ["dashboard", "crm", "leads", "purchase-leads", "lead-purchase-info", "settings", "teams"];
 
 export default function DashboardSectionPage({ params }: { params: Promise<{ section: string }> }) {
   const [section, setSection] = useState<string>("");
@@ -33,6 +33,8 @@ export default function DashboardSectionPage({ params }: { params: Promise<{ sec
 
   const renderSection = () => {
     switch (section.toLowerCase()) {
+      case "dashboard":
+        return <DashBoard />;
       case "crm":
         return <CRM />;
       case "leads":

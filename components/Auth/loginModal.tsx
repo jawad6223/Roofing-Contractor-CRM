@@ -105,7 +105,7 @@ export default function LoginModal() {
       }
 
       // 4️⃣ Redirect to dashboard or thank-you page
-      router.push("/dashboard");
+      router.push("/contractor/dashboard");
     } catch (err: any) {
       console.error("Login error:", err);
       toast.error("Login failed. Please try again.");

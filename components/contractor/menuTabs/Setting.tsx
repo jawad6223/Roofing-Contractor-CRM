@@ -11,16 +11,18 @@ import { FormField } from "@/types/Types";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
 import * as yup from "yup";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { paymentMethodType } from "@/types/DashboardTypes";
 
 export const Setting = () => {
   const { user, getCurrentUserFullName } = useAuth();
   const currentUserFullName = getCurrentUserFullName();
-
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
   const [cards, setCards] = useState<paymentMethodType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<settingType>({
     fullName: "",
     email: "",
@@ -129,41 +131,8 @@ export const Setting = () => {
     setIsEditing(false);
   };
 
-  // const handleUpdate = async () => {
-  //   try {
-  //     const userId = localStorage.getItem("user_id");
-  //     if (!userId) {
-  //       toast.error("User not logged in");
-  //       return;
-  //     }
-
-  //     setIsEditing(false); // disable edit mode during update
-
-  //     const { error } = await supabase
-  //       .from("Roofing_Auth")
-  //       .update({
-  //         "Full Name": formData.fullName,
-  //         "Email Address": formData.email,
-  //         "Service Radius": formData.serviceRadius,
-  //         "Business Address": formData.businessAddress,
-  //       })
-  //       .eq("user_id", userId);
-
-  //     console.log("Updating for user_id:", userId);
-
-  //     if (error) throw error;
-
-  //     toast.success("Profile updated successfully 🎉");
-  //   } catch (err: any) {
-  //     console.error("Error updating profile:", err);
-  //     toast.error(`Failed to update profile: ${err.message}`);
-  //   } finally {
-  //     setIsEditing(false);
-  //   }
-  // };
-
-
   const handleUpdate = async () => {
+    setLoading(true);
     try {
       const userId = localStorage.getItem("user_id");
       if (!userId) {
@@ -196,6 +165,28 @@ export const Setting = () => {
           }
           throw new Error(result.error || "Failed to update email");
         }
+
+        const { error: dbError } = await supabase
+          .from("Roofing_Auth")
+          .update({
+            "Full Name": formData.fullName,
+            "Email Address": formData.email,
+            "Service Radius": formData.serviceRadius,
+            "Business Address": formData.businessAddress,
+          })
+          .eq("user_id", userId);
+
+        if (dbError) throw dbError;
+
+        toast.success("Email updated successfully! Please log in again with your new email.");
+        
+        await supabase.auth.signOut();
+        localStorage.removeItem("user_id");
+        localStorage.removeItem("loggedInUser");
+        localStorage.removeItem("userInfo");
+        
+        router.push("/login");
+        return;
       }
 
       const { error: dbError } = await supabase
@@ -215,11 +206,10 @@ export const Setting = () => {
     } catch (err: any) {
       console.error("Error updating profile:", err);
       toast.error(`Failed to update profile: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
   };
-  
-  
-  
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -238,7 +228,6 @@ export const Setting = () => {
 
   const handleFormSubmit = async (formData: Record<string, any>) => {
     try {
-      // 1️⃣ Get the logged-in user's ID from localStorage or Supabase session
       const userId = localStorage.getItem("user_id");
 
       if (!userId) {
@@ -246,12 +235,10 @@ export const Setting = () => {
         return;
       }
 
-      // 2️⃣ Extract and prepare card info
       const cardNumber = formData.cardNumber.trim();
       const card_last4 = cardNumber.slice(-4);
       const expiry_date = formData.expiryDate;
 
-      // 3️⃣ Insert into Supabase table
       const { error } = await supabase.from("Payment_Method").insert([
         {
           user_id: userId,
@@ -264,7 +251,6 @@ export const Setting = () => {
 
       if (error) throw error;
 
-      // 4️⃣ Notify user and close modal
       toast.success("Payment method saved successfully");
       await fetchCards();
       handleClosePaymentModal();
@@ -276,7 +262,6 @@ export const Setting = () => {
 
   const fetchCards = async () => {
     try {
-      // get user id (prefer from Supabase session)
       const { data: sessionData } = await supabase.auth.getSession();
       const userId =
         sessionData?.session?.user?.id || localStorage.getItem("user_id");
@@ -286,7 +271,6 @@ export const Setting = () => {
         return;
       }
 
-      // fetch payment methods for that user
       const { data, error } = await supabase
         .from("Payment_Method")
         .select("*")
@@ -471,10 +455,11 @@ export const Setting = () => {
                 </Button>
                 <Button
                   onClick={handleUpdate}
-                  className="flex-1 h-11 bg-[#122E5F] hover:bg-[#0f2347] font-semibold"
+                  className={`flex-1 h-11 bg-[#122E5F] hover:bg-[#0f2347] font-semibold ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                  disabled={loading}
                 >
                   <Save className="h-4 w-4 mr-2" />
-                  Update Profile
+                  {loading ? "Updating..." : "Update Profile"}
                 </Button>
               </div>
             )}

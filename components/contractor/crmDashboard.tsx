@@ -30,11 +30,13 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
     const pathSegments = pathname.split("/");
     const section = pathSegments[pathSegments.length - 1];
 
-    if (pathname === "/dashboard" || section === "dashboard") {
+    if (pathname === "/contractor" || section === "dashboard") {
       return "Dashboard";
     }
 
     switch (section) {
+      case "dashboard":
+        return "Dashboard";
       case "crm":
         return "CRM";
       case "leads":
@@ -55,13 +57,13 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
   const activeTab = getActiveTab();
 
   const menuItems = [
-    { icon: Home, label: "Dashboard", path: "/dashboard" },
-    { icon: BarChart3, label: "CRM", path: "/dashboard/crm" },
-    { icon: FileText, label: "Leads", path: "/dashboard/leads" },
-    { icon: ShoppingCart, label: "Purchase Leads", path: "/dashboard/purchase-leads" },
-    { icon: FileText, label: "Lead Purchase Info", path: "/dashboard/lead-purchase-info" },
-    { icon: Settings, label: "Settings", path: "/dashboard/settings" },
-    { icon: UserPlus, label: "Teams", path: "/dashboard/teams" },
+    { icon: Home, label: "Dashboard", path: "/contractor/dashboard" },
+    { icon: BarChart3, label: "CRM", path: "/contractor/crm" },
+    { icon: FileText, label: "Leads", path: "/contractor/leads" },
+    { icon: ShoppingCart, label: "Purchase Leads", path: "/contractor/purchase-leads" },
+    { icon: FileText, label: "Lead Purchase Info", path: "/contractor/lead-purchase-info" },
+    { icon: Settings, label: "Settings", path: "/contractor/settings" },
+    { icon: UserPlus, label: "Teams", path: "/contractor/teams" },
   ];
 
   const handleLogout = () => {

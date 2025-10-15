@@ -1,7 +1,7 @@
 import { FileText, Users, DollarSign, Settings, BarChart3 } from "lucide-react";
 
 export const sidebarItems = [
-  { id: "dashboard", label: "Dashboard", icon: BarChart3, path: "/admin" },
+  { id: "dashboard", label: "Dashboard", icon: BarChart3, path: "/admin/dashboard" },
   { id: "leads", label: "Leads", icon: FileText, path: "/admin/leads" },
   { id: "contractors", label: "Contractors", icon: Users, path: "/admin/contractors", },
   { id: "leads-request", label: "Lead Request", icon: FileText, path: "/admin/leads-request", },

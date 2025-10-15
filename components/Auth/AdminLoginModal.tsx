@@ -65,10 +65,8 @@ export default function AdminLoginModal() {
     setIsLoading(true);
     try {
       // 1️⃣ Check against environment variables (you'll need to use NEXT_PUBLIC_ prefix for client-side access)
-      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-      console.log(adminEmail);
-      console.log(data.emailAddress);
-      if (data.emailAddress === adminEmail) {
+      // const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+      // if (data.emailAddress === adminEmail) {
         // 2️⃣ If credentials match, try to sign in with Supabase Auth
         const { data: authData, error } = await supabase.auth.signInWithPassword({
           email: data.emailAddress.toLowerCase(),
@@ -87,14 +85,21 @@ export default function AdminLoginModal() {
         }
 
         // 3️⃣ Successfully logged in
+        const admin = authData.user;
+        if (!admin) {
+          toast.error("Admin not found after login.");
+          return;
+        }
+        
+        localStorage.setItem("admin_id", admin.id);
         toast.success("Admin login successful!");
         loginAdmin(data.emailAddress);
         reset();
         
         // 4️⃣ Redirect to admin dashboard
-        router.push("/admin");
+        router.push("/admin/dashboard");
         return;
-      }
+      // }
 
       // 5️⃣ If credentials don't match env vars, show error
       toast.error("Invalid admin credentials");

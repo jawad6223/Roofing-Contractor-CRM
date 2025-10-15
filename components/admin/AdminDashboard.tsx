@@ -18,17 +18,13 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { requestLeads } from "./menuTabs/Data";
-import { requestLeadType, sidebarItemsType } from "@/types/AdminTypes";
+import { sidebarItemsType } from "@/types/AdminTypes";
 import { sidebarItems } from "./menuTabs/Data";
 import {
-  Users,
   Menu,
   X,
   LogOut,
   User,
-  MapPin,
-  Phone,
-  Search,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -38,23 +34,11 @@ import { AdminDashboardProps } from "@/types/AdminTypes";
 export default function AdminDashboard({ children }: AdminDashboardProps) {
   const { logoutAdmin, admin, getCurrentAdminName, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
   const pathname = usePathname();
 
   const handleLogout = () => {
     logoutAdmin();
   };
-
-  const filteredLeads = requestLeads.filter((lead) => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      lead.firstName.toLowerCase().includes(searchLower) ||
-      lead.lastName.toLowerCase().includes(searchLower) ||
-      lead.phoneno.includes(searchTerm) ||
-      lead.zipCode.includes(searchTerm) ||
-      lead.status.toLowerCase().includes(searchLower)
-    );
-  });
 
   const getActiveTab = () => {
     const pathSegments = pathname.split("/");

@@ -225,7 +225,7 @@ const colors = {
 #### 1. Code Splitting
 ```typescript
 // Dynamic imports for large components
-const Dashboard = dynamic(() => import('./Dashboard'), {
+const Dashboard = dynamic(() => import('./contractor'), {
   loading: () => <DashboardSkeleton />
 });
 ```

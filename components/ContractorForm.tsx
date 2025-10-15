@@ -299,7 +299,7 @@ export function ContractorForm() {
         email: formData.emailAddress.toLowerCase(),
         password: formData.password,
         options: {
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/dashboard`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
         },
       });
 
@@ -310,8 +310,8 @@ export function ContractorForm() {
         return;
       }
       // if(user?.user_metadata?.email_verified){
-        localStorage.setItem("user_id", user.id);
-        localStorage.setItem("loggedInUser", formData.emailAddress.toLowerCase());
+        // localStorage.setItem("user_id", user.id);
+        // localStorage.setItem("loggedInUser", formData.emailAddress.toLowerCase());
       // }
   
       if (error) throw error;

@@ -1,7 +1,7 @@
 "use client";
 
 import { ProtectedRoute } from '@/components/Auth/ProtectedRoute';
-import { DashBoard } from '@/components/dashboard/menuTabs';
+import { DashBoard } from '@/components/contractor/menuTabs';
 
 export default function Dashboard() {
   return (

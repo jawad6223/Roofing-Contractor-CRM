@@ -21,7 +21,7 @@ export const ProtectedRoute = ({
       router.push(redirectTo)
     }
     //  else if (!requireAuth && loggedInUser) {
-    //   router.push('/dashboard')
+    //   router.push('/bowije4380@gamegta.com')
     // }
      else {
       setShouldRender(true)

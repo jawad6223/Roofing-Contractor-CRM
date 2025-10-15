@@ -33,7 +33,7 @@ export const useAuth = () => {
       localStorage.setItem("loggedInUser", emailAddress);
     }
     setUser(emailAddress);
-    router.push("/dashboard");
+    router.push("/contractor");
   };
 
   const loginAdmin = (emailAddress: string) => {
@@ -55,6 +55,7 @@ export const useAuth = () => {
   const logoutAdmin = () => {
     if (typeof window !== 'undefined') {
       localStorage.removeItem("adminLoggedInUser");
+      localStorage.removeItem("admin_id");
     }
     setAdmin(null);
     router.push("/adminLogin");
