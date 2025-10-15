@@ -196,8 +196,6 @@ export const Setting = () => {
           }
           throw new Error(result.error || "Failed to update email");
         }
-
-        toast.success("Email updated successfully in authentication system!");
       }
 
       const { error: dbError } = await supabase
