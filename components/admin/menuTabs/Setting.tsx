@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { settingType } from "@/types/AdminTypes";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
+import { supabase } from "@/lib/supabase";
 
 export const Setting = () => {
   const { user } = useAuth();
@@ -20,22 +21,53 @@ export const Setting = () => {
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [formData, setFormData] = useState<settingType>({
-    fullName: "Admin",
-    email: "admin@admin.com",
-    serviceRadius: "25",
-    businessAddress: "123 Main St, Dallas, TX 75201",
-    leads: "10"
+    fullName: "",
+    email: "",
+    businessAddress: "",
+    leads: ""
   });
 
+  // useEffect(() => {
+  //   setFormData({
+  //     fullName: currentUserFullName || "Admin",
+  //     email: user || "admin@admin.com",
+  //     serviceRadius: "25",
+  //     businessAddress: "123 Main St, Dallas, TX 75201",
+  //     leads: "10"
+  //   });
+  // }, [currentUserFullName, user]);
   useEffect(() => {
-    setFormData({
-      fullName: currentUserFullName || "Admin",
-      email: user || "admin@admin.com",
-      serviceRadius: "25",
-      businessAddress: "123 Main St, Dallas, TX 75201",
-      leads: "10"
-    });
-  }, [currentUserFullName, user]);
+    const fetchAdminData = async () => {
+      try {
+        // setIsLoading(true);
+
+        const { data, error } = await supabase
+          .from("Admin_Data")
+          .select(`"Full Name", "Email Address", "Business Address", "Price Per Lead"`)
+          .maybeSingle();
+
+        if (error) throw error;
+
+        if (data) {
+          setFormData({
+            fullName: data["Full Name"] || "",
+            email: data["Email Address"] || "",
+            businessAddress: data["Business Address"] || "",
+            leads: data["Price Per Lead"]?.toString() || "",
+          });
+        } else {
+          toast.warning("No admin data found in table.");
+        }
+      } catch (err: any) {
+        console.error("Error fetching admin data:", err);
+        toast.error("Failed to load admin data");
+      } finally {
+        // setIsLoading(false);
+      }
+    };
+
+    fetchAdminData();
+  }, []);
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -46,17 +78,81 @@ export const Setting = () => {
     setFormData({
       fullName: currentUserFullName || "",
       email: user || "",
-      serviceRadius: "25",
-      businessAddress: "123 Main St, Dallas, TX 75201",
+      businessAddress: "",
       leads: "10"
     });
   };
 
-  const handleUpdate = () => {
-    console.log('Updating profile with:', formData);
-    toast.success("Profile updated successfully");
-    setIsEditing(false);
+  // const handleUpdate = () => {
+  //   console.log('Updating profile with:', formData);
+  //   toast.success("Profile updated successfully");
+  //   setIsEditing(false);
+  // };
+
+  // const handleUpdate = async () => {
+  //   try {
+  //     const { error } = await supabase
+  //       .from("Admin_Data")
+  //       .update({
+  //         "Full Name": formData.fullName,
+  //         "Email Address": formData.email,
+  //         "Business Address": formData.businessAddress,
+  //         "Price Per Lead": parseFloat(formData.leads) || null,
+  //       })
+  //       .eq("Email Address", formData.email); // use email to identify the record
+
+  //     if (error) throw error;
+
+  //     toast.success("Admin profile updated successfully!");
+  //     setIsEditing(false);
+  //   } catch (err: any) {
+  //     console.error("Update error:", err);
+  //     toast.error("Failed to update admin data");
+  //   }
+  // };
+
+  const handleUpdate = async () => {
+    try {
+      const oldEmail = localStorage.getItem("adminLoggedInUser");
+      if (!oldEmail) {
+        toast.error("Admin not logged in.");
+        return;
+      }
+  
+      console.log("🟢 Updating Admin_Data for:", oldEmail, "→", formData.email);
+  
+      // 1️⃣ Update Admin_Data
+      const { error: updateError } = await supabase
+        .from("Admin_Data")
+        .update({
+          "Full Name": formData.fullName,
+          "Email Address": formData.email,
+          "Business Address": formData.businessAddress,
+          "Price Per Lead": parseFloat(formData.leads) || null,
+        })
+        .eq("Email Address", oldEmail);
+  
+      if (updateError) {
+        console.error("❌ Supabase Admin_Data update error:", updateError);
+        toast.error("Error updating Admin_Data table");
+        return;
+      }
+  
+      console.log("✅ Admin_Data updated, now calling API to update auth email...");
+  
+      localStorage.setItem("adminLoggedInUser", formData.email);
+  
+      toast.success("Admin profile updated successfully!");
+      setIsEditing(false);
+    } catch (err: any) {
+      console.error("❌ Update error:", err);
+      toast.error("Failed to update admin data");
+    }
   };
+  
+  
+  
+  
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
@@ -107,22 +203,6 @@ export const Setting = () => {
                   readOnly={!isEditing}
                   className={`text-gray-900 h-11 ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Service Radius
-                </label>
-                <div className="relative">
-                  <Input
-                    value={formData.serviceRadius}
-                    onChange={(e) => handleInputChange('serviceRadius', e.target.value)}
-                    readOnly={!isEditing}
-                    className={`text-gray-900 h-11 pr-16 ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
-                  />
-                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                    miles
-                  </span>
-                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">

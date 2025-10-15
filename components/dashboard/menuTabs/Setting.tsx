@@ -1,24 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  User,
-  CreditCard,
-  Edit3,
-  Save,
-  X,
-  Trash,
-} from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import { User, CreditCard, Edit3, Save, X, Trash } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -146,6 +129,40 @@ export const Setting = () => {
     setIsEditing(false);
   };
 
+  // const handleUpdate = async () => {
+  //   try {
+  //     const userId = localStorage.getItem("user_id");
+  //     if (!userId) {
+  //       toast.error("User not logged in");
+  //       return;
+  //     }
+
+  //     setIsEditing(false); // disable edit mode during update
+
+  //     const { error } = await supabase
+  //       .from("Roofing_Auth")
+  //       .update({
+  //         "Full Name": formData.fullName,
+  //         "Email Address": formData.email,
+  //         "Service Radius": formData.serviceRadius,
+  //         "Business Address": formData.businessAddress,
+  //       })
+  //       .eq("user_id", userId);
+
+  //     console.log("Updating for user_id:", userId);
+
+  //     if (error) throw error;
+
+  //     toast.success("Profile updated successfully 🎉");
+  //   } catch (err: any) {
+  //     console.error("Error updating profile:", err);
+  //     toast.error(`Failed to update profile: ${err.message}`);
+  //   } finally {
+  //     setIsEditing(false);
+  //   }
+  // };
+
+
   const handleUpdate = async () => {
     try {
       const userId = localStorage.getItem("user_id");
@@ -153,10 +170,37 @@ export const Setting = () => {
         toast.error("User not logged in");
         return;
       }
-  
-      setIsEditing(false); // disable edit mode during update
-  
-      const { error } = await supabase
+
+      const { data: currentUser } = await supabase.auth.getUser();
+      const currentEmail = currentUser?.user?.email;
+      const newEmail = formData.email;
+
+      if (currentEmail !== newEmail) {
+        const response = await fetch("/api/update-user-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: userId,
+            newEmail: newEmail,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          if (result.error?.includes("already registered") || result.error?.includes("duplicate")) {
+            toast.error("This email is already registered with another account");
+            return;
+          }
+          throw new Error(result.error || "Failed to update email");
+        }
+
+        toast.success("Email updated successfully in authentication system!");
+      }
+
+      const { error: dbError } = await supabase
         .from("Roofing_Auth")
         .update({
           "Full Name": formData.fullName,
@@ -166,18 +210,17 @@ export const Setting = () => {
         })
         .eq("user_id", userId);
 
-        console.log("Updating for user_id:", userId);
-  
-      if (error) throw error;
-  
+      if (dbError) throw dbError;
+
       toast.success("Profile updated successfully 🎉");
+      setIsEditing(false);
     } catch (err: any) {
       console.error("Error updating profile:", err);
       toast.error(`Failed to update profile: ${err.message}`);
-    } finally {
-      setIsEditing(false);
     }
   };
+  
+  
   
 
   const handleInputChange = (field: string, value: string) => {
@@ -195,27 +238,21 @@ export const Setting = () => {
     setIsPaymentModalOpen(false);
   };
 
-  // const handleFormSubmit = (formData: Record<string, any>) => {
-  //   console.log("Saving payment method:", formData);
-  //   toast.success("Payment method saved successfully");
-  //   handleClosePaymentModal();
-  // };
-
   const handleFormSubmit = async (formData: Record<string, any>) => {
     try {
       // 1️⃣ Get the logged-in user's ID from localStorage or Supabase session
       const userId = localStorage.getItem("user_id");
-  
+
       if (!userId) {
         toast.error("User not logged in");
         return;
       }
-  
+
       // 2️⃣ Extract and prepare card info
       const cardNumber = formData.cardNumber.trim();
       const card_last4 = cardNumber.slice(-4);
       const expiry_date = formData.expiryDate;
-  
+
       // 3️⃣ Insert into Supabase table
       const { error } = await supabase.from("Payment_Method").insert([
         {
@@ -226,14 +263,13 @@ export const Setting = () => {
           expiry_date: expiry_date,
         },
       ]);
-  
+
       if (error) throw error;
-  
+
       // 4️⃣ Notify user and close modal
       toast.success("Payment method saved successfully");
       await fetchCards();
       handleClosePaymentModal();
-  
     } catch (err: any) {
       console.error("Error saving payment method:", err);
       toast.error("Failed to save payment method");
@@ -244,7 +280,8 @@ export const Setting = () => {
     try {
       // get user id (prefer from Supabase session)
       const { data: sessionData } = await supabase.auth.getSession();
-      const userId = sessionData?.session?.user?.id || localStorage.getItem("user_id");
+      const userId =
+        sessionData?.session?.user?.id || localStorage.getItem("user_id");
 
       if (!userId) {
         toast.error("User not logged in");
@@ -271,13 +308,16 @@ export const Setting = () => {
   useEffect(() => {
     fetchCards();
   }, []);
-  
+
   const handlePaymentMethodDelete = async (cardId: string) => {
     try {
-      const { error } = await supabase.from("Payment_Method").delete().eq("id", cardId);
+      const { error } = await supabase
+        .from("Payment_Method")
+        .delete()
+        .eq("id", cardId);
       if (error) throw error;
       toast.success("Payment method deleted successfully");
-      await fetchCards(); 
+      await fetchCards();
     } catch (err: any) {
       console.error("Delete error:", err);
       toast.error("Failed to delete payment method");
@@ -455,7 +495,10 @@ export const Setting = () => {
               {cards.length > 0 ? (
                 <div className="space-y-4">
                   {cards.map((card) => (
-                    <div key={card.id} className="p-4 border border-gray-200 rounded-lg hover:border-[#286BBD] hover:shadow-md transition-all">
+                    <div
+                      key={card.id}
+                      className="p-4 border border-gray-200 rounded-lg hover:border-[#286BBD] hover:shadow-md transition-all"
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                           <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg flex items-center justify-center">
@@ -463,43 +506,60 @@ export const Setting = () => {
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className="font-medium text-gray-900">
-                                •••• {card.card_last4}
-                              </p>
-                              <Badge variant="outline" className="text-xs font-normal capitalize">
+                                <p className="font-medium text-gray-900">
+                                  •••• {card.card_last4}
+                                </p>
+                              <Badge
+                                variant="outline"
+                                className="text-xs font-normal capitalize"
+                              >
                                 {card.card_brand}
                               </Badge>
                             </div>
+                            <p className="font-medium text-gray-500">
+                              {card.card_holder_name}
+                            </p>
                             <p className="text-sm text-gray-500">
                               Expires {card.expiry_date}
                             </p>
                           </div>
                         </div>
                         <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                        <Button
-                          variant="ghost" 
-                          size="sm"
-                          className="h-8 w-8 p-0 text-red-500 border border-red-500  hover:text-white hover:bg-red-500"
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                        </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="text-[#286BBD]">Delete Payment Method</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete this payment method? This action cannot be undone and you will lose access to the system.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel className="text-[#286BBD]">Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handlePaymentMethodDelete(card.id)} className="bg-red-500 hover:bg-red-600">
-                                  Yes, Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 text-red-500 border border-red-500  hover:text-white hover:bg-red-500"
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-[#286BBD]">
+                                Delete Payment Method
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this payment
+                                method? This action cannot be undone and you
+                                will lose access to the system.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="text-[#286BBD]">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() =>
+                                  handlePaymentMethodDelete(card.id)
+                                }
+                                className="bg-red-500 hover:bg-red-600"
+                              >
+                                Yes, Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   ))}

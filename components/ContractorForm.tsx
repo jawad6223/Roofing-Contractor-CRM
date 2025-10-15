@@ -732,10 +732,14 @@ export function ContractorForm() {
                 <div className="w-20 h-20 bg-[#122E5F] rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg animate-bounce-slow">
                   <Mail className="h-10 w-10 text-white drop-shadow-lg" />
                 </div>
-                <p className="text-gray-500 mb-2">
-                  We&apos;ve sent a verification email to{" "}
-                  <span className="font-semibold text-[#286BBD] my-2">{formData.emailAddress}</span>.<br />
-                  Please check your email and click the verification link to activate your account.
+                <p className="text-gray-500">
+                  We&apos;ve sent a verification email to
+                  <span className="font-semibold text-[#286BBD] block my-2">{formData.emailAddress}</span>
+                </p>
+                <p className="text-gray-500 mt-5">
+                  Please check your email and click the verification link
+                  <br/>
+                  to activate your account.
                 </p>
               </div>
 

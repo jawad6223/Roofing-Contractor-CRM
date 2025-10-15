@@ -73,6 +73,6 @@ export interface  paymentMethodType {
   card_last4: string;
   expiry_date: string;
   cvv: string;
-  cardholderName: string;
+  card_holder_name: string;
   card_brand: string;
 }

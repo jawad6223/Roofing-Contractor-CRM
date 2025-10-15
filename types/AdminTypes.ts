@@ -50,7 +50,6 @@ export interface dashboardCardType {
 export interface settingType {
   fullName: string;
   email: string;
-  serviceRadius: string;
   businessAddress: string;
   leads: string;
 }
