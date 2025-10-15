@@ -2,15 +2,23 @@ import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   User,
-  Bell,
   CreditCard,
   Edit3,
   Save,
   X,
-  Calendar,
-  Lock,
   Trash,
 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,6 +29,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "react-toastify";
 import * as yup from "yup";
 import { supabase } from "@/lib/supabase";
+import { paymentMethodType } from "@/types/DashboardTypes";
 
 export const Setting = () => {
   const { user, getCurrentUserFullName } = useAuth();
@@ -28,6 +37,7 @@ export const Setting = () => {
 
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
+  const [cards, setCards] = useState<paymentMethodType[]>([]);
   const [formData, setFormData] = useState<settingType>({
     fullName: "",
     email: "",
@@ -203,8 +213,8 @@ export const Setting = () => {
   
       // 2️⃣ Extract and prepare card info
       const cardNumber = formData.cardNumber.trim();
-      const card_last4 = cardNumber.slice(-4); // store only last 4 digits for safety
-      const expiry_date = formData.expiryDate; // e.g. "12/27"
+      const card_last4 = cardNumber.slice(-4);
+      const expiry_date = formData.expiryDate;
   
       // 3️⃣ Insert into Supabase table
       const { error } = await supabase.from("Payment_Method").insert([
@@ -221,11 +231,56 @@ export const Setting = () => {
   
       // 4️⃣ Notify user and close modal
       toast.success("Payment method saved successfully");
+      await fetchCards();
       handleClosePaymentModal();
   
     } catch (err: any) {
       console.error("Error saving payment method:", err);
       toast.error("Failed to save payment method");
+    }
+  };
+
+  const fetchCards = async () => {
+    try {
+      // get user id (prefer from Supabase session)
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData?.session?.user?.id || localStorage.getItem("user_id");
+
+      if (!userId) {
+        toast.error("User not logged in");
+        return;
+      }
+
+      // fetch payment methods for that user
+      const { data, error } = await supabase
+        .from("Payment_Method")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setCards(data || []);
+    } catch (err) {
+      console.error("Error fetching cards:", err);
+      toast.error("Failed to load cards");
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    fetchCards();
+  }, []);
+  
+  const handlePaymentMethodDelete = async (cardId: string) => {
+    try {
+      const { error } = await supabase.from("Payment_Method").delete().eq("id", cardId);
+      if (error) throw error;
+      toast.success("Payment method deleted successfully");
+      await fetchCards(); 
+    } catch (err: any) {
+      console.error("Delete error:", err);
+      toast.error("Failed to delete payment method");
     }
   };
 
@@ -397,29 +452,65 @@ export const Setting = () => {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-6 border-2 border-gray-200 rounded-xl hover:border-[#286BBD] transition-colors">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <CreditCard className="h-6 w-6 text-[#286BBD]" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">
-                      •••• •••• •••• 4242
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Visa • Expires 12/25
-                    </p>
-                  </div>
+              {cards.length > 0 ? (
+                <div className="space-y-4">
+                  {cards.map((card) => (
+                    <div key={card.id} className="p-4 border border-gray-200 rounded-lg hover:border-[#286BBD] hover:shadow-md transition-all">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-50 rounded-lg flex items-center justify-center">
+                            <CreditCard className="h-5 w-5 text-[#286BBD]" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium text-gray-900">
+                                •••• {card.card_last4}
+                              </p>
+                              <Badge variant="outline" className="text-xs font-normal capitalize">
+                                {card.card_brand}
+                              </Badge>
+                            </div>
+                            <p className="text-sm text-gray-500">
+                              Expires {card.expiry_date}
+                            </p>
+                          </div>
+                        </div>
+                        <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost" 
+                          size="sm"
+                          className="h-8 w-8 p-0 text-red-500 border border-red-500  hover:text-white hover:bg-red-500"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                        </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="text-[#286BBD]">Delete Payment Method</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this payment method? This action cannot be undone and you will lose access to the system.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel className="text-[#286BBD]">Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handlePaymentMethodDelete(card.id)} className="bg-red-500 hover:bg-red-600">
+                                  Yes, Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex flex-col items-center space-y-3">
-                  <Button
-                    variant="outline"
-                    className="h-8 text-red-500 hover:bg-red-500 hover:text-white"
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center text-gray-500">
+                  <CreditCard className="h-12 w-12 mb-3 text-gray-300" />
+                  <p>No payment methods added yet</p>
+                  <p className="text-sm">Add a card to get started</p>
                 </div>
-              </div>
+              )}
               <Button
                 variant="outline"
                 onClick={handleAddPaymentMethod}

@@ -68,10 +68,11 @@ export interface settingType {
   businessAddress: string;
 }
 
-export interface paymentMethodType {
-  cardNumber: string;
-  expiryDate: string;
+export interface  paymentMethodType {
+  id: string;
+  card_last4: string;
+  expiry_date: string;
   cvv: string;
   cardholderName: string;
-  cardType: string;
+  card_brand: string;
 }
