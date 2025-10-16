@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Calendar, Building, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,12 +8,14 @@ import { DetailPopup } from "@/components/ui/DetailPopup";
 import { dashboardCard, allLeads, requestLeads } from "./Data";
 import Link from "next/link";
 import {dashboardCardType, LeadType, requestLeadType } from "@/types/AdminTypes";
+import { fetchLeads } from "./Data";
 
 export const Dashboard = () => {
   const [selectedLead, setSelectedLead] = useState<LeadType>();
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
   const [selectedRequestLead, setSelectedRequestLead] = useState<requestLeadType>();
   const [isRequestLeadModalOpen, setIsRequestLeadModalOpen] = useState<boolean>(false);
+  const [leads, setLeads] = useState<LeadType[]>([]);
   const handleLeadClick = (lead: LeadType) => {
     setSelectedLead(lead);
     setIsLeadModalOpen(true);
@@ -35,42 +37,52 @@ export const Dashboard = () => {
     setSelectedRequestLead(undefined);
   };
 
+  useEffect(() => {
+    const fetchLeadsData = async () => {
+      const leadsData = await fetchLeads()
+      if (leadsData) {
+        setLeads(leadsData);
+      }
+    };
+    fetchLeadsData();
+  }, []);
+
    const leadFields = selectedLead ? [
     {
       label: "Full Name",
-      value: `${selectedLead.firstName} ${selectedLead.lastName}`,
+      value: `${selectedLead["First Name"]} ${selectedLead["Last Name"]}`,
       icon: User
     },
     {
       label: "Phone",
-      value: selectedLead.phoneno,
+      value: selectedLead["Phone Number"],
       icon: Phone
     },
     {
       label: "Email",
-      value: selectedLead.email,
+      value: selectedLead["Email Address"],
       icon: Mail,
       breakAll: true
     },
     {
       label: "Zip Code",
-      value: selectedLead.zipCode,
+      value: selectedLead["Property ZIP Code"],
       icon: MapPin
     },
     {
       label: "Insurance Company",
-      value: selectedLead.company,
+      value: selectedLead["Insurance Company"],
       icon: Building,
       whitespaceNowrap: true
     },
     {
       label: "Policy Number",
-      value: selectedLead.policy,
+      value: selectedLead["Policy Number"],
       icon: Hash
     },
     {
       label: "Purchase Date",
-      value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
+      value: new Date(selectedLead["Purchase Date"]).toLocaleDateString(),
       icon: Calendar
     }
   ] : [];
@@ -170,7 +182,7 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {allLeads.slice(0, 3).map((lead: LeadType, index: number) => (
+              {leads.slice(0, 3).map((lead: LeadType, index: number) => (
                 <div
                   key={index}
                   onClick={() => handleLeadClick(lead)}
@@ -183,13 +195,13 @@ export const Dashboard = () => {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
                         <h4 className="font-semibold text-gray-900 text-base">
-                          {lead.firstName} {lead.lastName}
+                          {lead["First Name"]} {lead["Last Name"]}
                         </h4>
                       </div>
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
                         <div className="flex items-center space-x-1">
                           <MapPin className="h-3 w-3" />
-                          <span>{lead.company}</span>
+                          <span>{lead["Insurance Company"]}</span>
                         </div>
                       </div>
                     </div>
@@ -199,11 +211,11 @@ export const Dashboard = () => {
                     <div className="flex flex-col items-end space-y-1">
                       <div className="text-sm text-[#286BBD] flex items-center hover:text-[#1d4ed8] transition-colors">
                         <Phone className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{lead.phoneno}</span>
+                        <span className="font-medium">{lead["Phone Number"]}</span>
                       </div>
                       <div className="text-sm text-gray-600 flex items-center hover:text-gray-800 transition-colors">
                         <Mail className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{lead.email}</span>
+                        <span className="font-medium">{lead["Email Address"]}</span>
                       </div>
                     </div>
                   </div>

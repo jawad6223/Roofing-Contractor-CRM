@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const { leadAmount, leadName } = await request.json();
+    const { leadAmount, leadName, email, user_id } = await request.json();
 
     if (!leadAmount) {
       return NextResponse.json({ error: "Missing lead amount" }, { status: 400 });
@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
+      customer_email: email,
       line_items: [
         {
           price_data: {
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
             product_data: {
               name: leadName || "Premium Lead",
             },
-            unit_amount: Math.round(leadAmount * 100), // convert dollars to cents
+            unit_amount: Math.round(leadAmount * 100),
           },
           quantity: 1,
         },
@@ -30,6 +31,11 @@ export async function POST(request: NextRequest) {
       mode: "payment",
       success_url: `${request.headers.get("origin")}/success`,
       cancel_url: `${request.headers.get("origin")}/cancel`,
+      // payment_method_options: {
+      //   card: {
+      //     customer: customerId,
+      //   },
+      // },
     });
 
     return NextResponse.json({ url: session.url });

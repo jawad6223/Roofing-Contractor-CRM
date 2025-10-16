@@ -1,4 +1,7 @@
 import { FileText, Users, DollarSign, Settings, BarChart3 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { toast } from "react-toastify";
+import { ContractorType } from "@/types/AdminTypes";
 
 export const sidebarItems = [
   { id: "dashboard", label: "Dashboard", icon: BarChart3, path: "/admin/dashboard" },
@@ -7,6 +10,48 @@ export const sidebarItems = [
   { id: "leads-request", label: "Lead Request", icon: FileText, path: "/admin/leads-request", },
   { id: "settings", label: "Settings", icon: Settings, path: "/admin/settings", },
 ];
+
+export const fetchContractors = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("Roofing_Auth")
+      .select(
+        `"Full Name", "Title", "Phone Number", "Email Address", "Business Address", "Service Radius", user_id`
+      );
+
+    if (error) throw error;
+
+    const mappedData: ContractorType[] =
+      data?.map((item: any) => ({
+        user_id: item.user_id,
+        fullName: item["Full Name"] || "",
+        title: item["Title"] || "",
+        phoneno: item["Phone Number"] || "",
+        email: item["Email Address"] || "",
+        businessAddress: item["Business Address"] || "",
+        serviceRadius: item["Service Radius"] || "",
+      })) || [];
+
+    return mappedData;
+  } catch (err: any) {
+    console.error("Error fetching contractors:", err);
+    toast.error("Failed to load contractors");
+  }
+};
+
+export const fetchLeads = async () => {
+
+  const { data, error } = await supabase
+    .from("Leads_Data")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching leads:", error);
+  } else {
+    return data || [];
+  }
+};
 
 // Leads Data
 export const allLeads = [

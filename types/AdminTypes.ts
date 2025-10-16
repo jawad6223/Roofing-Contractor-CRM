@@ -16,22 +16,23 @@ export interface sidebarItemsType {
 }
 
 export interface LeadType {
-  id: number;
-  firstName: string;
-  lastName: string;
-  phoneno: string;
-  email: string;
-  zipCode: string;
-  address: string;
-  assignedDate: string;
-  company: string;
-  policy: string;
-  assignedTo: string | null;
-  purchaseDate: string;
+  id: string;
+  "First Name": string;
+  "Last Name": string;
+  "Phone Number": string;
+  "Email Address": string;
+  "Property ZIP Code": string;
+  "Address": string;
+  "Status": string;
+  "Assigned Date": string;
+  "Insurance Company": string;
+  "Policy Number": string;
+  "Assigned To": string | null;
+  "Purchase Date": string;
 }
 
 export interface ContractorType {
-  id: string;
+  user_id: string;
   fullName: string;
   title: string;
   phoneno: string;

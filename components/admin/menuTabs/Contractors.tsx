@@ -21,10 +21,11 @@ import {
   Building,
 } from "lucide-react";
 import { UserCheck } from "lucide-react";
-import { contractors } from "./Data";
 import { ContractorType, LeadType } from "@/types/AdminTypes";
 import { allLeads } from "./Data";
 import { toast } from "react-toastify";
+import { supabase } from "@/lib/supabase";
+import { fetchContractors, fetchLeads } from "./Data";
 
 export const Contractors = () => {
   const [selectedContractor, setSelectedContractor] =
@@ -36,7 +37,8 @@ export const Contractors = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [contractorSearchTerm, setContractorSearchTerm] = useState("");
   const [assignedLeadsSearchTerm, setAssignedLeadsSearchTerm] = useState("");
-
+  const [contractors, setContractors] = useState<ContractorType[]>([]);
+  const [assignedLeads, setAssignedLeads] = useState<any[]>([]);
   // Filter contractors based on search term
   const filteredContractors = contractors.filter(
     (contractor) =>
@@ -51,26 +53,52 @@ export const Contractors = () => {
         .includes(contractorSearchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    const fetchContractorsData = async () => {
+      const contractorsData = await fetchContractors()
+      if (contractorsData) {
+        setContractors(contractorsData);
+      }
+    };
+    fetchContractorsData();
+  }, []);
+
+  const fetchAssignedLeads = async (contractorId: string) => {
+    console.log('fetching assigned leads for contractor:', contractorId);
+    try {
+      const { data, error } = await supabase
+        .from("Contractor_Leads")
+        .select("*")
+        .eq("contractor_id", contractorId);
+
+      if (error) throw error;
+      setAssignedLeads(data);
+    } catch (err) {
+      console.error("Error fetching assigned leads:", err);
+      setAssignedLeads([]);
+    }
+  };
+
+  useEffect(() => {
+    const fetchLeadsData = async () => {
+      const leadsData = await fetchLeads()
+      if (leadsData) {
+        setLeads(leadsData);
+      }
+    };
+    fetchLeadsData();
+  }, []);
+
   // Filter assigned leads based on search term
-  const filteredAssignedLeads = allLeads
-    .slice(0, 3)
-    .filter(
-      (lead) =>
-        lead.firstName
-          .toLowerCase()
-          .includes(assignedLeadsSearchTerm.toLowerCase()) ||
-        lead.lastName
-          .toLowerCase()
-          .includes(assignedLeadsSearchTerm.toLowerCase()) ||
-        lead.zipCode.includes(assignedLeadsSearchTerm) ||
-        lead.phoneno.includes(assignedLeadsSearchTerm) ||
-        lead.email
-          .toLowerCase()
-          .includes(assignedLeadsSearchTerm.toLowerCase()) ||
-        lead.company
-          .toLowerCase()
-          .includes(assignedLeadsSearchTerm.toLowerCase())
-    );
+  const filteredAssignedLeads = assignedLeads.filter(
+    (lead) =>
+      (lead["First Name"]?.toLowerCase() || "").includes(assignedLeadsSearchTerm.toLowerCase()) ||
+      (lead["Last Name"]?.toLowerCase() || "").includes(assignedLeadsSearchTerm.toLowerCase()) ||
+      (lead["Zip Code"] || "").includes(assignedLeadsSearchTerm) ||
+      (lead["Phone Number"] || "").includes(assignedLeadsSearchTerm) ||
+      (lead["Email Address"]?.toLowerCase() || "").includes(assignedLeadsSearchTerm.toLowerCase()) ||
+      (lead["Insurance Company"]?.toLowerCase() || "").includes(assignedLeadsSearchTerm.toLowerCase())
+  );
 
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [assignedLeadsCurrentPage, setAssignedLeadsCurrentPage] = useState<number>(1);
@@ -86,6 +114,7 @@ export const Contractors = () => {
   const assignedLeadsStartIndex = (assignedLeadsCurrentPage - 1) * assignedLeadsItemsPerPage;
   const assignedLeadsEndIndex = assignedLeadsStartIndex + assignedLeadsItemsPerPage;
   const currentAssignedLeadsData = filteredAssignedLeads.slice(assignedLeadsStartIndex, assignedLeadsEndIndex);
+  const [leads, setLeads] = useState<LeadType[]>([]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -115,10 +144,14 @@ export const Contractors = () => {
     setSelectedContractor(contractor);
     setAssignedLeadsCurrentPage(1); // Reset pagination when opening modal
     setShowModal(true);
+    if (contractor.user_id) {
+      fetchAssignedLeads(contractor.user_id);
+    }
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
+    setAssignedLeads([]);
   };
 
   // Reset assigned leads pagination when search term changes
@@ -173,14 +206,14 @@ export const Contractors = () => {
     setCurrentPage(1);
   };
 
-  const filteredLeads = allLeads.filter(
+  const filteredLeads = leads.filter(
     (lead) =>
-      lead.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.zipCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.policy.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.phoneno.toLowerCase().includes(searchTerm.toLowerCase())
+      lead["First Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead["Last Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead["Property ZIP Code"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead["Insurance Company"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead["Policy Number"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead["Phone Number"].toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -237,7 +270,7 @@ export const Contractors = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentData.map((contractor: ContractorType) => (
-                  <tr key={contractor.id} className="hover:bg-gray-50">
+                  <tr key={contractor.user_id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-bold text-[#122E5F] flex items-center">
                         <User className="h-3 w-3 mr-1 text-gray-600" />
@@ -257,10 +290,12 @@ export const Contractors = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      {/* <div className="bg-red-500 w-10 break-all"> */}
                       <span className="text-sm text-gray-900 flex items-center">
                         <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                        {contractor.businessAddress}
+                        <span className="w-52 truncate">{contractor.businessAddress}</span>
                       </span>
+                      {/* </div> */}
                     </td>
                     <td className="px-6 py-4 flex items-center gap-2 whitespace-nowrap">
                       <Button
@@ -454,44 +489,52 @@ export const Contractors = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {currentAssignedLeadsData.map(
-                          (lead: LeadType, index: number) => (
-                            <tr key={lead.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div>
-                                  <div className="text-sm font-bold text-[#122E5F]">
-                                    {lead.firstName} {lead.lastName}
+                        {currentAssignedLeadsData.length > 0 ? (
+                          currentAssignedLeadsData.map(
+                            (lead: any, index: number) => (
+                              <tr key={index} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div>
+                                    <div className="text-sm font-bold text-[#122E5F]">
+                                      {lead["First Name"]} {lead["Last Name"]}
+                                    </div>
                                   </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                  <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                                  <span className="text-sm font-medium text-gray-900">
-                                    {lead.zipCode}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <div className="flex items-center">
+                                    <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                                    <span className="text-sm font-medium text-gray-900">
+                                      {lead["Zip Code"]}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-black">
+                                  <div className="space-y-1 flex items-center">
+                                    <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                    {lead["Phone Number"]}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-black">
+                                  <div className="space-y-1 flex items-center">
+                                    <Mail className="h-3 w-3 text-gray-400 mr-1" />
+                                    {lead["Email Address"]}
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className="text-sm font-medium text-gray-900 flex items-center">
+                                    <Building className="h-3 w-3 text-gray-400 mr-1" />
+                                    {lead["Insurance Company"]}
                                   </span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-black">
-                                <div className="space-y-1 flex items-center">
-                                  <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead.phoneno}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-black">
-                                <div className="space-y-1 flex items-center">
-                                  <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead.email}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm font-medium text-gray-900 flex items-center">
-                                  <Building className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead.company}
-                                </span>
-                              </td>
-                            </tr>
+                                </td>
+                              </tr>
+                            )
                           )
+                        ) : (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                              No assigned leads found for this contractor
+                            </td>
+                          </tr>
                         )}
                       </tbody>
                     </table>
@@ -576,7 +619,7 @@ export const Contractors = () => {
               <div className="max-h-64 overflow-y-auto">
                 <div className="space-y-3">
                   {filteredLeads.length > 0 ? (
-                    filteredLeads.map((lead: LeadType) => (
+                    filteredLeads.filter((lead: LeadType) => lead.Status === "open").map((lead: LeadType) => (
                       <div
                         key={lead.id}
                         className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors"
@@ -593,29 +636,29 @@ export const Contractors = () => {
                             />
                             <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
                               <span className="text-sm font-semibold text-[#286BBD]">
-                                {lead.firstName.charAt(0).toUpperCase()}
-                                {lead.lastName.charAt(0).toUpperCase()}
+                                {lead["First Name"].charAt(0).toUpperCase()}
+                                {lead["Last Name"].charAt(0).toUpperCase()}
                               </span>
                             </div>
                             <div>
                               <h4 className="font-semibold text-gray-900">
-                                {lead.firstName} {lead.lastName}
+                                {lead["First Name"]} {lead["Last Name"]}
                               </h4>
                               <p className="text-sm text-gray-600">
-                                {lead.company} • {lead.zipCode}
+                                {lead["Insurance Company"]} • {lead["Property ZIP Code"]}
                               </p>
                             </div>
                           </div>
                           <div className="flex justify-between space-x-16 md:space-x-4 mt-4 md:mt-0">
                             <div className="text-end">
                               <p className="text-sm font-medium text-[#286BBD]">
-                                {lead.policy}
+                                {lead["Policy Number"]}
                               </p>
                               <p className="text-xs text-gray-500">Policy</p>
                             </div>
                             <div className="text-end">
                               <p className="text-sm font-medium text-green-600">
-                                {lead.phoneno}
+                                {lead["Phone Number"]}
                               </p>
                               <p className="text-xs text-gray-500">Phone</p>
                             </div>

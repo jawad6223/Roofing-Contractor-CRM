@@ -83,33 +83,58 @@ export const DashBoard = () => {
       ]
     : [];
 
-  async function handleBuyNow(lead: sampleLeadType) {
-    // Add this lead to loading set
-    setLoadingLeads((prev) => new Set(prev).add(lead.id));
+  // async function handleBuyNow(lead: sampleLeadType) {
+  //   // Add this lead to loading set
+  //   setLoadingLeads((prev) => new Set(prev).add(lead.id));
 
+  //   try {
+  //     const response = await fetch("/api/create-single-checkout-session", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         // leadAmount: lead.price,
+  //         leadAmount: 50,
+  //         leadName: `${lead.firstName} ${lead.lastName}`,
+  //       }),
+  //     });
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       console.error("Checkout error:", errorData.error);
+  //       return;
+  //     }
+
+  //     const { url } = await response.json();
+  //     window.location.href = url;
+  //   } catch (error) {
+  //     console.error("Stripe checkout error:", error);
+  //   } finally {
+  //     // Remove this lead from loading set
+  //     setLoadingLeads((prev) => {
+  //       const newSet = new Set(prev);
+  //       newSet.delete(lead.id);
+  //       return newSet;
+  //     });
+  //   }
+  // }
+
+  async function handleBuyNow(lead: sampleLeadType) {
+    setLoadingLeads((prev) => new Set(prev).add(lead.id));
     try {
       const response = await fetch("/api/create-single-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // leadAmount: lead.price,
           leadAmount: 50,
-          leadName: `${lead.firstName} ${lead.lastName}`,
+          leadName: "Test Lead",
+          email: localStorage.getItem("loggedInUser"),
         }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Checkout error:", errorData.error);
-        return;
-      }
-
       const { url } = await response.json();
       window.location.href = url;
     } catch (error) {
-      console.error("Stripe checkout error:", error);
+      console.error(error);
     } finally {
-      // Remove this lead from loading set
       setLoadingLeads((prev) => {
         const newSet = new Set(prev);
         newSet.delete(lead.id);

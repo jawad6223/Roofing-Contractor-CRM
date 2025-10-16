@@ -30,15 +30,15 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DetailPopup } from "@/components/ui/DetailPopup";
 import { FormPopup } from "@/components/ui/FormPopup";
+import { supabase } from "@/lib/supabase";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { contractors } from "./Data";
-import { LeadType } from "@/types/AdminTypes";
-import { allLeads } from "./Data";
+import { fetchContractors, fetchLeads } from "./Data";
+import { LeadType, ContractorType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
 import * as ExcelJS from "exceljs";
 import * as yup from "yup";
@@ -57,17 +57,9 @@ export const Leads = () => {
   const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>(
     {}
   );
-  const [newLead, setNewLead] = useState({
-    firstName: "",
-    lastName: "",
-    phoneno: "",
-    email: "",
-    zipCode: "",
-    company: "",
-    policy: "",
-    status: "Available",
-  });
-
+  const [leads, setLeads] = useState<LeadType[]>([]);
+  const [contractors, setContractors] = useState<ContractorType[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   // Validation schema for new lead form
   const newLeadSchema = yup.object().shape({
     firstName: yup.string()
@@ -102,18 +94,18 @@ export const Leads = () => {
   const itemsPerPage = 10;
 
   // Filter leads based on search term and status
-  const filteredLeads = allLeads.filter((lead) => {
+  const filteredLeads = leads.filter((lead) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
-      lead.zipCode.toLowerCase().includes(searchLower) ||
-      lead.firstName.toLowerCase().includes(searchLower) ||
-      lead.lastName.toLowerCase().includes(searchLower) ||
-      lead.phoneno.includes(searchTerm) ||
-      lead.email.toLowerCase().includes(searchLower) ||
-      lead.company.toLowerCase().includes(searchLower) ||
-      lead.policy.includes(searchTerm);
+      (lead["Property ZIP Code"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["First Name"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["Last Name"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["Phone Number"] || "").includes(searchTerm) ||
+      (lead["Email Address"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["Insurance Company"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["Policy Number"] || "").includes(searchTerm);
 
-    const leadStatus = leadStatuses[lead.id.toString()] || "Open";
+    const leadStatus = leadStatuses[lead.id?.toString() || ""] || lead["Status"];
     const matchesStatus =
       statusFilter === "All" ||
       leadStatus.toLowerCase() === statusFilter.toLowerCase();
@@ -123,7 +115,7 @@ export const Leads = () => {
 
   // Filter leads for Open tab (shows leads with "Open" and "Cancel" status)
   const openLeads = filteredLeads.filter((lead) => {
-    const leadStatus = leadStatuses[lead.id.toString()] || "Open";
+    const leadStatus = leadStatuses[lead.id?.toString() || ""] || lead["Status"];
     return (
       leadStatus.toLowerCase() === "open" ||
       leadStatus.toLowerCase() === "cancel"
@@ -132,10 +124,13 @@ export const Leads = () => {
 
   // Filter leads for Close tab (shows leads with "Close" status)
   const closeLeads = filteredLeads.filter((lead) => {
-    const leadStatus = leadStatuses[lead.id.toString()] || "Open";
+    const leadStatus = leadStatuses[lead.id?.toString() || ""] || lead["Status"];
     return leadStatus.toLowerCase() === "close";
   });
 
+
+  
+   
   // Get current tab data
   const currentTabData = activeTab === "open" ? openLeads : closeLeads;
 
@@ -166,6 +161,27 @@ export const Leads = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
+
+  useEffect(() => {
+    const fetchContractorsData = async () => {
+      const contractorsData = await fetchContractors()
+      if (contractorsData) {
+        setContractors(contractorsData);
+      }
+    };
+    fetchContractorsData();
+  }, []);
+  
+  const fetchLeadsData = async () => {
+    const leadsData = await fetchLeads()
+    if (leadsData) {
+      setLeads(leadsData);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeadsData();
+  }, []);
 
   const handleViewLead = (lead: LeadType): void => {
     setSelectedLead(lead);
@@ -203,45 +219,77 @@ export const Leads = () => {
     setSelectedContractor(contractorId);
   };
 
-  const handleSelectContractor = () => {
-    if (selectedContractor && leadToAssign) {
-      console.log(
-        `Assigning lead ${leadToAssign.id} to contractor:`,
-        selectedContractor
-      );
+
+  const handleSelectContractor = async () => {
+    if (!selectedContractor || !leadToAssign) {
+      toast.error("Please select a contractor");
+      return;
+    }
+  
+    try { 
+      const { error } = await supabase.from("Contractor_Leads").insert([
+        {
+          contractor_id: selectedContractor,
+          "First Name": leadToAssign["First Name"],
+          "Last Name": leadToAssign["Last Name"],
+          "Phone Number": leadToAssign["Phone Number"],
+          "Email Address": leadToAssign["Email Address"],
+          "Zip Code": leadToAssign["Property ZIP Code"],
+          "Insurance Company": leadToAssign["Insurance Company"],
+          "Policy Number": leadToAssign["Policy Number"],
+        },
+      ]);
+  
+      if (error) throw error;
+
+      const { error: updateError } = await supabase
+      .from("Leads_Data")
+      .update({ Status: "close" })
+      .eq("id", leadToAssign["id"]);
+
+    if (updateError) throw updateError;
+  
       toast.success("Lead assigned successfully");
-      // TODO: Add assignment logic here
+      fetchLeadsData();
       handleCloseAssignModal();
+    } catch (err: any) {
+      console.error("Error assigning lead:", err);
+      if (err.code === '23505') {
+        toast.error("This lead is already assigned to a contractor");
+      } else {
+        toast.error("Failed to assign lead");
+      }
     }
   };
+  
 
-  const handleCloseLead = (leadId: string) => {
-    setLeadStatuses((prev) => ({
-      ...prev,
-      [leadId]: "Cancel",
-    }));
-  };
+  const handleCancelLead = async (leadId: string) => {
+    try {
+      console.log(`Cancelling lead ${leadId}`);
+  
+      const { error } = await supabase
+        .from("Leads_Data")
+        .update({ Status: "cancel" })
+        .eq("id", leadId);
 
-  const getLeadStatus = (leadId: string) => {
-    return leadStatuses[leadId] || "Open";
+      if (error) throw error;
+
+        toast.success("Lead status updated to cancel");
+        fetchLeadsData();
+    } catch (err) {
+      console.error("Unexpected error:", err);
+      toast.error("Something went wrong while updating lead status");
+    }
   };
+  
+
 
   const getStatusBadgeColor = (leadId: string) => {
-    const status = getLeadStatus(leadId);
-    switch (status.toLowerCase()) {
-      case "cancel":
-        return "bg-red-100 text-red-800 hover:bg-red-200";
-      case "close":
-        return "bg-gray-100 text-gray-800 hover:bg-gray-200";
-      case "hot":
-        return "bg-orange-100 text-orange-800 hover:bg-orange-200";
-      case "warm":
-        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-200";
-      case "cold":
-        return "bg-blue-100 text-blue-800 hover:bg-blue-200";
-      case "open":
-      default:
-        return "bg-green-100 text-green-800 hover:bg-green-200";
+    const status = leadId.toLowerCase();
+    if (status === "open") {
+      return "bg-green-100 text-green-800 hover:bg-green-200";
+    } else {
+      return "bg-red-100 text-red-800 hover:bg-red-200";
     }
   };
 
@@ -284,14 +332,14 @@ export const Leads = () => {
       // Add data rows
       filteredLeads.forEach((lead) => {
         worksheet.addRow({
-          firstName: lead.firstName,
-          lastName: lead.lastName,
-          phoneno: lead.phoneno,
-          email: lead.email,
-          zipCode: lead.zipCode,
-          company: lead.company,
-          policy: lead.policy,
-          assignedTo: lead.assignedTo || "Unassigned",
+          firstName: lead["First Name"],
+          lastName: lead["Last Name"],
+          phoneno: lead["Phone Number"],
+          email: lead["Email Address"],
+          zipCode: lead["Property ZIP Code"],
+          company: lead["Insurance Company"],
+          policy: lead["Policy Number"],
+          assignedTo: lead["Assigned To"] || "Unassigned",
         });
       });
 
@@ -318,55 +366,79 @@ export const Leads = () => {
     }
   };
 
-  const handleFormSubmit = (formData: Record<string, any>) => {
-    console.log("New lead data:", formData);
-    toast.success("Lead added successfully");
-    handleCloseAddModal();
+  const handleFormSubmit = async (formData: Record<string, any>) => {
+    setIsSubmitting(true);
+    try {
+      // 1️⃣ Insert data into Leads_Data table
+       const { error } = await supabase.from("Leads_Data").insert([
+         {
+           "Property ZIP Code": formData.zipCode,
+           "First Name": formData.firstName,
+           "Last Name": formData.lastName,
+           "Phone Number": formData.phoneno,
+           "Email Address": formData.email,
+           "Insurance Company": formData.company,
+           "Policy Number": formData.policy,
+           "Status": "open",
+         },
+       ]);
+  
+      if (error) throw error;
+
+      toast.success("Lead added successfully!");
+      fetchLeadsData();
+      handleCloseAddModal();
+    } catch (err: any) {
+      console.error("Error submitting lead:", err);
+      toast.error("Failed to submit lead. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const leadFields = selectedLead ? [
-    {
-      label: "First Name",
-      value: selectedLead.firstName,
-      icon: User
-    },
-    {
-      label: "Last Name",
-      value: selectedLead.lastName,
-      icon: User
-    },
-    {
-      label: "Phone Number",
-      value: selectedLead.phoneno,
-      icon: Phone
-    },
-    {
-      label: "Email Address",
-      value: selectedLead.email,
-      icon: Mail,
-      breakAll: true
-    },
-    {
-      label: "Zip Code (Address)",
-      value: `${selectedLead.zipCode}, ${selectedLead.address}`,
-      icon: MapPin
-    },
-    {
-      label: "Insurance Company",
-      value: selectedLead.company,
-      icon: Building
-    },
-    {
-      label: "Policy Number",
-      value: selectedLead.policy,
-      icon: Hash
-    },
-    {
-      label: "Assigned To",
-      value: selectedLead.assignedTo || "Unassigned",
-      icon: User
-    }
-  ] : []
+  // const leadFields = selectedLead ? [
+  //   {
+  //     label: "First Name",
+  //     value: selectedLead["First Name"],
+  //     icon: User
+  //   },
+  //   {
+  //     label: "Last Name",
+  //     value: selectedLead["Last Name"],
+  //     icon: User
+  //   },
+  //   {
+  //     label: "Phone Number",
+  //     value: selectedLead["Phone Number"],
+  //     icon: Phone
+  //   },
+  //   {
+  //     label: "Email Address",
+  //     value: selectedLead["Email Address"],
+  //     icon: Mail,
+  //     breakAll: true
+  //   },
+  //   {
+  //     label: "Zip Code (Address)",
+  //     value: `${selectedLead["Property ZIP Code"]}`,
+  //     icon: MapPin
+  //   },
+  //   {
+  //     label: "Insurance Company",
+  //     value: selectedLead["Insurance Company"],
+  //     icon: Building
+  //   },
+  //   {
+  //     label: "Policy Number",
+  //     value: selectedLead["Policy Number"],
+  //     icon: Hash
+  //   },
+  //   {
+  //     label: "Assigned To",
+  //     value: selectedLead["Assigned To"] || "Unassigned",
+  //     icon: User
+  //   }
+  // ] : []
 
   const addLeadFields = [
     {
@@ -535,16 +607,16 @@ export const Leads = () => {
                     {currentData.length > 0 ? (
                       currentData.map((lead: LeadType, index: number) => (
                         <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-bold text-[#122E5F]">
-                              {lead.firstName} {lead.lastName}
-                            </span>
-                          </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className="text-sm font-bold text-[#122E5F]">
+                                {lead["First Name"]} {lead["Last Name"]}
+                              </span>
+                            </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
-                                {lead.zipCode}
+                                {lead["Property ZIP Code"]}
                               </span>
                             </div>
                           </td>
@@ -552,7 +624,7 @@ export const Leads = () => {
                             <div className="flex items-center">
                               <Phone className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
-                                {lead.phoneno}
+                                {lead["Phone Number"]}
                               </span>
                             </div>
                           </td>
@@ -560,17 +632,17 @@ export const Leads = () => {
                             <div className="flex items-center">
                               <Mail className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
-                                {lead.email}
+                                {lead["Email Address"]}
                               </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <Badge
                               className={getStatusBadgeColor(
-                                lead.id.toString()
+                                lead["Status"]
                               )}
                             >
-                              {getLeadStatus(lead.id.toString())}
+                              {lead["Status"]}
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
@@ -593,8 +665,9 @@ export const Leads = () => {
                                   View
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
+                                  disabled={lead["Status"] === "cancel"}
                                   onClick={() =>
-                                    handleCloseLead(lead.id.toString())
+                                    handleCancelLead(lead.id.toString())
                                   }
                                   className="cursor-pointer text-red-600 hover:text-red-700"
                                 >
@@ -606,6 +679,7 @@ export const Leads = () => {
                             <Button
                               size="sm"
                               variant="outline"
+                              disabled={lead["Status"] === "cancel"}
                               className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
                               onClick={() => handleAssignLead(lead)}
                             >
@@ -670,14 +744,14 @@ export const Leads = () => {
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm font-bold text-[#122E5F]">
-                              {lead.firstName} {lead.lastName}
+                              {lead["First Name"]} {lead["Last Name"]}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
-                                {lead.zipCode}
+                                {lead["Property ZIP Code"]}
                               </span>
                             </div>
                           </td>
@@ -685,7 +759,7 @@ export const Leads = () => {
                             <div className="flex items-center">
                               <Phone className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
-                                {lead.phoneno}
+                                {lead["Phone Number"]}
                               </span>
                             </div>
                           </td>
@@ -693,17 +767,17 @@ export const Leads = () => {
                             <div className="flex items-center">
                               <Mail className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
-                                {lead.email}
+                                {lead["Email Address"]}
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <td className="px-6 py-4 whitespace-nowra text-sm font-medium">
                             <Badge
                               className={getStatusBadgeColor(
-                                lead.id.toString()
+                                lead["Status"]
                               )}
                             >
-                              {getLeadStatus(lead.id.toString())}
+                              {lead["Status"]}
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
@@ -725,18 +799,9 @@ export const Leads = () => {
                                   <Eye className="h-4 w-4 mr-2" />
                                   View
                                 </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  onClick={() =>
-                                    handleCloseLead(lead.id.toString())
-                                  }
-                                  className="cursor-pointer text-red-600 hover:text-red-700"
-                                >
-                                  <X className="h-4 w-4 mr-2" />
-                                  Cancel
-                                </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
-                            <Button
+                            {/* <Button
                               size="sm"
                               variant="outline"
                               className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
@@ -744,7 +809,7 @@ export const Leads = () => {
                             >
                               <Target className="h-4 w-4 mr-1" />
                               Assign
-                            </Button>
+                            </Button> */}
                           </td>
                         </tr>
                       ))
@@ -789,14 +854,181 @@ export const Leads = () => {
       />
 
       {/* View Lead Modal */}
-      <DetailPopup
+      {/* <DetailPopup
         isOpen={showModal}
         onClose={handleCloseModal}
         title="Lead Details"
         subtitle="Complete information for this lead"
         titleIcon={FileText}
         fields={leadFields}
-      />
+      /> */}
+
+{showModal && selectedLead && (
+        <div className="fixed inset-0 -top-5 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white  shadow-2xl w-full relative animate-in zoom-in-95 duration-300 h-full overflow-y-auto">
+            {/* Close Button */}
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+              aria-label="Close modal"
+            >
+              <X className="h-3 w-3" />
+            </button>
+
+            <div className="p-6">
+              {/* Header */}
+              <div className="text-center mb-6">
+                <div className="w-12 h-12 bg-[#286BBD]/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <FileText className="h-6 w-6 text-[#122E5F]" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Lead Details
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Complete information for this lead
+                </p>
+              </div>
+
+              {/* Contractor Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    First Name
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead["First Name"]}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Last Name
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <User className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead["Last Name"]}
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Phone Number
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead["Phone Number"]}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Email Address
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 break-all rounded-md text-sm flex items-center">
+                    <Mail className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead["Email Address"]}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Property ZIP Code
+                  </label>
+                  <p className="text-gray-900 break-all bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead["Property ZIP Code"]}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Insurance Company
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <Building className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead["Insurance Company"]}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Policy Number
+                  </label>
+                  <p className="text-gray-900 bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
+                    <Hash className="h-3 w-3 mr-1 text-gray-400" />
+                    {selectedLead["Policy Number"]}
+                  </p>
+                </div>
+              </div>
+
+              {/* Leads Section */}
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <Target className="h-5 w-5 mr-2 text-[#286BBD]" />
+                  Assigned Leads
+                </h3>
+
+                {/* Search Bar for Assigned Leads */}
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="Search assigned leads..."
+                      // value={assignedLeadsSearchTerm}
+                      // onChange={(e) =>
+                      //   setAssignedLeadsSearchTerm(e.target.value)
+                      // }
+                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#286BBD] focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                 <div className="space-y-3">
+                   <div className="overflow-auto max-h-64">
+                     <table className="w-full">
+                       <thead className="bg-gray-50">
+                         <tr>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                             Name
+                           </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                             Zip Code
+                           </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                             Phone no
+                           </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                             Email
+                           </th>
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                             Company
+                           </th>
+                         </tr>
+                       </thead>
+                       <tbody className="bg-white divide-y divide-gray-200">
+                         <tr>
+                           <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                             No assigned leads data available
+                           </td>
+                         </tr>
+                       </tbody>
+                     </table>
+                   </div>
+                 </div>
+               </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={handleCloseModal}
+                  className="px-3 py-1.5 text-sm"
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Add New Lead Modal */}
       <FormPopup
@@ -805,7 +1037,7 @@ export const Leads = () => {
         title="Add New Lead"
         subtitle="Enter lead information to add to the system"
         titleIcon={FileText}
-        submitButtonText="Add Lead"
+        submitButtonText={isSubmitting ? "Submitting..." : "Add Lead"}
         submitButtonIcon={Plus}
         onSubmit={handleFormSubmit}
         validationSchema={newLeadSchema as yup.ObjectSchema<any>}
@@ -838,7 +1070,7 @@ export const Leads = () => {
                   <p className="text-sm text-gray-600">
                     Select contractors to assign lead:{" "}
                     <span className="font-semibold text-[#286BBD]">
-                      {leadToAssign.firstName} {leadToAssign.lastName}
+                      {leadToAssign["First Name"]} {leadToAssign["Last Name"]}
                     </span>
                   </p>
                 </div>
@@ -859,19 +1091,19 @@ export const Leads = () => {
               </div>
 
               {/* Contractors List */}
-              <div className="max-h-96 overflow-y-auto">
+              <div className="max-h-64 overflow-y-auto">
                 <div className="space-y-3">
                   {filteredContractors.length > 0 ? (
                     filteredContractors.map((contractor) => (
                       <div
-                        key={contractor.id}
+                        key={contractor.user_id}
                         className="flex flex-col md:flex-row justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 hover:border-[#286BBD]/50"
                       >
                         <div className="flex items-center space-x-4">
                           <Checkbox
-                            checked={selectedContractor === contractor.id}
+                            checked={selectedContractor === contractor.user_id}
                             onCheckedChange={() =>
-                              handleContractorSelect(contractor.id)
+                              handleContractorSelect(contractor.user_id)
                             }
                             className="data-[state=checked]:bg-[#286BBD] data-[state=checked]:border-[#286BBD]"
                           />
