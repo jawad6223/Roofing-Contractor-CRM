@@ -78,6 +78,16 @@ export default function LoginModal() {
         return;
       }
 
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+
+        // Check user role - only allow user role
+        if (currentUser?.user_metadata.role !== "user") {
+          await supabase.auth.signOut();
+          toast.error("Access denied. Only contractors can access this panel.");
+          // setIsLoading(false);
+          return;
+        }
+
       // 2️⃣ Successfully logged in
 
       const user = authData.user;

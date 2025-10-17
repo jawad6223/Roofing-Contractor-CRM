@@ -64,10 +64,6 @@ export default function AdminLoginModal() {
   const onSubmit = async (data: FormDataType) => {
     setIsLoading(true);
     try {
-      // 1️⃣ Check against environment variables (you'll need to use NEXT_PUBLIC_ prefix for client-side access)
-      // const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-      // if (data.emailAddress === adminEmail) {
-        // 2️⃣ If credentials match, try to sign in with Supabase Auth
         const { data: authData, error } = await supabase.auth.signInWithPassword({
           email: data.emailAddress.toLowerCase(),
           password: data.password,
@@ -81,6 +77,16 @@ export default function AdminLoginModal() {
           } else {
             toast.error(error.message);
           }
+          return;
+        }
+
+        const { data: { user } } = await supabase.auth.getUser();
+
+        // Check user role - only allow admin role
+        if (user?.user_metadata.role === "user") {
+          await supabase.auth.signOut();
+          toast.error("Access denied. Only administrators can access this panel.");
+          setIsLoading(false);
           return;
         }
 

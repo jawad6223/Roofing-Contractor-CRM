@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Calendar, Building, FileText } from "lucide-react";
+import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Search, Calendar, Building, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DetailPopup } from "@/components/ui/DetailPopup";
@@ -192,45 +192,59 @@ export const Dashboard = () => {
                       <p className="mt-2 text-sm text-gray-500">Loading leads...</p>
                     </div>
                   </div>
-              ) : leads.filter(lead => lead.Status === "open").slice(0, 3).map((lead: LeadType, index: number) => (
-                <div
-                  key={index}
-                  onClick={() => handleLeadClick(lead)}
-                  className="flex flex-col lg:flex-row items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
-                >
-                  <div className="flex items-center space-x-4">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#286BBD]/10 to-[#2563eb]/10 flex items-center justify-center group-hover:from-[#286BBD]/20 group-hover:to-[#2563eb]/20 transition-all duration-200">
-                      <User className="h-6 w-6 text-[#286BBD]" />
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-1">
-                        <h4 className="font-semibold text-gray-900 text-base">
-                          {lead["First Name"]} {lead["Last Name"]}
-                        </h4>
+              ) : leads.filter(lead => lead.Status === "open").length > 0 ? (
+                leads.filter(lead => lead.Status === "open").slice(0, 3).map((lead: LeadType, index: number) => (
+                  <div
+                    key={index}
+                    onClick={() => handleLeadClick(lead)}
+                    className="flex flex-col lg:flex-row items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#286BBD]/10 to-[#2563eb]/10 flex items-center justify-center group-hover:from-[#286BBD]/20 group-hover:to-[#2563eb]/20 transition-all duration-200">
+                        <User className="h-6 w-6 text-[#286BBD]" />
                       </div>
-                      <div className="flex items-center space-x-4 text-sm text-gray-600">
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="h-3 w-3" />
-                          <span>{lead["Insurance Company"]}</span>
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <h4 className="font-semibold text-gray-900 text-base">
+                            {lead["First Name"]} {lead["Last Name"]}
+                          </h4>
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-gray-600">
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="h-3 w-3" />
+                            <span>{lead["Insurance Company"]}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+  
+                    <div className="flex flex-col items-end space-y-2">
+                      <div className="flex flex-col items-end space-y-1">
+                        <div className="text-sm text-[#286BBD] flex items-center hover:text-[#1d4ed8] transition-colors">
+                          <Phone className="h-4 w-4 mr-1" />
+                          <span className="font-medium">{lead["Phone Number"]}</span>
+                        </div>
+                        <div className="text-sm text-gray-600 flex items-center hover:text-gray-800 transition-colors">
+                          <Mail className="h-4 w-4 mr-1" />
+                          <span className="font-medium">{lead["Email Address"]}</span>
                         </div>
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex flex-col items-end space-y-2">
-                    <div className="flex flex-col items-end space-y-1">
-                      <div className="text-sm text-[#286BBD] flex items-center hover:text-[#1d4ed8] transition-colors">
-                        <Phone className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{lead["Phone Number"]}</span>
-                      </div>
-                      <div className="text-sm text-gray-600 flex items-center hover:text-gray-800 transition-colors">
-                        <Mail className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{lead["Email Address"]}</span>
-                      </div>
-                    </div>
-                  </div>
+                ))
+              ) : 
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-8 w-8 text-gray-400" />
                 </div>
-              ))}
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No open leads found
+                </h3>
+                <p className="text-sm text-gray-500">
+                  There are currently no open leads in the system
+                </p>
+              </div>
+               }
             </div>
           </CardContent>
         </Card>

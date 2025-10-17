@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
@@ -10,9 +10,14 @@ import { DetailPopup } from "@/components/ui/DetailPopup";
 import { useState } from "react";
 import { purchasedLeadType, sampleLeadType } from "@/types/DashboardTypes";
 import { purchasedLeads, sampleLeads } from "./Data";
+import { supabase } from "@/lib/supabase";
+import { toast } from "react-toastify";
 
 export const Leads = () => {
   const router = useRouter();
+  
+  const [contractorLeads, setContractorLeads] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   
   const defaultStatuses: Record<string, string> = {};
   purchasedLeads.forEach(lead => {
@@ -33,26 +38,56 @@ export const Leads = () => {
     return leadStatuses[leadId];
   };
 
+  const fetchContractorLeads = async () => {
+    setLoading(true);
+    try {
+      const userId = localStorage.getItem("user_id");
+      if (!userId) {
+        toast.error("User not logged in");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("Contractor_Leads")
+        .select("*")
+        .eq("contractor_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setContractorLeads(data || []);
+    } catch (error) {
+      console.error("Error fetching contractor leads:", error);
+      toast.error("Failed to fetch leads");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchContractorLeads();
+  }, []);
+
   const [loadingLeads, setLoadingLeads] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const itemsPerPage = 10;
-
+console.log('contractorLeads', contractorLeads);
   // Filter data based on search term and status
-  const filteredData = purchasedLeads.filter((lead) => {
+  const filteredData = contractorLeads.filter((lead) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
-      lead.firstName.toLowerCase().includes(searchLower) ||
-      lead.lastName.toLowerCase().includes(searchLower) ||
-      lead.email.toLowerCase().includes(searchLower) ||
-      lead.phoneno.includes(searchTerm) ||
-      lead.zipCode.includes(searchTerm) ||
-      lead.company.toLowerCase().includes(searchLower) ||
-      lead.policy.includes(searchTerm) ||
-      lead.location.toLowerCase().includes(searchLower);
+      (lead["First Name"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["Last Name"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["Email Address"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["Phone Number"] || "").includes(searchTerm) ||
+      (lead["Zip Code"] || "").includes(searchTerm) ||
+      (lead["Insurance Company"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["Policy Number"] || "").includes(searchTerm);
 
-    const leadStatus = getLeadStatus(lead.id.toString());
+    // const leadStatus = getLeadStatus(lead.id?.toString() || "");
+    const leadStatus = lead["Status"];
     const matchesStatus = statusFilter === "All" || leadStatus.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
@@ -92,43 +127,43 @@ export const Leads = () => {
   const leadFields = selectedLead ? [
     {
       label: "Name",
-      value: `${selectedLead.firstName} ${selectedLead.lastName}`,
+      value: `${selectedLead["First Name"]} ${selectedLead["Last Name"]}`,
       icon: User
     },
     {
       label: "Zip Code",
-      value: selectedLead.zipCode,
+      value: selectedLead["Zip Code"],
       icon: MapPin
     },
     {
       label: "Phone Number",
-      value: selectedLead.phoneno,
+      value: selectedLead["Phone Number"],
       icon: Phone
     },
     {
       label: "Email Address",
-      value: selectedLead.email,
+      value: selectedLead["Email Address"],
       icon: Mail,
       breakAll: true
     },
-    {
-      label: "Location",
-      value: selectedLead.location,
-      icon: MapPin
-    },
+    // {
+    //   label: "Location",
+    //   value: selectedLead["Location"],
+    //   icon: MapPin
+    // },
     {
       label: "Insurance Company",
-      value: selectedLead.company,
+      value: selectedLead["Insurance Company"],
       icon: Building
     },
     {
       label: "Policy Number",
-      value: selectedLead.policy,
+      value: selectedLead["Policy Number"],
       icon: Hash
     },
     {
       label: "Purchase Date",
-      value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
+      value: new Date(selectedLead["Purchase Date"]).toLocaleDateString(),
       icon: Calendar
     }
   ] : [];
@@ -270,19 +305,19 @@ export const Leads = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
                         <div className="text-sm font-bold text-gray-400 select-none">
-                          {`${lead.firstName.slice(0, 2)}${"*".repeat(
-                            Math.max(lead.firstName.length - 2, 0)
-                          )} ${lead.lastName.slice(0, 2)}${"*".repeat(Math.max(lead.lastName.length - 2, 0))}`}
+                          {`${lead.firstName?.slice(0, 2) || ""}${"*".repeat(
+                            Math.max((lead.firstName?.length || 0) - 2, 0)
+                          )} ${lead.lastName?.slice(0, 2) || ""}${"*".repeat(Math.max((lead.lastName?.length || 0) - 2, 0))}`}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-400 select-none">{`${lead.zipCode.slice(
+                        <span className="text-sm font-medium text-gray-400 select-none">{`${lead.zipCode?.slice(
                           0,
                           2
-                        )}${"*".repeat(Math.max(lead.zipCode.length - 2, 0))}`}</span>
+                        ) || ""}${"*".repeat(Math.max((lead.zipCode?.length || 0) - 2, 0))}`}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -296,8 +331,8 @@ export const Leads = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                        <span className="text-sm text-gray-400 select-none">{`${lead.email.slice(0, 2)}${"*".repeat(
-                          Math.max(lead.email.length - 2, 0)
+                        <span className="text-sm text-gray-400 select-none">{`${lead.email?.slice(0, 2) || ""}${"*".repeat(
+                          Math.max((lead.email?.length || 0) - 2, 0)
                         )}`}</span>
                       </div>
                     </td>
@@ -324,32 +359,41 @@ export const Leads = () => {
                   </tr>
                 ))}
 
-                {currentData.length > 0 ? (
-                  currentData.map((lead: purchasedLeadType, index: number) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                        <p className="mt-2 text-sm text-gray-500">Loading leads...</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : currentData.length > 0 ? (
+                  currentData.map((lead: any, index: number) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>
                           <div className="text-sm font-bold text-[#122E5F]">
-                            {lead.firstName} {lead.lastName}
+                            {lead["First Name"]} {lead["Last Name"]}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
+                          <span className="text-sm font-medium text-gray-900">{lead["Zip Code"]}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-black">
                         <div className="space-y-1 flex items-center">
                           <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                          {lead.phoneno}
+                          {lead["Phone Number"]}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-black">
                         <div className="space-y-1 flex items-center">
                           <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                          {lead.email}
+                          {lead["Email Address"]}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

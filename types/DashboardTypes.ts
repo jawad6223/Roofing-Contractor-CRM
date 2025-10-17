@@ -18,16 +18,14 @@ export interface crmDataType {
 }
 
 export interface purchasedLeadType {
-  location: string;
-  id: string;
-  zipCode: string;
-  firstName: string;
-  lastName: string;
-  phoneno: string;
-  email: string;
-  company: string;
-  policy: string;
-  purchaseDate: string;
+  "First Name": string;
+  "Last Name": string;
+  "Phone Number": string;
+  "Email Address": string;
+  "Zip Code": string;
+  "Insurance Company": string;
+  "Policy Number": string;
+  "Purchase Date": string;
 }
 
 export interface sampleLeadType {
@@ -56,9 +54,9 @@ export interface leadsInfoType {
 }
 
 export interface teamMemberType {
-  name: string;
-  email: string;
-  phoneno: string;
+  Full_Name: string;
+  Email_Address: string;
+  Phone_Number: string;
 }
 
 export interface settingType {

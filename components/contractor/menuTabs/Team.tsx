@@ -1,4 +1,4 @@
-import React from 'react'
+import { useEffect } from 'react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,11 +12,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { supabase } from '@/lib/supabase'
 import { UserPlus, User, X, Save, Trash2, Pencil } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { FormPopup } from '@/components/ui/FormPopup'
-import { teamMembers } from './Data'
 import { teamMemberType } from '@/types/DashboardTypes'
 import { toast } from "react-toastify";
 import * as yup from "yup";
@@ -25,24 +25,25 @@ import { FormField } from '@/types/Types';
 
 export const Team = () => {
   const [showAddModal, setShowAddModal] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<teamMemberType[]>([]);
   const [newMember, setNewMember] = useState<teamMemberType>({
-    name: '',
-    email: '',
-    phoneno: '',
+    Full_Name: '',
+    Email_Address: '',
+    Phone_Number: '',
   });
   const [editingMember, setEditingMember] = useState<number | null>(null);
   const [editedMember, setEditedMember] = useState<teamMemberType>({
-    name: '',
-    email: '',
-    phoneno: ''
+    Full_Name: '',
+    Email_Address: '',
+    Phone_Number: '',
   });
 
   const handleCloseModal = () => {
     setShowAddModal(false);
     setNewMember({
-      name: '',
-      email: '',
-      phoneno: '',
+      Full_Name: '',
+      Email_Address: '',
+      Phone_Number: '',
     });
   };
 
@@ -60,42 +61,87 @@ export const Team = () => {
           .matches(/^\(\d{3}\) \d{3}-\d{4}$/, 'Please enter a valid phone number in format (555) 123-4567')
       });
 
-  const handleFormSubmit = (formData: Record<string, any>) => {
+  const handleFormSubmit = async (formData: Record<string, any>) => {
     console.log('Form submitted with data:', formData);
-    // Here you can process the form data
-    // For example: add to team members, send to API, etc.
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      toast.error("User not logged in");
+      return;
+    }
+    const { error } = await supabase.from("Team_Members").insert([
+      {
+        user_id: userId,
+        Full_Name: formData.name,
+        Email_Address: formData.email,
+        Phone_Number: formData.phoneno
+      }
+    ]);
+    if (error) throw error;
     toast.success('Team member added successfully!');
+    fetchTeamMembers();
     handleCloseModal();
   };
 
+  const fetchTeamMembers = async () => {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      toast.error("User not logged in");
+      return;
+    }
+    const { data, error } = await supabase.from("Team_Members").select("*").eq("user_id", userId);
+    if (error) throw error;
+    setTeamMembers(data);
+  };
+
+  useEffect(() => {
+    fetchTeamMembers();
+  }, []);
+
   const handleEditClick = (index: number, member: any) => {
+
+    console.log('Editing member:', member);
     setEditingMember(index);
     setEditedMember({
-      name: member.name,
-      email: member.email,
-      phoneno: member.phoneno
+      Full_Name: member.Full_Name,
+      Email_Address: member.Email_Address,
+      Phone_Number: member.Phone_Number
     });
   };
 
-  const handleSaveClick = (index: number) => {
-    console.log('Saving member data:', editedMember);
-    toast.success("Team member updated successfully");
-    // TODO: Add save logic here
-    setEditingMember(null);
-    setEditedMember({
-      name: '',
-      email: '',
-      phoneno: ''
-    });
+  const handleSaveClick = async (index: number) => {
+    try {
+      const originalMember = teamMembers[index];
+      const userId = localStorage.getItem("user_id");
+      
+      if (!userId) {
+        toast.error("User not logged in");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("Team_Members")
+        .update({
+          Full_Name: editedMember.Full_Name,
+          Email_Address: editedMember.Email_Address,
+          Phone_Number: editedMember.Phone_Number
+        })
+        .eq("user_id", userId)
+        .eq("Full_Name", originalMember.Full_Name)
+        .eq("Email_Address", originalMember.Email_Address);
+
+      if (error) throw error;
+
+      toast.success("Team member updated successfully");
+      setEditingMember(null);
+      fetchTeamMembers();
+    } catch (error) {
+      console.error("Error updating team member:", error);
+      toast.error("Failed to update team member");
+    }
   };
 
   const handleCancelEdit = () => {
     setEditingMember(null);
-    setEditedMember({
-      name: '',
-      email: '',
-      phoneno: ''
-    });
   };
 
   const handleEditInputChange = (field: string, value: string) => {
@@ -105,9 +151,32 @@ export const Team = () => {
     }));
   };
 
-  const handleDeleteMember = (index: number) => {
-    console.log('Deleting team member at index:', index);
-    toast.success("Team member deleted successfully");
+  const handleDeleteMember = async (index: number) => {
+    try {
+      const memberToDelete = teamMembers[index];
+      const userId = localStorage.getItem("user_id");
+      
+      if (!userId) {
+        toast.error("User not logged in");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("Team_Members")
+        .delete()
+        .eq("user_id", userId)
+        .eq("Full_Name", memberToDelete.Full_Name)
+        .eq("Email_Address", memberToDelete.Email_Address);
+
+      if (error) throw error;
+
+      // setTeamMembers(prev => prev.filter((_, i) => i !== index));
+      fetchTeamMembers();
+      toast.success("Team member deleted successfully");
+    } catch (error) {
+      console.error("Error deleting team member:", error);
+      toast.error("Failed to delete team member");
+    }
   };
 
   const addTeamMemberFields = [
@@ -165,29 +234,29 @@ export const Team = () => {
                             {editingMember === index ? (
                               <div className="space-y-3">
                                 <Input
-                                  value={editedMember.name}
-                                  onChange={(e) => handleEditInputChange('name', e.target.value)}
+                                  value={editedMember.Full_Name}
+                                  onChange={(e) => handleEditInputChange('Full_Name', e.target.value)}
                                   className="h-8 text-sm font-bold w-full"
                                   placeholder="Full Name"
                                 />
                                 <Input
-                                  value={editedMember.email}
-                                  onChange={(e) => handleEditInputChange('email', e.target.value)}
+                                  value={editedMember.Email_Address}
+                                  onChange={(e) => handleEditInputChange('Email_Address', e.target.value)}
                                   className="h-8 text-sm w-full"
                                   placeholder="Email Address"
                                 />
                                 <Input
-                                  value={editedMember.phoneno}
-                                  onChange={(e) => handleEditInputChange('phoneno', e.target.value)}
+                                  value={editedMember.Phone_Number}
+                                  onChange={(e) => handleEditInputChange('Phone_Number', e.target.value)}
                                   className="h-8 text-sm font-medium w-full"
                                   placeholder="Phone Number"
                                 />
                               </div>
                             ) : (
                               <div className="flex flex-col space-y-1">
-                                <input type="text" value={member.name} onChange={(e) => handleEditInputChange('name', e.target.value)} className="text-sm text-[#286BBD] w-full" placeholder="Full Name" />
-                                <input type="email" value={member.email} onChange={(e) => handleEditInputChange('email', e.target.value)} className="text-sm text-[#286BBD] w-full" placeholder="Email Address" />
-                                <input type="text" value={member.phoneno} onChange={(e) => handleEditInputChange('phoneno', e.target.value)} className="text-sm font-medium text-[#286BBD] w-full" placeholder="Phone Number" />
+                                <div className="text-sm font-bold text-[#286BBD]">{member.Full_Name}</div>
+                                <div className="text-sm text-[#286BBD]">{member.Email_Address}</div>
+                                <div className="text-sm font-medium text-[#286BBD]">{member.Phone_Number}</div>
                               </div>
                             )}
                           </div>
