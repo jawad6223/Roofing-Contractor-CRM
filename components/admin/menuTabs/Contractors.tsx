@@ -361,10 +361,7 @@ export const Contractors = () => {
                     Full Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Phone Number
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email Address
+                    Contect Info
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Business Address
@@ -400,8 +397,6 @@ export const Contractors = () => {
                           <Phone className="h-3 w-3 mr-1 text-gray-400" />
                           {contractor.phoneno}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm font-medium text-[#286BBD] flex items-center">
                           <Mail className="h-3 w-3 mr-1 text-gray-400" />
                           {contractor.email}
@@ -484,10 +479,10 @@ export const Contractors = () => {
             {/* Close Button */}
             <button
               onClick={handleCloseModal}
-              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+              className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
               aria-label="Close modal"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
             </button>
 
             <div className="p-6">
@@ -587,7 +582,6 @@ export const Contractors = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="overflow-auto max-h-64">
                     <table className="w-full">
                       <thead className="bg-gray-50">
                         <tr>
@@ -670,7 +664,6 @@ export const Contractors = () => {
                         )}
                       </tbody>
                     </table>
-                  </div>
                 </div>
 
                 {/* Assigned Leads Pagination */}
@@ -716,7 +709,7 @@ export const Contractors = () => {
               className="absolute top-3 right-3 w-6 h-6 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
               aria-label="Close modal"
             >
-              <X className="h-3 w-3" />
+              <X className="h-4 w-4" />
             </button>
 
             <div className="p-6">

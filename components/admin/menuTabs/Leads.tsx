@@ -572,10 +572,7 @@ export const Leads = () => {
                         Zip Code
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Phone No
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Email
+                        Contect Info
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -618,8 +615,6 @@ export const Leads = () => {
                                 {lead["Phone Number"]}
                               </span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <Mail className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
@@ -714,10 +709,7 @@ export const Leads = () => {
                         Zip Code
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Phone No
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Email
+                        Contect Info
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -751,8 +743,6 @@ export const Leads = () => {
                                 {lead["Phone Number"]}
                               </span>
                             </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <Mail className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
