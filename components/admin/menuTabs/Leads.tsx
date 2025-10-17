@@ -7,36 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/types/Types";
 import { Pagination } from "@/components/ui/pagination";
-import {
-  Search,
-  Target,
-  Plus,
-  Download,
-  Eye,
-  ChevronDown,
-  X,
-  UserPlus,
-  Check,
-  FileText,
-  MoreHorizontal,
-  MapPin,
-  Phone,
-  Mail,
-  Hash,
-  User,
-  Building,
-} from "lucide-react";
+import { Search, Target, Plus, Download, Eye, ChevronDown, X, UserPlus, Check, FileText, MoreHorizontal, MapPin, Phone, Mail, User, Building, Hash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DetailPopup } from "@/components/ui/DetailPopup";
 import { FormPopup } from "@/components/ui/FormPopup";
 import { supabase } from "@/lib/supabase";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { fetchContractors, fetchLeads } from "./Data";
 import { LeadType, ContractorType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
@@ -54,13 +30,12 @@ export const Leads = () => {
   const [leadToAssign, setLeadToAssign] = useState<LeadType | null>(null);
   const [selectedContractor, setSelectedContractor] = useState<string>("");
   const [contractorSearchTerm, setContractorSearchTerm] = useState("");
-  const [leadStatuses, setLeadStatuses] = useState<{ [key: string]: string }>(
-    {}
-  );
   const [leads, setLeads] = useState<LeadType[]>([]);
+  const [loadingLeads, setLoadingLeads] = useState(false);
   const [contractors, setContractors] = useState<ContractorType[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [assignedContractor, setAssignedContractor] = useState<any>(null);
+  const [loadingAssignedContractor, setLoadingAssignedContractor] = useState(false);
   // Validation schema for new lead form
   const newLeadSchema = yup.object().shape({
     firstName: yup
@@ -78,8 +53,7 @@ export const Leads = () => {
       .required("Phone number is required")
       .matches(
         /^\(\d{3}\) \d{3}-\d{4}$/,
-        "Please enter a valid phone number in format (555) 123-4567"
-      ),
+        "Please enter a valid phone number in format (555) 123-4567" ),
     email: yup
       .string()
       .required("Email is required")
@@ -116,30 +90,24 @@ export const Leads = () => {
       (lead["Insurance Company"]?.toLowerCase() || "").includes(searchLower) ||
       (lead["Policy Number"] || "").includes(searchTerm);
 
-    const leadStatus =
-      leadStatuses[lead.id?.toString() || ""] || lead["Status"];
     const matchesStatus =
       statusFilter === "All" ||
-      leadStatus.toLowerCase() === statusFilter.toLowerCase();
+      lead["Status"].toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
   });
 
   // Filter leads for Open tab (shows leads with "Open" and "Cancel" status)
   const openLeads = filteredLeads.filter((lead) => {
-    const leadStatus =
-      leadStatuses[lead.id?.toString() || ""] || lead["Status"];
     return (
-      leadStatus.toLowerCase() === "open" ||
-      leadStatus.toLowerCase() === "cancel"
+      lead["Status"].toLowerCase() === "open" ||
+      lead["Status"].toLowerCase() === "cancel"
     );
   });
 
   // Filter leads for Close tab (shows leads with "Close" status)
   const closeLeads = filteredLeads.filter((lead) => {
-    const leadStatus =
-      leadStatuses[lead.id?.toString() || ""] || lead["Status"];
-    return leadStatus.toLowerCase() === "close";
+    return lead["Status"].toLowerCase() === "close";
   });
 
   // Get current tab data
@@ -184,13 +152,16 @@ export const Leads = () => {
   }, []);
 
   const fetchLeadsData = async () => {
+    setLoadingLeads(true);
     const leadsData = await fetchLeads();
     if (leadsData) {
       setLeads(leadsData);
     }
+    setLoadingLeads(false);
   };
 
   const fetchAssignedContractor = async (leadEmail: string) => {
+    setLoadingAssignedContractor(true);
     try {
       console.log("Fetching contractor for lead email:", leadEmail);
 
@@ -228,6 +199,8 @@ export const Leads = () => {
     } catch (err) {
       console.error("Error fetching assigned contractor:", err);
       setAssignedContractor(null);
+    } finally {
+      setLoadingAssignedContractor(false);
     }
   };
 
@@ -613,7 +586,16 @@ export const Leads = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {currentData.length > 0 ? (
+                    {loadingLeads ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-8 text-center">
+                          <div className="flex flex-col items-center justify-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                            <p className="mt-2 text-sm text-gray-500">Loading leads...</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : currentData.length > 0 ? (
                       currentData.map((lead: LeadType, index: number) => (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -953,7 +935,6 @@ export const Leads = () => {
               </div>
 
               {/* Assigned Contractor Section */}
-              {assignedContractor && (
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                     <User className="h-5 w-5 mr-2 text-[#286BBD]" />
@@ -977,7 +958,19 @@ export const Leads = () => {
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
+                      {loadingAssignedContractor ? (
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          <tr>
+                            <td colSpan={4} className="px-6 py-8 text-center">
+                              <div className="flex flex-col items-center justify-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                                <p className="mt-2 text-sm text-gray-500">Loading assigned contractor...</p>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      ) : assignedContractor ? (
+                        <tbody className="bg-white divide-y divide-gray-200">
                         <tr>
                           <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             {assignedContractor["Full Name"]}
@@ -993,10 +986,19 @@ export const Leads = () => {
                           </td>
                         </tr>
                       </tbody>
+                      ) : (
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          <tr>
+                            <td colSpan={4} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              No assigned contractor found
+                            </td>
+                          </tr>
+                        </tbody>
+                      )}
                     </table>
                   </div>
                 </div>
-              )}
+              
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">

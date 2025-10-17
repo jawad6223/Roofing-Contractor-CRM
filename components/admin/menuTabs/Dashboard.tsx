@@ -5,7 +5,7 @@ import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Ca
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DetailPopup } from "@/components/ui/DetailPopup";
-import { dashboardCard, allLeads, requestLeads } from "./Data";
+import { dashboardCard, requestLeads } from "./Data";
 import Link from "next/link";
 import {dashboardCardType, LeadType, requestLeadType } from "@/types/AdminTypes";
 import { fetchLeads } from "./Data";
@@ -16,6 +16,7 @@ export const Dashboard = () => {
   const [selectedRequestLead, setSelectedRequestLead] = useState<requestLeadType>();
   const [isRequestLeadModalOpen, setIsRequestLeadModalOpen] = useState<boolean>(false);
   const [leads, setLeads] = useState<LeadType[]>([]);
+  const [loadingLeads, setLoadingLeads] = useState(false);
   const handleLeadClick = (lead: LeadType) => {
     setSelectedLead(lead);
     setIsLeadModalOpen(true);
@@ -39,10 +40,12 @@ export const Dashboard = () => {
 
   useEffect(() => {
     const fetchLeadsData = async () => {
-      const leadsData = await fetchLeads()
+      setLoadingLeads(true);
+      const leadsData = await fetchLeads();
       if (leadsData) {
         setLeads(leadsData);
       }
+      setLoadingLeads(false);
     };
     fetchLeadsData();
   }, []);
@@ -182,7 +185,14 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {leads.filter(lead => lead.Status === "open").slice(0, 3).map((lead: LeadType, index: number) => (
+              {loadingLeads ? (
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                      <p className="mt-2 text-sm text-gray-500">Loading leads...</p>
+                    </div>
+                  </div>
+              ) : leads.filter(lead => lead.Status === "open").slice(0, 3).map((lead: LeadType, index: number) => (
                 <div
                   key={index}
                   onClick={() => handleLeadClick(lead)}
@@ -269,10 +279,6 @@ export const Dashboard = () => {
                       <Phone className="h-4 w-4 mr-1" />
                       <span className="font-medium">{reqLead.phoneno}</span>
                     </div>
-                    {/* <div className="text-sm mt-1 text-gray-600 flex hover:text-gray-800 transition-colors">
-                      <Mail className="h-4 w-4 mr-1" />
-                      <span className="font-medium">{reqLead.email}</span>
-                    </div> */}
                   </div>
                 </div>
               ))}

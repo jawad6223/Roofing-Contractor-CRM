@@ -22,7 +22,6 @@ import {
 } from "lucide-react";
 import { UserCheck } from "lucide-react";
 import { ContractorType, LeadType } from "@/types/AdminTypes";
-import { allLeads } from "./Data";
 import { toast } from "react-toastify";
 import { supabase } from "@/lib/supabase";
 import { fetchContractors, fetchLeads } from "./Data";
@@ -39,6 +38,8 @@ export const Contractors = () => {
   const [contractors, setContractors] = useState<ContractorType[]>([]);
   const [assignedLeads, setAssignedLeads] = useState<any[]>([]);
   const [existingAssignments, setExistingAssignments] = useState<string[]>([]);
+  const [loadingContractors, setLoadingContractors] = useState(false);
+  const [loadingAssignedLeads, setLoadingAssignedLeads] = useState(false);
   // Filter contractors based on search term
   const filteredContractors = contractors.filter(
     (contractor) =>
@@ -55,16 +56,19 @@ export const Contractors = () => {
 
   useEffect(() => {
     const fetchContractorsData = async () => {
-      const contractorsData = await fetchContractors()
+      setLoadingContractors(true);
+      const contractorsData = await fetchContractors();
       if (contractorsData) {
         setContractors(contractorsData);
       }
+      setLoadingContractors(false);
     };
     fetchContractorsData();
   }, []);
 
   const fetchAssignedLeads = async (contractorId: string) => {
-    console.log('fetching assigned leads for contractor:', contractorId);
+    setLoadingAssignedLeads(true);
+    console.log("fetching assigned leads for contractor:", contractorId);
     try {
       const { data, error } = await supabase
         .from("Contractor_Leads")
@@ -76,6 +80,8 @@ export const Contractors = () => {
     } catch (err) {
       console.error("Error fetching assigned leads:", err);
       setAssignedLeads([]);
+    } finally {
+      setLoadingAssignedLeads(false);
     }
   };
 
@@ -86,7 +92,10 @@ export const Contractors = () => {
         .select('"Email Address"');
 
       if (error) throw error;
-      const emails = data?.map((item: any) => (item as any)["Email Address"]).filter(Boolean) || [];
+      const emails =
+        data
+          ?.map((item: any) => (item as any)["Email Address"])
+          .filter(Boolean) || [];
       setExistingAssignments(emails);
     } catch (err) {
       console.error("Error fetching existing assignments:", err);
@@ -96,7 +105,7 @@ export const Contractors = () => {
 
   useEffect(() => {
     const fetchLeadsData = async () => {
-      const leadsData = await fetchLeads()
+      const leadsData = await fetchLeads();
       if (leadsData) {
         setLeads(leadsData);
       }
@@ -108,28 +117,44 @@ export const Contractors = () => {
   // Filter assigned leads based on search term
   const filteredAssignedLeads = assignedLeads.filter(
     (lead) =>
-      (lead["First Name"]?.toLowerCase() || "").includes(assignedLeadsSearchTerm.toLowerCase()) ||
-      (lead["Last Name"]?.toLowerCase() || "").includes(assignedLeadsSearchTerm.toLowerCase()) ||
+      (lead["First Name"]?.toLowerCase() || "").includes(
+        assignedLeadsSearchTerm.toLowerCase()
+      ) ||
+      (lead["Last Name"]?.toLowerCase() || "").includes(
+        assignedLeadsSearchTerm.toLowerCase()
+      ) ||
       (lead["Zip Code"] || "").includes(assignedLeadsSearchTerm) ||
       (lead["Phone Number"] || "").includes(assignedLeadsSearchTerm) ||
-      (lead["Email Address"]?.toLowerCase() || "").includes(assignedLeadsSearchTerm.toLowerCase()) ||
-      (lead["Insurance Company"]?.toLowerCase() || "").includes(assignedLeadsSearchTerm.toLowerCase())
+      (lead["Email Address"]?.toLowerCase() || "").includes(
+        assignedLeadsSearchTerm.toLowerCase()
+      ) ||
+      (lead["Insurance Company"]?.toLowerCase() || "").includes(
+        assignedLeadsSearchTerm.toLowerCase()
+      )
   );
 
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [assignedLeadsCurrentPage, setAssignedLeadsCurrentPage] = useState<number>(1);
+  const [assignedLeadsCurrentPage, setAssignedLeadsCurrentPage] =
+    useState<number>(1);
   const itemsPerPage = 10;
   const assignedLeadsItemsPerPage = 10; // Smaller page size for modal table
   const totalPages = Math.ceil(filteredContractors.length / itemsPerPage);
-  const assignedLeadsTotalPages = Math.ceil(filteredAssignedLeads.length / assignedLeadsItemsPerPage);
+  const assignedLeadsTotalPages = Math.ceil(
+    filteredAssignedLeads.length / assignedLeadsItemsPerPage
+  );
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredContractors.slice(startIndex, endIndex);
 
-  const assignedLeadsStartIndex = (assignedLeadsCurrentPage - 1) * assignedLeadsItemsPerPage;
-  const assignedLeadsEndIndex = assignedLeadsStartIndex + assignedLeadsItemsPerPage;
-  const currentAssignedLeadsData = filteredAssignedLeads.slice(assignedLeadsStartIndex, assignedLeadsEndIndex);
+  const assignedLeadsStartIndex =
+    (assignedLeadsCurrentPage - 1) * assignedLeadsItemsPerPage;
+  const assignedLeadsEndIndex =
+    assignedLeadsStartIndex + assignedLeadsItemsPerPage;
+  const currentAssignedLeadsData = filteredAssignedLeads.slice(
+    assignedLeadsStartIndex,
+    assignedLeadsEndIndex
+  );
   const [leads, setLeads] = useState<LeadType[]>([]);
 
   const handlePageChange = (page: number) => {
@@ -153,7 +178,9 @@ export const Contractors = () => {
   };
 
   const handleAssignedLeadsNextPage = () => {
-    setAssignedLeadsCurrentPage((prev) => Math.min(prev + 1, assignedLeadsTotalPages));
+    setAssignedLeadsCurrentPage((prev) =>
+      Math.min(prev + 1, assignedLeadsTotalPages)
+    );
   };
 
   const handleViewContractor = (contractor: ContractorType): void => {
@@ -208,11 +235,11 @@ export const Contractors = () => {
 
     try {
       const contractorId = selectedContractor.user_id;
-      
-      const leadDataToInsert = selectedLeads.map(leadId => {
-        const lead = leads.find(l => l.id.toString() === leadId);
+
+      const leadDataToInsert = selectedLeads.map((leadId) => {
+        const lead = leads.find((l) => l.id.toString() === leadId);
         if (!lead) throw new Error(`Lead with ID ${leadId} not found`);
-        
+
         return {
           "First Name": lead["First Name"],
           "Last Name": lead["Last Name"],
@@ -221,7 +248,7 @@ export const Contractors = () => {
           "Zip Code": lead["Property ZIP Code"],
           "Insurance Company": lead["Insurance Company"],
           "Policy Number": lead["Policy Number"],
-          contractor_id: contractorId
+          contractor_id: contractorId,
         };
       });
 
@@ -230,8 +257,10 @@ export const Contractors = () => {
         .insert(leadDataToInsert);
 
       if (insertError) {
-        if (insertError.code === '23505') {
-          toast.error("Some leads have already been assigned to contractors. Please select different leads.");
+        if (insertError.code === "23505") {
+          toast.error(
+            "Some leads have already been assigned to contractors. Please select different leads."
+          );
           return;
         }
         throw insertError;
@@ -239,7 +268,7 @@ export const Contractors = () => {
 
       const { error: updateError } = await supabase
         .from("Leads_Data")
-        .update({ 
+        .update({
           Status: "close",
           // "Assigned To": selectedContractor.fullName
         })
@@ -247,12 +276,14 @@ export const Contractors = () => {
 
       if (updateError) throw updateError;
 
-      toast.success(`${selectedLeads.length} leads assigned successfully to ${selectedContractor.fullName}`);
-      
+      toast.success(
+        `${selectedLeads.length} leads assigned successfully to ${selectedContractor.fullName}`
+      );
+
       if (selectedContractor.user_id) {
         await fetchAssignedLeads(selectedContractor.user_id);
       }
-      
+
       await fetchExistingAssignments();
       handleCloseAssignModal();
     } catch (error) {
@@ -275,11 +306,19 @@ export const Contractors = () => {
   const filteredLeads = leads.filter(
     (lead) =>
       (lead["First Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead["Last Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead["Property ZIP Code"].toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead["Insurance Company"].toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead["Policy Number"].toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead["Phone Number"].toLowerCase().includes(searchTerm.toLowerCase())) &&
+        lead["Last Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead["Property ZIP Code"]
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        lead["Insurance Company"]
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        lead["Policy Number"]
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        lead["Phone Number"]
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())) &&
       !existingAssignments.includes(lead["Email Address"])
   );
 
@@ -336,56 +375,89 @@ export const Contractors = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentData.map((contractor: ContractorType) => (
-                  <tr key={contractor.user_id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-bold text-[#122E5F] flex items-center">
-                        <User className="h-3 w-3 mr-1 text-gray-600" />
-                        {contractor.fullName}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 flex items-center">
-                        <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                        {contractor.phoneno}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-medium text-[#286BBD] flex items-center">
-                        <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                        {contractor.email}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {/* <div className="bg-red-500 w-10 break-all"> */}
-                      <span className="text-sm text-gray-900 flex items-center">
-                        <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                        <span className="w-52 truncate">{contractor.businessAddress}</span>
-                      </span>
-                      {/* </div> */}
-                    </td>
-                    <td className="px-6 py-4 flex items-center gap-2 whitespace-nowrap">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
-                        onClick={() => handleViewContractor(contractor)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
-                        onClick={() => handleAssignLead(contractor)}
-                      >
-                        <Target className="h-4 w-4 mr-1" />
-                        Assign
-                      </Button>
+                {loadingContractors ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                        <p className="mt-2 text-sm text-gray-500">
+                          Loading contractors...
+                        </p>
+                      </div>
                     </td>
                   </tr>
-                ))}
+                ) : currentData.length > 0 ? (
+                  currentData.map((contractor: ContractorType) => (
+                    <tr key={contractor.user_id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-bold text-[#122E5F] flex items-center">
+                          <User className="h-3 w-3 mr-1 text-gray-600" />
+                          {contractor.fullName}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900 flex items-center">
+                          <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                          {contractor.phoneno}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-medium text-[#286BBD] flex items-center">
+                          <Mail className="h-3 w-3 mr-1 text-gray-400" />
+                          {contractor.email}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {/* <div className="bg-red-500 w-10 break-all"> */}
+                        <span className="text-sm text-gray-900 flex items-center">
+                          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                          <span className="w-52 truncate">
+                            {contractor.businessAddress}
+                          </span>
+                        </span>
+                        {/* </div> */}
+                      </td>
+                      <td className="px-6 py-4 flex items-center gap-2 whitespace-nowrap">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
+                          onClick={() => handleViewContractor(contractor)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
+                          onClick={() => handleAssignLead(contractor)}
+                        >
+                          <Target className="h-4 w-4 mr-1" />
+                          Assign
+                        </Button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center">
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Search className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          No contractors found
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {contractorSearchTerm
+                            ? `No contractors match "${contractorSearchTerm}"`
+                            : "No contractors available"}
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -404,23 +476,6 @@ export const Contractors = () => {
         startIndex={startIndex}
         endIndex={endIndex}
       />
-
-      {/* No Results Message */}
-      {filteredContractors.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="h-8 w-8 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            No contractors found
-          </h3>
-          <p className="text-sm text-gray-500">
-            {contractorSearchTerm
-              ? `No contractors match "${contractorSearchTerm}"`
-              : "No contractors available"}
-          </p>
-        </div>
-      )}
 
       {/* View Contractor Modal */}
       {showModal && selectedContractor && (
@@ -554,7 +609,16 @@ export const Contractors = () => {
                         </tr>
                       </thead>
                       <tbody className="bg-white divide-y divide-gray-200">
-                        {currentAssignedLeadsData.length > 0 ? (
+                        {loadingAssignedLeads ? (
+                          <tr>
+                            <td colSpan={5} className="px-6 py-8 text-center">
+                              <div className="flex flex-col items-center justify-center">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                                <p className="mt-2 text-sm text-gray-500">Loading assigned leads...</p>
+                              </div>
+                            </td>
+                          </tr>
+                        ) : currentAssignedLeadsData.length > 0 ? (
                           currentAssignedLeadsData.map(
                             (lead: any, index: number) => (
                               <tr key={index} className="hover:bg-gray-50">
@@ -596,7 +660,10 @@ export const Contractors = () => {
                           )
                         ) : (
                           <tr>
-                            <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                            <td
+                              colSpan={5}
+                              className="px-6 py-8 text-center text-gray-500"
+                            >
                               No assigned leads found for this contractor
                             </td>
                           </tr>
@@ -684,53 +751,56 @@ export const Contractors = () => {
               <div className="max-h-64 overflow-y-auto">
                 <div className="space-y-3">
                   {filteredLeads.length > 0 ? (
-                    filteredLeads.filter((lead: LeadType) => lead.Status === "open").map((lead: LeadType) => (
-                      <div
-                        key={lead.id}
-                        className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <Checkbox
-                              checked={selectedLeads.includes(
-                                lead.id.toString()
-                              )}
-                              onCheckedChange={() =>
-                                handleLeadCheckbox(lead.id.toString())
-                              }
-                            />
-                            <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
-                              <span className="text-sm font-semibold text-[#286BBD]">
-                                {lead["First Name"].charAt(0).toUpperCase()}
-                                {lead["Last Name"].charAt(0).toUpperCase()}
-                              </span>
+                    filteredLeads
+                      .filter((lead: LeadType) => lead.Status === "open")
+                      .map((lead: LeadType) => (
+                        <div
+                          key={lead.id}
+                          className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors"
+                        >
+                          <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <Checkbox
+                                checked={selectedLeads.includes(
+                                  lead.id.toString()
+                                )}
+                                onCheckedChange={() =>
+                                  handleLeadCheckbox(lead.id.toString())
+                                }
+                              />
+                              <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
+                                <span className="text-sm font-semibold text-[#286BBD]">
+                                  {lead["First Name"].charAt(0).toUpperCase()}
+                                  {lead["Last Name"].charAt(0).toUpperCase()}
+                                </span>
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-gray-900">
+                                  {lead["First Name"]} {lead["Last Name"]}
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  {lead["Insurance Company"]} •{" "}
+                                  {lead["Property ZIP Code"]}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900">
-                                {lead["First Name"]} {lead["Last Name"]}
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                {lead["Insurance Company"]} • {lead["Property ZIP Code"]}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex justify-between space-x-16 md:space-x-4 mt-4 md:mt-0">
-                            <div className="text-end">
-                              <p className="text-sm font-medium text-[#286BBD]">
-                                {lead["Policy Number"]}
-                              </p>
-                              <p className="text-xs text-gray-500">Policy</p>
-                            </div>
-                            <div className="text-end">
-                              <p className="text-sm font-medium text-green-600">
-                                {lead["Phone Number"]}
-                              </p>
-                              <p className="text-xs text-gray-500">Phone</p>
+                            <div className="flex justify-between space-x-16 md:space-x-4 mt-4 md:mt-0">
+                              <div className="text-end">
+                                <p className="text-sm font-medium text-[#286BBD]">
+                                  {lead["Policy Number"]}
+                                </p>
+                                <p className="text-xs text-gray-500">Policy</p>
+                              </div>
+                              <div className="text-end">
+                                <p className="text-sm font-medium text-green-600">
+                                  {lead["Phone Number"]}
+                                </p>
+                                <p className="text-xs text-gray-500">Phone</p>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      ))
                   ) : (
                     <div className="text-center py-8">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
