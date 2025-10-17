@@ -63,31 +63,41 @@ export const Leads = () => {
   const [assignedContractor, setAssignedContractor] = useState<any>(null);
   // Validation schema for new lead form
   const newLeadSchema = yup.object().shape({
-    firstName: yup.string()
-      .required('First name is required')
-      .min(2, 'First name must be at least 2 characters')
-      .max(50, 'First name must be less than 50 characters'),
-    lastName: yup.string()
-      .required('Last name is required')
-      .min(2, 'Last name must be at least 2 characters')
-      .max(50, 'Last name must be less than 50 characters'),
-    phoneno: yup.string()
-      .required('Phone number is required')
-      .matches(/^\(\d{3}\) \d{3}-\d{4}$/, 'Please enter a valid phone number in format (555) 123-4567'),
-    email: yup.string()
-      .required('Email is required')
-      .email('Please enter a valid email address'),
-    zipCode: yup.string()
-      .required('Zip code is required')
-      .matches(/^\d{5}(-\d{4})?$/, 'Please enter a valid zip code'),
-    company: yup.string()
-      .required('Insurance company is required')
-      .min(2, 'Company name must be at least 2 characters')
-      .max(100, 'Company name must be less than 100 characters'),
-    policy: yup.string()
-      .required('Policy number is required')
-      .min(2, 'Policy number must be at least 2 characters')
-      .max(50, 'Policy number must be less than 50 characters')
+    firstName: yup
+      .string()
+      .required("First name is required")
+      .min(2, "First name must be at least 2 characters")
+      .max(50, "First name must be less than 50 characters"),
+    lastName: yup
+      .string()
+      .required("Last name is required")
+      .min(2, "Last name must be at least 2 characters")
+      .max(50, "Last name must be less than 50 characters"),
+    phoneno: yup
+      .string()
+      .required("Phone number is required")
+      .matches(
+        /^\(\d{3}\) \d{3}-\d{4}$/,
+        "Please enter a valid phone number in format (555) 123-4567"
+      ),
+    email: yup
+      .string()
+      .required("Email is required")
+      .email("Please enter a valid email address"),
+    zipCode: yup
+      .string()
+      .required("Address is required")
+      .min(5, "Please enter a valid address"),
+    company: yup
+      .string()
+      .required("Insurance company is required")
+      .min(2, "Company name must be at least 2 characters")
+      .max(100, "Company name must be less than 100 characters"),
+    policy: yup
+      .string()
+      .required("Policy number is required")
+      .min(2, "Policy number must be at least 2 characters")
+      .max(50, "Policy number must be less than 50 characters"),
   });
 
   // Pagination state
@@ -106,7 +116,8 @@ export const Leads = () => {
       (lead["Insurance Company"]?.toLowerCase() || "").includes(searchLower) ||
       (lead["Policy Number"] || "").includes(searchTerm);
 
-    const leadStatus = leadStatuses[lead.id?.toString() || ""] || lead["Status"];
+    const leadStatus =
+      leadStatuses[lead.id?.toString() || ""] || lead["Status"];
     const matchesStatus =
       statusFilter === "All" ||
       leadStatus.toLowerCase() === statusFilter.toLowerCase();
@@ -116,7 +127,8 @@ export const Leads = () => {
 
   // Filter leads for Open tab (shows leads with "Open" and "Cancel" status)
   const openLeads = filteredLeads.filter((lead) => {
-    const leadStatus = leadStatuses[lead.id?.toString() || ""] || lead["Status"];
+    const leadStatus =
+      leadStatuses[lead.id?.toString() || ""] || lead["Status"];
     return (
       leadStatus.toLowerCase() === "open" ||
       leadStatus.toLowerCase() === "cancel"
@@ -125,13 +137,11 @@ export const Leads = () => {
 
   // Filter leads for Close tab (shows leads with "Close" status)
   const closeLeads = filteredLeads.filter((lead) => {
-    const leadStatus = leadStatuses[lead.id?.toString() || ""] || lead["Status"];
+    const leadStatus =
+      leadStatuses[lead.id?.toString() || ""] || lead["Status"];
     return leadStatus.toLowerCase() === "close";
   });
 
-
-  
-   
   // Get current tab data
   const currentTabData = activeTab === "open" ? openLeads : closeLeads;
 
@@ -165,16 +175,16 @@ export const Leads = () => {
 
   useEffect(() => {
     const fetchContractorsData = async () => {
-      const contractorsData = await fetchContractors()
+      const contractorsData = await fetchContractors();
       if (contractorsData) {
         setContractors(contractorsData);
       }
     };
     fetchContractorsData();
   }, []);
-  
+
   const fetchLeadsData = async () => {
-    const leadsData = await fetchLeads()
+    const leadsData = await fetchLeads();
     if (leadsData) {
       setLeads(leadsData);
     }
@@ -182,16 +192,17 @@ export const Leads = () => {
 
   const fetchAssignedContractor = async (leadEmail: string) => {
     try {
-      console.log('Fetching contractor for lead email:', leadEmail);
-      
-      // First, get the contractor_id from Contractor_Leads table
-      const { data: contractorLead, error: contractorLeadError } = await supabase
-        .from("Contractor_Leads")
-        .select("contractor_id")
-        .eq("Email Address", leadEmail)
-        .single();
+      console.log("Fetching contractor for lead email:", leadEmail);
 
-      if (contractorLeadError && contractorLeadError.code !== 'PGRST116') {
+      // First, get the contractor_id from Contractor_Leads table
+      const { data: contractorLead, error: contractorLeadError } =
+        await supabase
+          .from("Contractor_Leads")
+          .select("contractor_id")
+          .eq("Email Address", leadEmail)
+          .single();
+
+      if (contractorLeadError && contractorLeadError.code !== "PGRST116") {
         throw contractorLeadError;
       }
 
@@ -203,11 +214,13 @@ export const Leads = () => {
       // Then, get the contractor details from Roofing_Auth table
       const { data: contractorData, error: contractorError } = await supabase
         .from("Roofing_Auth")
-        .select(`"Full Name", "Phone Number", "Email Address", "Business Address", "Service Radius"`)
+        .select(
+          `"Full Name", "Phone Number", "Email Address", "Business Address", "Service Radius"`
+        )
         .eq("user_id", contractorLead.contractor_id)
         .single();
 
-      if (contractorError && contractorError.code !== 'PGRST116') {
+      if (contractorError && contractorError.code !== "PGRST116") {
         throw contractorError;
       }
 
@@ -262,14 +275,13 @@ export const Leads = () => {
     setSelectedContractor(contractorId);
   };
 
-
   const handleSelectContractor = async () => {
     if (!selectedContractor || !leadToAssign) {
       toast.error("Please select a contractor");
       return;
     }
-  
-    try { 
+
+    try {
       const { error } = await supabase.from("Contractor_Leads").insert([
         {
           contractor_id: selectedContractor,
@@ -282,34 +294,33 @@ export const Leads = () => {
           "Policy Number": leadToAssign["Policy Number"],
         },
       ]);
-  
+
       if (error) throw error;
 
       const { error: updateError } = await supabase
-      .from("Leads_Data")
-      .update({ Status: "close" })
-      .eq("id", leadToAssign["id"]);
+        .from("Leads_Data")
+        .update({ Status: "close" })
+        .eq("id", leadToAssign["id"]);
 
-    if (updateError) throw updateError;
-  
+      if (updateError) throw updateError;
+
       toast.success("Lead assigned successfully");
       fetchLeadsData();
       handleCloseAssignModal();
     } catch (err: any) {
       console.error("Error assigning lead:", err);
-      if (err.code === '23505') {
+      if (err.code === "23505") {
         toast.error("This lead is already assigned to a contractor");
       } else {
         toast.error("Failed to assign lead");
       }
     }
   };
-  
 
   const handleCancelLead = async (leadId: string) => {
     try {
       console.log(`Cancelling lead ${leadId}`);
-  
+
       const { error } = await supabase
         .from("Leads_Data")
         .update({ Status: "cancel" })
@@ -317,20 +328,18 @@ export const Leads = () => {
 
       if (error) throw error;
 
-        toast.success("Lead status updated to cancel");
-        fetchLeadsData();
+      toast.success("Lead status updated to cancel");
+      fetchLeadsData();
     } catch (err) {
       console.error("Unexpected error:", err);
       toast.error("Something went wrong while updating lead status");
     }
   };
-  
-
 
   const getStatusBadgeColor = (leadId: string) => {
     const status = leadId.toLowerCase();
     if (status === "open") {
-        return "bg-green-100 text-green-800 hover:bg-green-200";
+      return "bg-green-100 text-green-800 hover:bg-green-200";
     } else {
       return "bg-red-100 text-red-800 hover:bg-red-200";
     }
@@ -413,19 +422,19 @@ export const Leads = () => {
     setIsSubmitting(true);
     try {
       // 1️⃣ Insert data into Leads_Data table
-       const { error } = await supabase.from("Leads_Data").insert([
-         {
-           "Property ZIP Code": formData.zipCode,
-           "First Name": formData.firstName,
-           "Last Name": formData.lastName,
-           "Phone Number": formData.phoneno,
-           "Email Address": formData.email,
-           "Insurance Company": formData.company,
-           "Policy Number": formData.policy,
-           "Status": "open",
-         },
-       ]);
-  
+      const { error } = await supabase.from("Leads_Data").insert([
+        {
+          "Property ZIP Code": formData.zipCode,
+          "First Name": formData.firstName,
+          "Last Name": formData.lastName,
+          "Phone Number": formData.phoneno,
+          "Email Address": formData.email,
+          "Insurance Company": formData.company,
+          "Policy Number": formData.policy,
+          Status: "open",
+        },
+      ]);
+
       if (error) throw error;
 
       toast.success("Lead added successfully!");
@@ -439,101 +448,58 @@ export const Leads = () => {
     }
   };
 
-  // const leadFields = selectedLead ? [
-  //   {
-  //     label: "First Name",
-  //     value: selectedLead["First Name"],
-  //     icon: User
-  //   },
-  //   {
-  //     label: "Last Name",
-  //     value: selectedLead["Last Name"],
-  //     icon: User
-  //   },
-  //   {
-  //     label: "Phone Number",
-  //     value: selectedLead["Phone Number"],
-  //     icon: Phone
-  //   },
-  //   {
-  //     label: "Email Address",
-  //     value: selectedLead["Email Address"],
-  //     icon: Mail,
-  //     breakAll: true
-  //   },
-  //   {
-  //     label: "Zip Code (Address)",
-  //     value: `${selectedLead["Property ZIP Code"]}`,
-  //     icon: MapPin
-  //   },
-  //   {
-  //     label: "Insurance Company",
-  //     value: selectedLead["Insurance Company"],
-  //     icon: Building
-  //   },
-  //   {
-  //     label: "Policy Number",
-  //     value: selectedLead["Policy Number"],
-  //     icon: Hash
-  //   },
-  //   {
-  //     label: "Assigned To",
-  //     value: selectedLead["Assigned To"] || "Unassigned",
-  //     icon: User
-  //   }
-  // ] : []
-
   const addLeadFields = [
     {
       name: "firstName",
       label: "First Name",
       type: "text",
       placeholder: "John",
-      required: true
+      required: true,
     },
     {
       name: "lastName",
       label: "Last Name",
       type: "text",
       placeholder: "Doe",
-      required: true
+      required: true,
     },
     {
       name: "phoneno",
       label: "Phone Number",
       type: "tel",
       placeholder: "(555) 123-4567",
-      required: true
+      required: true,
     },
     {
       name: "email",
       label: "Email Address",
       type: "email",
       placeholder: "john@example.com",
-      required: true
+      required: true,
     },
     {
       name: "zipCode",
       label: "Zip Code",
       type: "text",
       placeholder: "75201",
-      required: true
+      required: true,
+      maxLength: 5,
     },
     {
       name: "company",
       label: "Insurance Company",
       type: "text",
       placeholder: "ABC Insurance",
-      required: true
+      required: true,
     },
     {
       name: "policy",
       label: "Policy Number",
       type: "text",
       placeholder: "POL123456789",
-      required: true
-    }
-  ]
+      required: true,
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -652,7 +618,7 @@ export const Leads = () => {
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm font-bold text-[#122E5F]">
-                                {lead["First Name"]} {lead["Last Name"]}
+                              {lead["First Name"]} {lead["Last Name"]}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -681,9 +647,7 @@ export const Leads = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <Badge
-                              className={getStatusBadgeColor(
-                                lead["Status"]
-                              )}
+                              className={getStatusBadgeColor(lead["Status"])}
                             >
                               {lead["Status"]}
                             </Badge>
@@ -816,9 +780,7 @@ export const Leads = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowra text-sm font-medium">
                             <Badge
-                              className={getStatusBadgeColor(
-                                lead["Status"]
-                              )}
+                              className={getStatusBadgeColor(lead["Status"])}
                             >
                               {lead["Status"]}
                             </Badge>
@@ -896,17 +858,7 @@ export const Leads = () => {
         endIndex={endIndex}
       />
 
-      {/* View Lead Modal */}
-      {/* <DetailPopup
-        isOpen={showModal}
-        onClose={handleCloseModal}
-        title="Lead Details"
-        subtitle="Complete information for this lead"
-        titleIcon={FileText}
-        fields={leadFields}
-      /> */}
-
-{showModal && selectedLead && (
+      {showModal && selectedLead && (
         <div className="fixed inset-0 -top-5 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white  shadow-2xl w-full relative animate-in zoom-in-95 duration-300 h-full overflow-y-auto">
             {/* Close Button */}
@@ -1007,43 +959,43 @@ export const Leads = () => {
                     <User className="h-5 w-5 mr-2 text-[#286BBD]" />
                     Assigned Contractor
                   </h3>
-                <div className="overflow-auto max-h-64">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Name
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Email
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Phone no
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Business Address
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      <tr>
-                        <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          {assignedContractor["Full Name"]}
-                        </td>
-                        <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          {assignedContractor["Email Address"]}
-                        </td>
-                        <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          {assignedContractor["Phone Number"]}
-                        </td>
-                        <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          {assignedContractor["Business Address"]}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
+                  <div className="overflow-auto max-h-64">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Phone no
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Business Address
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        <tr>
+                          <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {assignedContractor["Full Name"]}
+                          </td>
+                          <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {assignedContractor["Email Address"]}
+                          </td>
+                          <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {assignedContractor["Phone Number"]}
+                          </td>
+                          <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            {assignedContractor["Business Address"]}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
               )}
 
               {/* Action Buttons */}
@@ -1060,7 +1012,6 @@ export const Leads = () => {
           </div>
         </div>
       )}
-
 
       {/* Add New Lead Modal */}
       <FormPopup

@@ -32,13 +32,13 @@ export const Contractors = () => {
     useState<ContractorType>();
   const [showModal, setShowModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedLead, setSelectedLead] = useState<LeadType>();
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [contractorSearchTerm, setContractorSearchTerm] = useState("");
   const [assignedLeadsSearchTerm, setAssignedLeadsSearchTerm] = useState("");
   const [contractors, setContractors] = useState<ContractorType[]>([]);
   const [assignedLeads, setAssignedLeads] = useState<any[]>([]);
+  const [existingAssignments, setExistingAssignments] = useState<string[]>([]);
   // Filter contractors based on search term
   const filteredContractors = contractors.filter(
     (contractor) =>
@@ -79,6 +79,21 @@ export const Contractors = () => {
     }
   };
 
+  const fetchExistingAssignments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("Contractor_Leads")
+        .select('"Email Address"');
+
+      if (error) throw error;
+      const emails = data?.map((item: any) => (item as any)["Email Address"]).filter(Boolean) || [];
+      setExistingAssignments(emails);
+    } catch (err) {
+      console.error("Error fetching existing assignments:", err);
+      setExistingAssignments([]);
+    }
+  };
+
   useEffect(() => {
     const fetchLeadsData = async () => {
       const leadsData = await fetchLeads()
@@ -87,6 +102,7 @@ export const Contractors = () => {
       }
     };
     fetchLeadsData();
+    fetchExistingAssignments();
   }, []);
 
   // Filter assigned leads based on search term
@@ -163,8 +179,8 @@ export const Contractors = () => {
     handleCloseModal();
   };
 
-  const handleAssignLead = (lead: LeadType) => {
-    setSelectedLead(lead);
+  const handleAssignLead = (contractor: ContractorType) => {
+    setSelectedContractor(contractor);
     setShowAssignModal(true);
     setSelectedLeads([]);
     setSearchTerm("");
@@ -184,16 +200,65 @@ export const Contractors = () => {
     );
   };
 
-  const handleAssignToContractor = () => {
-    console.log(
-      "Assigning leads:",
-      selectedLeads,
-      "to contractor:",
-      selectedLead?.id
-    );
-    console.log('contractor id:', selectedContractor);
-    toast.success("Leads assigned successfully");
-    handleCloseAssignModal();
+  const handleAssignToContractor = async () => {
+    if (!selectedContractor || selectedLeads.length === 0) {
+      toast.error("Please select a contractor and leads to assign");
+      return;
+    }
+
+    try {
+      const contractorId = selectedContractor.user_id;
+      
+      const leadDataToInsert = selectedLeads.map(leadId => {
+        const lead = leads.find(l => l.id.toString() === leadId);
+        if (!lead) throw new Error(`Lead with ID ${leadId} not found`);
+        
+        return {
+          "First Name": lead["First Name"],
+          "Last Name": lead["Last Name"],
+          "Phone Number": lead["Phone Number"],
+          "Email Address": lead["Email Address"],
+          "Zip Code": lead["Property ZIP Code"],
+          "Insurance Company": lead["Insurance Company"],
+          "Policy Number": lead["Policy Number"],
+          contractor_id: contractorId
+        };
+      });
+
+      const { error: insertError } = await supabase
+        .from("Contractor_Leads")
+        .insert(leadDataToInsert);
+
+      if (insertError) {
+        if (insertError.code === '23505') {
+          toast.error("Some leads have already been assigned to contractors. Please select different leads.");
+          return;
+        }
+        throw insertError;
+      }
+
+      const { error: updateError } = await supabase
+        .from("Leads_Data")
+        .update({ 
+          Status: "close",
+          // "Assigned To": selectedContractor.fullName
+        })
+        .in("id", selectedLeads);
+
+      if (updateError) throw updateError;
+
+      toast.success(`${selectedLeads.length} leads assigned successfully to ${selectedContractor.fullName}`);
+      
+      if (selectedContractor.user_id) {
+        await fetchAssignedLeads(selectedContractor.user_id);
+      }
+      
+      await fetchExistingAssignments();
+      handleCloseAssignModal();
+    } catch (error) {
+      console.error("Error assigning leads:", error);
+      toast.error("Failed to assign leads. Please try again.");
+    }
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,12 +274,13 @@ export const Contractors = () => {
 
   const filteredLeads = leads.filter(
     (lead) =>
-      lead["First Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (lead["First Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead["Last Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead["Property ZIP Code"].toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead["Insurance Company"].toLowerCase().includes(searchTerm.toLowerCase()) ||
       lead["Policy Number"].toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead["Phone Number"].toLowerCase().includes(searchTerm.toLowerCase())
+      lead["Phone Number"].toLowerCase().includes(searchTerm.toLowerCase())) &&
+      !existingAssignments.includes(lead["Email Address"])
   );
 
   return (
@@ -312,9 +378,7 @@ export const Contractors = () => {
                         size="sm"
                         variant="outline"
                         className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
-                        onClick={() =>
-                          handleAssignLead(contractor as unknown as LeadType)
-                        }
+                        onClick={() => handleAssignLead(contractor)}
                       >
                         <Target className="h-4 w-4 mr-1" />
                         Assign
@@ -576,7 +640,7 @@ export const Contractors = () => {
       )}
 
       {/* Assign Lead Modal */}
-      {showAssignModal && selectedLead && (
+      {showAssignModal && selectedContractor && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-auto">
             {/* Close Button */}
@@ -595,10 +659,10 @@ export const Contractors = () => {
                   <FileText className="h-6 w-6 text-[#122E5F]" />
                 </div>
                 <h2 className="text-xl font-bold text-gray-900 mb-1">
-                  Available Leads
+                  Assign Leads to {selectedContractor?.fullName}
                 </h2>
                 <p className="text-sm text-gray-600">
-                  Select a lead to assign to this contractor
+                  Select leads to assign to this contractor
                 </p>
               </div>
 

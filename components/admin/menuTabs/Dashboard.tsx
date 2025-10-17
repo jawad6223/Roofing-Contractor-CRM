@@ -182,7 +182,7 @@ export const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {leads.slice(0, 3).map((lead: LeadType, index: number) => (
+              {leads.filter(lead => lead.Status === "open").slice(0, 3).map((lead: LeadType, index: number) => (
                 <div
                   key={index}
                   onClick={() => handleLeadClick(lead)}

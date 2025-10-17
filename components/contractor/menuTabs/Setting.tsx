@@ -74,10 +74,10 @@ export const Setting = () => {
           return false;
         }
       ),
-    cvv: yup
+      cvv: yup
       .string()
       .required("CVV is required")
-      .matches(/^\d{3,4}$/, "Please enter a valid CVV (3-4 digits)"),
+      .matches(/^\d{3}$/, "Please enter a valid CVV (3 digits only)"),
     cardType: yup
       .string()
       .required("Card type is required")
@@ -336,7 +336,7 @@ export const Setting = () => {
       type: "text",
       placeholder: "123",
       required: true,
-      maxLength: 4,
+      maxLength: 3,
     },
     {
       name: "cardType",

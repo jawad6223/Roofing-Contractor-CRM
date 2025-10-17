@@ -1,16 +1,30 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { X } from "lucide-react";
+import { X, MapPin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { FormPopupProps } from "@/types/Types";
 import { FormField } from "@/types/Types";
+
+interface PlacePrediction {
+  place_id: string;
+  description: string;
+  structured_formatting: {
+    main_text: string;
+    secondary_text: string;
+  };
+  types: string[];
+  matched_substrings?: Array<{
+    length: number;
+    offset: number;
+  }>;
+}
 
 
 
@@ -125,6 +139,46 @@ export const FormPopup: React.FC<FormPopupProps> = ({
   initialValues = {},
   validationSchema,
 }) => {
+  const [zipSuggestions, setZipSuggestions] = useState<PlacePrediction[]>([]);
+  const [showZipSuggestions, setShowZipSuggestions] = useState(false);
+  const [isLoadingZips, setIsLoadingZips] = useState(false);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const fetchZipCodeSuggestions = async (input: string) => {
+    try {
+      setIsLoadingZips(true);
+  
+      const response = await fetch(`/api/places?input=${encodeURIComponent(input)}`);
+  
+      if (!response.ok) {
+        throw new Error("Failed to fetch ZIP code suggestions");
+      }
+  
+      const data = await response.json();
+  
+      if (data.status === "OK") {
+        const filteredPredictions = data.predictions
+          .filter((prediction: PlacePrediction) =>
+            prediction.types.includes("postal_code") ||
+            prediction.types.includes("locality") ||
+            prediction.types.includes("administrative_area_level_1") ||
+            prediction.types.includes("route") ||
+            prediction.types.includes("street_address")
+          )
+          .slice(0, 5);
+  
+        setZipSuggestions(filteredPredictions || []);
+      } else {
+        console.error("Google API error:", data.status);
+        setZipSuggestions([]);
+      }
+    } catch (error) {
+      console.error("Error fetching ZIP code suggestions:", error);
+      setZipSuggestions([]);
+    } finally {
+      setIsLoadingZips(false);
+    }
+  };
   // Create validation schema from fields if not provided
   const createValidationSchema = () => {
     if (validationSchema) return validationSchema;
@@ -172,6 +226,7 @@ export const FormPopup: React.FC<FormPopupProps> = ({
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting }
   } = useForm({
     resolver: yupResolver(createValidationSchema()),
@@ -183,6 +238,14 @@ export const FormPopup: React.FC<FormPopupProps> = ({
       reset(memoizedInitialValues);
     }
   }, [isOpen, memoizedInitialValues, reset]);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+      }
+    };
+  }, []);
 
   const onFormSubmit = (data: Record<string, any>) => {
     onSubmit(data);
@@ -261,50 +324,127 @@ export const FormPopup: React.FC<FormPopupProps> = ({
                     )}
                   />
                 ) : (
-                  <Controller
-                    name={field.name}
-                    control={control}
-                    render={({ field: controllerField }) => (
-                      <Input
-                        {...controllerField}
-                        type={field.type}
-                        placeholder={field.placeholder}
-                        maxLength={
-                          field.type === "tel" 
-                            ? 14 
-                            : field.name === "cardNumber"
-                            ? 19
-                            : field.name === "expiryDate"
-                            ? 5
-                            : field.maxLength
-                        }
-                        className={`h-10 text-sm ${field.className || ""}`}
-                        value={
-                          field.type === "tel" 
-                            ? formatPhoneNumber(controllerField.value || "") 
-                            : field.name === "cardNumber"
-                            ? formatCardNumber(controllerField.value || "")
-                            : field.name === "expiryDate"
-                            ? formatExpiryDate(controllerField.value || "")
-                            : controllerField.value || ""
-                        }
-                        onChange={(e) => {
-                          if (field.type === "tel") {
-                            const formatted = formatPhoneNumber(e.target.value);
-                            controllerField.onChange(formatted);
-                          } else if (field.name === "cardNumber") {
-                            const formatted = formatCardNumber(e.target.value);
-                            controllerField.onChange(formatted);
-                          } else if (field.name === "expiryDate") {
-                            const formatted = formatExpiryDate(e.target.value);
-                            controllerField.onChange(formatted);
-                          } else {
-                            controllerField.onChange(e.target.value);
+                  <div className="relative">
+                    <Controller
+                      name={field.name}
+                      control={control}
+                      render={({ field: controllerField }) => (
+                        <Input
+                          {...controllerField}
+                          type={field.type}
+                          placeholder={field.placeholder}
+                          maxLength={
+                            field.type === "tel" 
+                              ? 14 
+                              : field.name === "cardNumber"
+                              ? 19
+                              : field.name === "expiryDate"
+                              ? 5
+                              : field.maxLength
                           }
-                        }}
-                      />
+                          className={`h-10 text-sm ${field.className || ""}`}
+                          value={
+                            field.type === "tel" 
+                              ? formatPhoneNumber(controllerField.value || "") 
+                              : field.name === "cardNumber"
+                              ? formatCardNumber(controllerField.value || "")
+                              : field.name === "expiryDate"
+                              ? formatExpiryDate(controllerField.value || "")
+                              : controllerField.value || ""
+                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            
+                            if (field.type === "tel") {
+                              const formatted = formatPhoneNumber(value);
+                              controllerField.onChange(formatted);
+                            } else if (field.name === "cardNumber") {
+                              const formatted = formatCardNumber(value);
+                              controllerField.onChange(formatted);
+                            } else if (field.name === "expiryDate") {
+                              const formatted = formatExpiryDate(value);
+                              controllerField.onChange(formatted);
+                            } else {
+                              controllerField.onChange(value);
+                              
+                              if (field.name === 'zipCode') {
+                                if (debounceTimer.current) {
+                                  clearTimeout(debounceTimer.current);
+                                }
+                                
+                                if (value.length >= 2) {
+                                  setShowZipSuggestions(true);
+                                  setIsLoadingZips(true);
+                                  
+                                  const timer = setTimeout(() => {
+                                    fetchZipCodeSuggestions(value);
+                                  }, 300);
+                                  
+                                  debounceTimer.current = timer;
+                                } else {
+                                  setShowZipSuggestions(false);
+                                  setZipSuggestions([]);
+                                }
+                              }
+                            }
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => {
+                              setShowZipSuggestions(false);
+                            }, 200);
+                          }}
+                          onFocus={() => {
+                            if (field.name === 'zipCode' && zipSuggestions.length > 0) {
+                              setShowZipSuggestions(true);
+                            }
+                          }}
+                        />
+                      )}
+                    />
+                    
+                    {field.name === 'zipCode' && showZipSuggestions && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                        {isLoadingZips ? (
+                          <div className="flex items-center justify-center p-3">
+                            <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+                            <span className="ml-2 text-sm text-gray-500">Loading suggestions...</span>
+                          </div>
+                        ) : zipSuggestions.length > 0 ? (
+                          zipSuggestions.map((suggestion, index) => {
+                            const extractZipCode = (description: string) => {
+                              const zipMatch = description.match(/\b\d{5}(-\d{4})?\b/);
+                              return zipMatch ? zipMatch[0] : description.split(',')[0].trim();
+                            };
+                            
+                            const zipCode = extractZipCode(suggestion.description);
+                            
+                            return (
+                              <button
+                                key={suggestion.place_id}
+                                type="button"
+                                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center"
+                                onClick={() => {
+                                  setValue(field.name, suggestion.description);
+                                  setShowZipSuggestions(false);
+                                  setZipSuggestions([]);
+                                }}
+                              >
+                                <MapPin className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                                <div className="flex flex-col">
+                                  <span className="font-medium text-gray-900">{zipCode}</span>
+                                  <span className="text-xs text-gray-500 truncate">{suggestion.description}</span>
+                                </div>
+                              </button>
+                            );
+                          })
+                        ) : (
+                          <div className="px-3 py-2 text-sm text-gray-500">
+                            No suggestions found
+                          </div>
+                        )}
+                      </div>
                     )}
-                  />
+                  </div>
                 )}
                 
                   {errors[field.name] && (
