@@ -60,6 +60,7 @@ export const Leads = () => {
   const [leads, setLeads] = useState<LeadType[]>([]);
   const [contractors, setContractors] = useState<ContractorType[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [assignedContractor, setAssignedContractor] = useState<any>(null);
   // Validation schema for new lead form
   const newLeadSchema = yup.object().shape({
     firstName: yup.string()
@@ -179,6 +180,44 @@ export const Leads = () => {
     }
   };
 
+  const fetchAssignedContractor = async (leadEmail: string) => {
+    try {
+      console.log('Fetching contractor for lead email:', leadEmail);
+      
+      // First, get the contractor_id from Contractor_Leads table
+      const { data: contractorLead, error: contractorLeadError } = await supabase
+        .from("Contractor_Leads")
+        .select("contractor_id")
+        .eq("Email Address", leadEmail)
+        .single();
+
+      if (contractorLeadError && contractorLeadError.code !== 'PGRST116') {
+        throw contractorLeadError;
+      }
+
+      if (!contractorLead) {
+        setAssignedContractor(null);
+        return;
+      }
+
+      // Then, get the contractor details from Roofing_Auth table
+      const { data: contractorData, error: contractorError } = await supabase
+        .from("Roofing_Auth")
+        .select(`"Full Name", "Phone Number", "Email Address", "Business Address", "Service Radius"`)
+        .eq("user_id", contractorLead.contractor_id)
+        .single();
+
+      if (contractorError && contractorError.code !== 'PGRST116') {
+        throw contractorError;
+      }
+
+      setAssignedContractor(contractorData || null);
+    } catch (err) {
+      console.error("Error fetching assigned contractor:", err);
+      setAssignedContractor(null);
+    }
+  };
+
   useEffect(() => {
     fetchLeadsData();
   }, []);
@@ -186,11 +225,15 @@ export const Leads = () => {
   const handleViewLead = (lead: LeadType): void => {
     setSelectedLead(lead);
     setShowModal(true);
+    if (lead["Email Address"]) {
+      fetchAssignedContractor(lead["Email Address"]);
+    }
   };
 
   const handleCloseModal = () => {
     setSelectedLead(null);
     setShowModal(false);
+    setAssignedContractor(null);
   };
 
   const handleAddLead = () => {
@@ -287,7 +330,7 @@ export const Leads = () => {
   const getStatusBadgeColor = (leadId: string) => {
     const status = leadId.toLowerCase();
     if (status === "open") {
-      return "bg-green-100 text-green-800 hover:bg-green-200";
+        return "bg-green-100 text-green-800 hover:bg-green-200";
     } else {
       return "bg-red-100 text-red-800 hover:bg-red-200";
     }
@@ -607,11 +650,11 @@ export const Leads = () => {
                     {currentData.length > 0 ? (
                       currentData.map((lead: LeadType, index: number) => (
                         <tr key={index} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm font-bold text-[#122E5F]">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-bold text-[#122E5F]">
                                 {lead["First Name"]} {lead["Last Name"]}
-                              </span>
-                            </td>
+                            </span>
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
@@ -957,62 +1000,51 @@ export const Leads = () => {
                 </div>
               </div>
 
-              {/* Leads Section */}
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                  <Target className="h-5 w-5 mr-2 text-[#286BBD]" />
-                  Assigned Leads
-                </h3>
-
-                {/* Search Bar for Assigned Leads */}
-                <div className="mb-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      type="text"
-                      placeholder="Search assigned leads..."
-                      // value={assignedLeadsSearchTerm}
-                      // onChange={(e) =>
-                      //   setAssignedLeadsSearchTerm(e.target.value)
-                      // }
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#286BBD] focus:border-transparent"
-                    />
-                  </div>
+              {/* Assigned Contractor Section */}
+              {assignedContractor && (
+                <div className="mt-6 pt-4 border-t border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <User className="h-5 w-5 mr-2 text-[#286BBD]" />
+                    Assigned Contractor
+                  </h3>
+                <div className="overflow-auto max-h-64">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Email
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Phone no
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Business Address
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      <tr>
+                        <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {assignedContractor["Full Name"]}
+                        </td>
+                        <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {assignedContractor["Email Address"]}
+                        </td>
+                        <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {assignedContractor["Phone Number"]}
+                        </td>
+                        <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          {assignedContractor["Business Address"]}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
-
-                 <div className="space-y-3">
-                   <div className="overflow-auto max-h-64">
-                     <table className="w-full">
-                       <thead className="bg-gray-50">
-                         <tr>
-                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                             Name
-                           </th>
-                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                             Zip Code
-                           </th>
-                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                             Phone no
-                           </th>
-                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                             Email
-                           </th>
-                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                             Company
-                           </th>
-                         </tr>
-                       </thead>
-                       <tbody className="bg-white divide-y divide-gray-200">
-                         <tr>
-                           <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                             No assigned leads data available
-                           </td>
-                         </tr>
-                       </tbody>
-                     </table>
-                   </div>
-                 </div>
-               </div>
+              </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">

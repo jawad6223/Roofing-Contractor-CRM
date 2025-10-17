@@ -191,6 +191,7 @@ export const Contractors = () => {
       "to contractor:",
       selectedLead?.id
     );
+    console.log('contractor id:', selectedContractor);
     toast.success("Leads assigned successfully");
     handleCloseAssignModal();
   };
