@@ -136,10 +136,6 @@ export const Setting = () => {
       setLoading(false);
     }
   };
-  
-  
-  
-  
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({
