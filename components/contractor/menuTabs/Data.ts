@@ -49,37 +49,6 @@ export const crmData = [
     }
   ];
 
- export const leadPricing = [
-    {
-      zipCode: '75201',
-      firstName:'John',
-      lastName:'Doe',
-      phoneno:'1234567890',
-      email:'john.doe@example.com',
-      company:'ABC Inc',
-      policy:'1234567890'
-
-    },
-    {
-      zipCode: '75202',
-      firstName:'Jane',
-      lastName:'Doe',
-      phoneno:'1234567890',
-      email:'jane.doe@example.com',
-      company:'ABC Inc',
-      policy:'1234567890'
-    },
-    {
-      zipCode: '75203',
-      firstName:'Jim',
-      lastName:'Beam',
-      phoneno:'1234567890',
-      email:'jim.beam@example.com',
-      company:'ABC Inc',
-      policy:'1234567890'
-    }
-  ];
-
   export const fetchContractorLeads = async () => {
     try {
       const userId = localStorage.getItem("user_id");
