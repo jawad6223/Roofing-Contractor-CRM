@@ -68,6 +68,21 @@ export const Team = () => {
       toast.error("User not logged in");
       return;
     }
+
+    // email already
+    const { data: existingMember, error: fetchError } = await supabase
+      .from("Team_Members")
+      .select("id")
+      .eq("Email_Address", formData.email)
+      .maybeSingle();
+
+    if (fetchError) throw fetchError;
+
+    if (existingMember) {
+      toast.error("A team member with this email already exists.");
+      return;
+    }
+
     const { error } = await supabase.from("Team_Members").insert([
       {
         user_id: userId,
