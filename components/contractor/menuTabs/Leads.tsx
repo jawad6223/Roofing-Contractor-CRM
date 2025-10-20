@@ -18,24 +18,27 @@ export const Leads = () => {
   
   const [contractorLeads, setContractorLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  
-  const defaultStatuses: Record<string, string> = {};
-  purchasedLeads.forEach(lead => {
-    defaultStatuses[lead.id] = "open";
-  });
-  
-  const [leadStatuses, setLeadStatuses] = useState<Record<string, string>>(defaultStatuses);
 
-  const handleStatusChange = (leadId: string, status: string) => {
-    setLeadStatuses((prev) => ({
-      ...prev,
-      [leadId]: status,
-    }));
-  };
-  console.log('leadStatuses', leadStatuses);
+  const handleStatusChange = async (leadId: string, status: string) => {
+    try {
+      const { error } = await supabase
+        .from("Contractor_Leads")
+        .update({ status: status })
+        .eq("id", leadId);
 
-  const getLeadStatus = (leadId: string) => {
-    return leadStatuses[leadId];
+      if (error) throw error;
+
+      setContractorLeads((prev) =>
+        prev.map((lead) =>
+          lead.id === leadId ? { ...lead, status: status } : lead
+        )
+      );
+
+      toast.success("Status updated successfully");
+    } catch (error) {
+      console.error("Error updating status:", error);
+      toast.error("Failed to update status");
+    }
   };
 
   const fetchContractorLeads = async () => {
@@ -73,9 +76,14 @@ export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const itemsPerPage = 10;
-console.log('contractorLeads', contractorLeads);
   // Filter data based on search term and status
   const filteredData = contractorLeads.filter((lead) => {
+    const leadStatus = lead["status"];
+    
+    if (leadStatus === "close") {
+      return false;
+    }
+
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       (lead["First Name"]?.toLowerCase() || "").includes(searchLower) ||
@@ -86,8 +94,6 @@ console.log('contractorLeads', contractorLeads);
       (lead["Insurance Company"]?.toLowerCase() || "").includes(searchLower) ||
       (lead["Policy Number"] || "").includes(searchTerm);
 
-    // const leadStatus = getLeadStatus(lead.id?.toString() || "");
-    const leadStatus = lead["Status"];
     const matchesStatus = statusFilter === "All" || leadStatus.toLowerCase() === statusFilter.toLowerCase();
 
     return matchesSearch && matchesStatus;
@@ -398,8 +404,8 @@ console.log('contractorLeads', contractorLeads);
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <Select
-                          value={getLeadStatus(lead.id)}
-                          onValueChange={(val) => handleStatusChange(lead.id, val)}
+                          value={lead["status"] || "open"}
+                          onValueChange={(val) => handleStatusChange(lead["id"], val)}
                         >
                           <SelectTrigger className="w-32 h-8 text-xs">
                             <SelectValue />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   MapPin,
   Eye,
@@ -23,6 +23,7 @@ import { crmData } from "./Data";
 import { toast } from "react-toastify";
 import * as yup from "yup";
 import { FormField } from "@/types/Types";
+import { supabase } from "@/lib/supabase";
 
 export const CRM = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -30,17 +31,17 @@ export const CRM = () => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [crmLeads, setCRMLeads] = useState<crmDataType[]>([]);
   const itemsPerPage = 10;
-
   // Filter data based on search term
-  const filteredData = crmData.filter((lead) =>
-    lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.phoneno.includes(searchTerm) ||
-    lead.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.insuranceCompany.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.policy.includes(searchTerm)
-  );
+  const filteredData = crmLeads.filter((lead) => lead["status"] === "close" && (
+    lead["First Name"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lead["Email Address"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lead["Phone Number"]?.includes(searchTerm) ||
+    lead["Zip Code"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lead["Insurance Company"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lead["Policy Number"]?.includes(searchTerm)
+  ));
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -93,46 +94,58 @@ export const CRM = () => {
 
   const leadFields = selectedLead ? [
     {
-      label: "Full Name",
-      value: selectedLead.name,
+      label: "First Name",
+      value: selectedLead["First Name"],
+      icon: User
+    },
+    {
+      label: "Last Name",
+      value: selectedLead["Last Name"],
       icon: User
     },
     {
       label: "Phone",
-      value: selectedLead.phoneno,
+      value: selectedLead["Phone Number"],
       icon: Phone
     },
     {
       label: "Email",
-      value: selectedLead.email,
+      value: selectedLead["Email Address"],
       icon: Mail,
       breakAll: true
     },
     {
-      label: "Location",
-      value: selectedLead.location,
+      label: "Zip Code",
+      value: selectedLead["Zip Code"],
       icon: MapPin
     },
     {
       label: "Insurance Company",
-      value: selectedLead.insuranceCompany,
+      value: selectedLead["Insurance Company"],
       icon: Building,
       whitespaceNowrap: true
     },
     {
       label: "Policy Number",
-      value: selectedLead.policy,
+      value: selectedLead["Policy Number"],
       icon: Hash
     }
   ] : [];
 
   const addMemberFields = [
     {
-      name: "name",
-      label: "Full Name",
+      name: "firstName",
+      label: "First Name",
       type: "text",
-      placeholder: "John Smith",
-      required: true
+      placeholder: "John",
+      required: true,
+    },
+    {
+      name: "lastName",
+      label: "Last Name",
+      type: "text",
+      placeholder: "Doe",
+      required: true,
     },
     {
       name: "phoneno",
@@ -149,11 +162,12 @@ export const CRM = () => {
       required: true
     },
     {
-      name: "location",
-      label: "Location",
+      name: "zipCode",
+      label: "Zip Code",
       type: "text",
-      placeholder: "Houston, TX",
-      required: true
+      placeholder: "75201",
+      required: true,
+      maxLength: 5,
     },
     {
       name: "insuranceCompany",
@@ -171,6 +185,36 @@ export const CRM = () => {
     }
   ]
 
+  const fetchCRMLeads = async () => {
+    // setLoading(true);
+    try {
+      const userId = localStorage.getItem("user_id");
+      if (!userId) {
+        toast.error("User not logged in");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("Contractor_Leads")
+        .select("*")
+        .eq("contractor_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      setCRMLeads(data || []);
+    } catch (error) {
+      console.error("Error fetching contractor leads:", error);
+      toast.error("Failed to fetch leads");
+    } finally {
+      // setLoading(false);
+    }
+  };
+
+  useEffect(()=>{
+    fetchCRMLeads();
+  },[])
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1); // Reset to first page when searching
@@ -184,10 +228,37 @@ export const CRM = () => {
     setShowAddMemberModal(false);
   };
 
-  const handleFormSubmit = (formData: Record<string, any>) => {
-    console.log('New member data:', formData);
-    toast.success("Member added successfully");
-    handleCloseAddMemberModal();
+  const handleFormSubmit = async (formData: Record<string, any>) => {
+    try {
+      const userId = localStorage.getItem("user_id");
+      if (!userId) {
+        toast.error("User not logged in");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("Contractor_Leads")
+        .insert({
+          contractor_id: userId,
+          "First Name": formData.firstName,
+          "Last Name": formData.lastName,
+          "Phone Number": formData.phoneno,
+          "Email Address": formData.email,
+          "Zip Code": formData.zipCode,
+          "Insurance Company": formData.insuranceCompany,
+          "Policy Number": formData.policy,
+          status: "close"
+        });
+
+      if (error) throw error;
+
+      toast.success("Member added successfully");
+      handleCloseAddMemberModal();
+      fetchCRMLeads();
+    } catch (error) {
+      console.error("Error adding member:", error);
+      toast.error("Failed to add member");
+    }
   };
 
   return (
@@ -247,7 +318,7 @@ export const CRM = () => {
                     Email
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Location
+                    Zip Code
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
@@ -260,25 +331,25 @@ export const CRM = () => {
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm font-bold text-[#122E5F]">
-                        {lead.name}
+                        {lead["First Name"]}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900 flex items-center">
                         <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                        {lead.phoneno}
+                        {lead["Phone Number"]}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900 flex items-center">
                         <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                        {lead.email}
+                        {lead["Email Address"]}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900 flex items-center">
                         <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                        {lead.location}
+                        {lead["Zip Code"]}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

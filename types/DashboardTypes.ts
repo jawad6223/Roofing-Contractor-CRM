@@ -9,12 +9,14 @@ export interface CrmDashboardProps {
 }
 
 export interface crmDataType {
-  name: string;
-  phoneno: string;
-  email: string;
-  location: string;
-  insuranceCompany: string;
-  policy: string;
+  "First Name": string;
+  "Last Name": string;
+  "Phone Number": string;
+  "Email Address": string;
+  "Zip Code": string;
+  "Insurance Company": string;
+  "Policy Number": string;
+  "status": string;
 }
 
 export interface purchasedLeadType {
