@@ -22,11 +22,11 @@ const schema = yup.object().shape({
 });
 
 // Form data type
-interface ForgetPasswordFormData {
+interface ForgetAdminPasswordFormData {
   emailAddress: string;
 }
 
-export default function ForgetPasswordPage() {
+export default function ForgetAdminPasswordPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,12 +35,12 @@ export default function ForgetPasswordPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ForgetPasswordFormData>({
+  } = useForm<ForgetAdminPasswordFormData>({
     resolver: yupResolver(schema),
   });
 
   // On form submit
-  const onSubmit = async (data: ForgetPasswordFormData) => {
+  const onSubmit = async (data: ForgetAdminPasswordFormData) => {
     setIsSubmitting(true);
     
     try {
@@ -53,7 +53,7 @@ export default function ForgetPasswordPage() {
       }
 
       toast.success("Password reset email sent! Check your inbox.");
-      router.push("/login");
+      router.push("/adminLogin");
     } catch (err: any) {
       console.error("Password reset error:", err);
       
@@ -89,9 +89,9 @@ export default function ForgetPasswordPage() {
               </div>
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Reset Password
+              Reset Admin Password
             </h2>
-            <p className="text-gray-600">Enter your email to receive a password reset link</p>
+            <p className="text-gray-600">Enter your email to receive a password reset link for admin</p>
           </div>
 
           {/* Form starts here */}
@@ -118,11 +118,11 @@ export default function ForgetPasswordPage() {
             <div className="flex space-x-3">
               <button
                 type="button"
-                onClick={() => router.push("/login")}
+                onClick={() => router.push("/adminLogin")}
                 className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Login
+                Back to Admin Login
               </button>
               <button
                 type="submit"
@@ -137,23 +137,10 @@ export default function ForgetPasswordPage() {
           {/* Additional Info */}
           <div className="text-center pt-4 border-t border-gray-200 mt-6">
             <p className="text-sm text-gray-500">
-              We'll send you a secure link to reset your password. 
+              We'll send you a secure link to reset your admin password. 
               <br />
               Check your spam folder if you don't see it in your inbox.
             </p>
-          </div>
-
-          {/* Switch to Register */}
-          <div className="text-center pt-4 border-t border-gray-200">
-            <span className="text-sm text-gray-600">
-              Don&apos;t have an account?{" "}
-              <button
-                onClick={() => router.push("/")}
-                className="text-[#286BBD] hover:text-[#1d4ed8] font-semibold transition-colors duration-200"
-              >
-                Create Account
-              </button>
-            </span>
           </div>
 
         </div>

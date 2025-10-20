@@ -94,7 +94,7 @@ function ResetPasswordForm() {
       }
 
       toast.success("Password updated successfully! You can now log in with your new password.");
-      router.push("/login");
+      // router.push("/login");
     } catch (err: any) {
       console.error("Password update error:", err);
       

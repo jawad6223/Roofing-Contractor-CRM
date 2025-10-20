@@ -183,7 +183,7 @@ export default function AdminLoginModal() {
             <div className="text-right">
               <button
                 type="button"
-                onClick={() => router.push("/forget-password")}
+                onClick={() => router.push("/forget-admin-password")}
                 className="text-sm text-[#286BBD] hover:text-[#1d4ed8] font-medium transition-colors duration-200"
               >
                 Forgot Password?
