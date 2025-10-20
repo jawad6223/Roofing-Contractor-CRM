@@ -1,4 +1,7 @@
- export const crmData = [
+import { supabase } from "@/lib/supabase";
+import { toast } from "react-toastify";
+
+export const crmData = [
     {
       id: '01',
       name: 'Michael Johnson',
@@ -76,6 +79,29 @@
       policy:'1234567890'
     }
   ];
+
+  export const fetchContractorLeads = async () => {
+    try {
+      const userId = localStorage.getItem("user_id");
+      if (!userId) {
+        toast.error("User not logged in");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("Contractor_Leads")
+        .select("*")
+        .eq("contractor_id", userId)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      return data || [];
+    } catch (error) {
+      console.error("Error fetching contractor leads:", error);
+      toast.error("Failed to fetch leads");
+    }
+  };
 
   export const purchasedLeads = [
     {

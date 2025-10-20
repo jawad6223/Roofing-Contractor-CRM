@@ -20,6 +20,7 @@ export interface crmDataType {
 }
 
 export interface purchasedLeadType {
+  id: string;
   "First Name": string;
   "Last Name": string;
   "Phone Number": string;
@@ -28,6 +29,7 @@ export interface purchasedLeadType {
   "Insurance Company": string;
   "Policy Number": string;
   "Purchase Date": string;
+  "status": string;
 }
 
 export interface sampleLeadType {

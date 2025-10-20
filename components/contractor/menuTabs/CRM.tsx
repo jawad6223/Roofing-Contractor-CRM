@@ -32,6 +32,7 @@ export const CRM = () => {
   const [showAddMemberModal, setShowAddMemberModal] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [crmLeads, setCRMLeads] = useState<crmDataType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 10;
   // Filter data based on search term
   const filteredData = crmLeads.filter((lead) => lead["status"] === "close" && (
@@ -186,7 +187,7 @@ export const CRM = () => {
   ]
 
   const fetchCRMLeads = async () => {
-    // setLoading(true);
+    setIsLoading(true);
     try {
       const userId = localStorage.getItem("user_id");
       if (!userId) {
@@ -207,7 +208,7 @@ export const CRM = () => {
       console.error("Error fetching contractor leads:", error);
       toast.error("Failed to fetch leads");
     } finally {
-      // setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -326,7 +327,17 @@ export const CRM = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {currentData.length > 0 ? (
+              {isLoading ? (
+                  <tr>
+                  <td colSpan={6} className="px-6 py-8 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                      <p className="mt-2 text-sm text-gray-500">Loading leads...</p>
+                    </div>
+                  </td>
+                </tr>
+              ) :
+                currentData.length > 0 ? (
                   currentData.map((lead, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">

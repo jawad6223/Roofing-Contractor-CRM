@@ -12,6 +12,7 @@ import { purchasedLeadType, sampleLeadType } from "@/types/DashboardTypes";
 import { purchasedLeads, sampleLeads } from "./Data";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
+import { fetchContractorLeads } from "./Data";
 
 export const Leads = () => {
   const router = useRouter();
@@ -41,34 +42,18 @@ export const Leads = () => {
     }
   };
 
-  const fetchContractorLeads = async () => {
+  const fetchContractorLeadsData = async () => {
     setLoading(true);
-    try {
-      const userId = localStorage.getItem("user_id");
-      if (!userId) {
-        toast.error("User not logged in");
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("Contractor_Leads")
-        .select("*")
-        .eq("contractor_id", userId)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      setContractorLeads(data || []);
-    } catch (error) {
-      console.error("Error fetching contractor leads:", error);
-      toast.error("Failed to fetch leads");
-    } finally {
-      setLoading(false);
+    const contractorLeadsData = await fetchContractorLeads();
+    if (contractorLeadsData) {
+      setContractorLeads(contractorLeadsData);
     }
+    setLoading(false);
   };
+  
 
   useEffect(() => {
-    fetchContractorLeads();
+    fetchContractorLeadsData();
   }, []);
 
   const [loadingLeads, setLoadingLeads] = useState<Set<number>>(new Set());
@@ -375,7 +360,7 @@ export const Leads = () => {
                     </td>
                   </tr>
                 ) : currentData.length > 0 ? (
-                  currentData.map((lead: any, index: number) => (
+                  currentData.map((lead: purchasedLeadType, index: number) => (
                     <tr key={index} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div>

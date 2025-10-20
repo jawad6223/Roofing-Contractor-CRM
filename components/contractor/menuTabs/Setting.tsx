@@ -342,6 +342,7 @@ export const Setting = () => {
       name: "cardType",
       label: "Card Type",
       type: "select",
+      placeholder: "Select Card",
       required: true,
       options: [
         { value: "visa", label: "Visa" },

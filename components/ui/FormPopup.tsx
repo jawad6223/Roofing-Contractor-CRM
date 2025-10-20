@@ -297,7 +297,7 @@ export const FormPopup: React.FC<FormPopupProps> = ({
                         value={controllerField.value || ""}
                         onValueChange={controllerField.onChange}
                       >
-                        <SelectTrigger className={`h-10 text-sm ${field.className || ""}`}>
+                        <SelectTrigger className={`h-10 text-sm text-gray-500 ${field.className || ""}`}>
                           <SelectValue placeholder={field.placeholder} />
                         </SelectTrigger>
                         <SelectContent>

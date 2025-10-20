@@ -1,5 +1,5 @@
 "use client";
-
+import { useEffect } from "react";
 import {
   Home,
   FileText,
@@ -14,23 +14,25 @@ import {
   Calendar,
   Hash,
   Building,
+  Search
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DetailPopup } from "@/components/ui/DetailPopup";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
-import { purchasedLeads, sampleLeads } from "./Data";
-import { sampleLeadType } from "@/types/DashboardTypes";
+import { sampleLeads } from "./Data";
+import { purchasedLeadType, sampleLeadType } from "@/types/DashboardTypes";
 import Link from "next/link";
-
+import { fetchContractorLeads } from "./Data";
 export const DashBoard = () => {
   const { getCurrentUserFullName } = useAuth();
   const currentUserFullName = getCurrentUserFullName();
   const [loadingLeads, setLoadingLeads] = useState<Set<number>>(new Set());
   const [selectedLead, setSelectedLead] = useState<any>(null);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [contractorLeads, setContractorLeads] = useState<any[]>([]);
   const handleCloseModal = () => {
     setIsLeadModalOpen(false);
     setSelectedLead(null);
@@ -83,40 +85,19 @@ export const DashBoard = () => {
       ]
     : [];
 
-  // async function handleBuyNow(lead: sampleLeadType) {
-  //   // Add this lead to loading set
-  //   setLoadingLeads((prev) => new Set(prev).add(lead.id));
-
-  //   try {
-  //     const response = await fetch("/api/create-single-checkout-session", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         // leadAmount: lead.price,
-  //         leadAmount: 50,
-  //         leadName: `${lead.firstName} ${lead.lastName}`,
-  //       }),
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       console.error("Checkout error:", errorData.error);
-  //       return;
-  //     }
-
-  //     const { url } = await response.json();
-  //     window.location.href = url;
-  //   } catch (error) {
-  //     console.error("Stripe checkout error:", error);
-  //   } finally {
-  //     // Remove this lead from loading set
-  //     setLoadingLeads((prev) => {
-  //       const newSet = new Set(prev);
-  //       newSet.delete(lead.id);
-  //       return newSet;
-  //     });
-  //   }
-  // }
+    const fetchContractorLeadsData = async () => {
+      setIsLoading(true);
+      const contractorLeadsData = await fetchContractorLeads();
+      if (contractorLeadsData) {
+        setContractorLeads(contractorLeadsData);
+      }
+      setIsLoading(false);
+    };
+    
+  
+    useEffect(() => {
+      fetchContractorLeadsData();
+    }, []);
 
   async function handleBuyNow(lead: sampleLeadType) {
     setLoadingLeads((prev) => new Set(prev).add(lead.id));
@@ -185,7 +166,7 @@ export const DashBoard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl text-[#286BBD] font-bold mb-1">2,847</div>
+            <div className="text-3xl text-[#286BBD] font-bold mb-1">{contractorLeads.length}</div>
           </CardContent>
         </Card>
 
@@ -199,7 +180,7 @@ export const DashBoard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl text-green-600 font-bold mb-1">150</div>
+            <div className="text-3xl text-green-600 font-bold mb-1">{contractorLeads.filter(lead => lead.status !== "close").length}</div>
           </CardContent>
         </Card>
 
@@ -213,7 +194,7 @@ export const DashBoard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl text-red-600 font-bold mb-1">1,369</div>
+            <div className="text-3xl text-red-600 font-bold mb-1">{contractorLeads.filter(lead => lead.status === "close").length}</div>
           </CardContent>
         </Card>
       </div>
@@ -241,10 +222,19 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {purchasedLeads.slice(0, 3).map((activity, index) => (
+              {isLoading ? (
+                  <div className="flex flex-col items-center justify-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                      <p className="mt-2 text-sm text-gray-500">Loading leads...</p>
+                    </div>
+                  </div>
+              ) :
+              contractorLeads.filter(lead => lead.status !== "close").length > 0 ? (
+                contractorLeads.filter(lead => lead.status !== "close").slice(0, 3).map((lead: purchasedLeadType, index: number) => (
                 <div
                   key={index}
-                  onClick={() => handleLeadClick(activity)}
+                  onClick={() => handleLeadClick(lead)}
                   className="flex flex-col lg:flex-row items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
                 >
                   <div className="flex items-center space-x-4">
@@ -254,13 +244,13 @@ export const DashBoard = () => {
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-1">
                         <h4 className="font-semibold text-gray-900 text-base">
-                          {activity.firstName} {activity.lastName}
+                          {lead["First Name"]} {lead["Last Name"]}
                         </h4>
                       </div>
                       <div className="flex items-center space-x-4 text-sm text-gray-600">
                         <div className="flex items-center space-x-1">
                           <MapPin className="h-3 w-3" />
-                          <span>{activity.location}</span>
+                          <span>{lead["Zip Code"]}</span>
                         </div>
                       </div>
                     </div>
@@ -270,16 +260,29 @@ export const DashBoard = () => {
                     <div className="flex flex-col items-end space-y-1">
                       <div className="text-sm text-[#286BBD] flex items-center hover:text-[#1d4ed8] transition-colors">
                         <Phone className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{activity.phoneno}</span>
+                        <span className="font-medium">{lead["Phone Number"]}</span>
                       </div>
                       <div className="text-sm text-gray-600 flex items-center break-all hover:text-gray-800 transition-colors">
                         <Mail className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{activity.email}</span>
+                        <span className="font-medium">{lead["Email Address"]}</span>
                       </div>
                     </div>
                   </div>
                 </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Search className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No leads found
+                </h3>
+                <p className="text-sm text-gray-500">
+                  There are currently no leads in the system
+                </p>
+              </div>
+              )}
             </div>
           </CardContent>
         </Card>
