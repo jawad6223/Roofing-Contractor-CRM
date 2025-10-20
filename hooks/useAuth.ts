@@ -49,7 +49,7 @@ export const useAuth = () => {
       localStorage.removeItem("loggedInUser");
     }
     setUser(null);
-    router.push("/");
+    router.push("/login");
   };
 
   const logoutAdmin = () => {
