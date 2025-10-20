@@ -4,17 +4,7 @@ import React, { useState } from "react";
 import { Home, Settings, BarChart3, Menu, X, User, LogOut, UserPlus, ShoppingCart, FileText } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { CrmDashboardProps } from "@/types/DashboardTypes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -152,7 +142,6 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
           </div>
         </div>
       </div>
-
       {/* Main content */}
       <div className="flex-1 lg:ml-0 flex flex-col h-full overflow-hidden">
         {/* Top header */}
@@ -168,7 +157,6 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
                 <h1 className="text-2xl font-bold text-gray-900">Contractor Dashboard</h1>
             </div>
         </div>
-
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
       </div>

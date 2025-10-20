@@ -1,17 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  MapPin,
-  Eye,
-  X,
-  Phone,
-  Mail,
-  FileText,
-  Building,
-  Search,
-  UserPlus,
-  Hash,
-  User,
-} from "lucide-react";
+import { MapPin, Eye, X, Phone, Mail, FileText, Building, Search, UserPlus, Hash, User, } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +7,6 @@ import { DetailPopup } from "@/components/ui/DetailPopup";
 import { FormPopup } from "@/components/ui/FormPopup";
 import { Pagination } from "@/components/ui/pagination";
 import { crmDataType } from "@/types/DashboardTypes";
-import { crmData } from "./Data";
 import { toast } from "react-toastify";
 import * as yup from "yup";
 import { FormField } from "@/types/Types";
@@ -35,14 +22,20 @@ export const CRM = () => {
   const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 10;
   // Filter data based on search term
-  const filteredData = crmLeads.filter((lead) => lead["status"] === "close" && (
-    lead["First Name"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead["Email Address"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead["Phone Number"]?.includes(searchTerm) ||
-    lead["Zip Code"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead["Insurance Company"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead["Policy Number"]?.includes(searchTerm)
-  ));
+  const filteredData = crmLeads.filter(
+    (lead) =>
+      lead["status"] === "close" &&
+      (lead["First Name"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead["Email Address"]
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        lead["Phone Number"]?.includes(searchTerm) ||
+        lead["Zip Code"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead["Insurance Company"]
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        lead["Policy Number"]?.includes(searchTerm))
+  );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
@@ -51,25 +44,34 @@ export const CRM = () => {
 
   // Validation schema for CRM member form
   const crmMemberSchema = yup.object().shape({
-    name: yup.string()
-      .required('Full name is required')
-      .min(2, 'Name must be at least 2 characters')
-      .max(50, 'Name must be less than 50 characters'),
-    phoneno: yup.string()
-      .required('Phone number is required')
-      .matches(/^\(\d{3}\) \d{3}-\d{4}$/, 'Please enter a valid phone number in format (555) 123-4567'),
-    email: yup.string()
-      .required('Email is required')
-      .email('Please enter a valid email address'),
-    location: yup.string()
-      .required('Location is required')
-      .min(2, 'Location must be at least 2 characters'),
-    insuranceCompany: yup.string()
-      .required('Insurance company is required')
-      .min(2, 'Insurance company must be at least 2 characters'),
-    policy: yup.string()
-      .required('Policy number is required')
-      .min(2, 'Policy number must be at least 2 characters')
+    name: yup
+      .string()
+      .required("Full name is required")
+      .min(2, "Name must be at least 2 characters")
+      .max(50, "Name must be less than 50 characters"),
+    phoneno: yup
+      .string()
+      .required("Phone number is required")
+      .matches(
+        /^\(\d{3}\) \d{3}-\d{4}$/,
+        "Please enter a valid phone number in format (555) 123-4567"
+      ),
+    email: yup
+      .string()
+      .required("Email is required")
+      .email("Please enter a valid email address"),
+    location: yup
+      .string()
+      .required("Location is required")
+      .min(2, "Location must be at least 2 characters"),
+    insuranceCompany: yup
+      .string()
+      .required("Insurance company is required")
+      .min(2, "Insurance company must be at least 2 characters"),
+    policy: yup
+      .string()
+      .required("Policy number is required")
+      .min(2, "Policy number must be at least 2 characters"),
   });
 
   const handlePageChange = (page: number) => {
@@ -93,45 +95,47 @@ export const CRM = () => {
     setShowModal(false);
   };
 
-  const leadFields = selectedLead ? [
-    {
-      label: "First Name",
-      value: selectedLead["First Name"],
-      icon: User
-    },
-    {
-      label: "Last Name",
-      value: selectedLead["Last Name"],
-      icon: User
-    },
-    {
-      label: "Phone",
-      value: selectedLead["Phone Number"],
-      icon: Phone
-    },
-    {
-      label: "Email",
-      value: selectedLead["Email Address"],
-      icon: Mail,
-      breakAll: true
-    },
-    {
-      label: "Zip Code",
-      value: selectedLead["Zip Code"],
-      icon: MapPin
-    },
-    {
-      label: "Insurance Company",
-      value: selectedLead["Insurance Company"],
-      icon: Building,
-      whitespaceNowrap: true
-    },
-    {
-      label: "Policy Number",
-      value: selectedLead["Policy Number"],
-      icon: Hash
-    }
-  ] : [];
+  const leadFields = selectedLead
+    ? [
+        {
+          label: "First Name",
+          value: selectedLead["First Name"],
+          icon: User,
+        },
+        {
+          label: "Last Name",
+          value: selectedLead["Last Name"],
+          icon: User,
+        },
+        {
+          label: "Phone",
+          value: selectedLead["Phone Number"],
+          icon: Phone,
+        },
+        {
+          label: "Email",
+          value: selectedLead["Email Address"],
+          icon: Mail,
+          breakAll: true,
+        },
+        {
+          label: "Zip Code",
+          value: selectedLead["Zip Code"],
+          icon: MapPin,
+        },
+        {
+          label: "Insurance Company",
+          value: selectedLead["Insurance Company"],
+          icon: Building,
+          whitespaceNowrap: true,
+        },
+        {
+          label: "Policy Number",
+          value: selectedLead["Policy Number"],
+          icon: Hash,
+        },
+      ]
+    : [];
 
   const addMemberFields = [
     {
@@ -153,14 +157,14 @@ export const CRM = () => {
       label: "Phone Number",
       type: "tel",
       placeholder: "(555) 123-4567",
-      required: true
+      required: true,
     },
     {
       name: "email",
       label: "Email Address",
       type: "email",
       placeholder: "john@company.com",
-      required: true
+      required: true,
     },
     {
       name: "zipCode",
@@ -175,16 +179,16 @@ export const CRM = () => {
       label: "Insurance Company",
       type: "text",
       placeholder: "State Farm",
-      required: true
+      required: true,
     },
     {
       name: "policy",
       label: "Policy Number",
       type: "text",
       placeholder: "SF123456789",
-      required: true
-    }
-  ]
+      required: true,
+    },
+  ];
 
   const fetchCRMLeads = async () => {
     setIsLoading(true);
@@ -212,13 +216,13 @@ export const CRM = () => {
     }
   };
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchCRMLeads();
-  },[])
+  }, []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   const handleAddMember = () => {
@@ -237,19 +241,17 @@ export const CRM = () => {
         return;
       }
 
-      const { error } = await supabase
-        .from("Contractor_Leads")
-        .insert({
-          contractor_id: userId,
-          "First Name": formData.firstName,
-          "Last Name": formData.lastName,
-          "Phone Number": formData.phoneno,
-          "Email Address": formData.email,
-          "Zip Code": formData.zipCode,
-          "Insurance Company": formData.insuranceCompany,
-          "Policy Number": formData.policy,
-          status: "close"
-        });
+      const { error } = await supabase.from("Contractor_Leads").insert({
+        contractor_id: userId,
+        "First Name": formData.firstName,
+        "Last Name": formData.lastName,
+        "Phone Number": formData.phoneno,
+        "Email Address": formData.email,
+        "Zip Code": formData.zipCode,
+        "Insurance Company": formData.insuranceCompany,
+        "Policy Number": formData.policy,
+        status: "close",
+      });
 
       if (error) throw error;
 
@@ -268,17 +270,17 @@ export const CRM = () => {
       <div className="flex flex-col md:flex-row items-center justify-between">
         <div className="text-center flex-1">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Customer Relationship Management
+            Customer Relationship Management
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             CRM turns customer data into meaningful business insights
           </p>
         </div>
-        
+
         <div className="md:flex-shrink-0 w-full md:w-auto">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             className="bg-[#122E5F] hover:bg-[#183B7A]/80 text-white mt-4 md:mt-0 hover:text-white w-full md:w-auto"
             onClick={handleAddMember}
           >
@@ -327,54 +329,55 @@ export const CRM = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-              {isLoading ? (
+                {isLoading ? (
                   <tr>
-                  <td colSpan={6} className="px-6 py-8 text-center">
-                    <div className="flex flex-col items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
-                      <p className="mt-2 text-sm text-gray-500">Loading leads...</p>
-                    </div>
-                  </td>
-                </tr>
-              ) :
-                currentData.length > 0 ? (
-                  currentData.map((lead, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm font-bold text-[#122E5F]">
-                        {lead["First Name"]}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 flex items-center">
-                        <Phone className="h-3 w-3 mr-1 text-gray-400" />
-                        {lead["Phone Number"]}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 flex items-center">
-                        <Mail className="h-3 w-3 mr-1 text-gray-400" />
-                        {lead["Email Address"]}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="text-sm text-gray-900 flex items-center">
-                        <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                        {lead["Zip Code"]}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
-                        onClick={() => handleViewLead(lead)}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
+                    <td colSpan={6} className="px-6 py-8 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                        <p className="mt-2 text-sm text-gray-500">
+                          Loading leads...
+                        </p>
+                      </div>
                     </td>
                   </tr>
+                ) : currentData.length > 0 ? (
+                  currentData.map((lead, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-bold text-[#122E5F]">
+                          {lead["First Name"]}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900 flex items-center">
+                          <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                          {lead["Phone Number"]}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900 flex items-center">
+                          <Mail className="h-3 w-3 mr-1 text-gray-400" />
+                          {lead["Email Address"]}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm text-gray-900 flex items-center">
+                          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                          {lead["Zip Code"]}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
+                          onClick={() => handleViewLead(lead)}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                      </td>
+                    </tr>
                   ))
                 ) : (
                   <tr>
@@ -382,11 +385,13 @@ export const CRM = () => {
                       <div className="flex flex-col items-center justify-center space-y-3">
                         <Search className="h-12 w-12 text-gray-300" />
                         <div>
-                          <p className="text-lg font-medium text-gray-900">No leads found</p>
+                          <p className="text-lg font-medium text-gray-900">
+                            No leads found
+                          </p>
                           <p className="text-sm text-gray-500">
-                            {searchTerm 
+                            {searchTerm
                               ? `No results for "${searchTerm}". Try adjusting your search terms.`
-                              : 'No leads available.'}
+                              : "No leads available."}
                           </p>
                         </div>
                       </div>

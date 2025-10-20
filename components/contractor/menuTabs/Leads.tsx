@@ -160,7 +160,6 @@ export const Leads = () => {
   ] : [];
 
   async function handleBuyNow(lead: sampleLeadType) {
-    // Add this lead to loading set
     setLoadingLeads((prev) => new Set(prev).add(lead.id));
 
     try {
@@ -185,7 +184,6 @@ export const Leads = () => {
     } catch (error) {
       console.error("Stripe checkout error:", error);
     } finally {
-      // Remove this lead from loading set
       setLoadingLeads((prev) => {
         const newSet = new Set(prev);
         newSet.delete(lead.id);
@@ -193,8 +191,6 @@ export const Leads = () => {
       });
     }
   }
-
-
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);

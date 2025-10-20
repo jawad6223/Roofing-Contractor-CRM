@@ -87,12 +87,12 @@ export const Setting = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // 1️⃣ Get user ID from localStorage (saved at login)
-        const userId = localStorage.getItem("user_id");
-        if (!userId) {
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError || !authData?.user) {
           toast.error("User not logged in");
           return;
         }
+        const userId = authData.user.id;
 
         // 2️⃣ Fetch data from Roofing_Auth table
         const { data, error } = await supabase
@@ -134,11 +134,12 @@ export const Setting = () => {
   const handleUpdate = async () => {
     setLoading(true);
     try {
-      const userId = localStorage.getItem("user_id");
-      if (!userId) {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) {
         toast.error("User not logged in");
         return;
       }
+      const userId = authData.user.id;
 
       const { data: currentUser } = await supabase.auth.getUser();
       const currentEmail = currentUser?.user?.email;
@@ -228,12 +229,12 @@ export const Setting = () => {
 
   const handleFormSubmit = async (formData: Record<string, any>) => {
     try {
-      const userId = localStorage.getItem("user_id");
-
-      if (!userId) {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) {
         toast.error("User not logged in");
         return;
       }
+      const userId = authData.user.id;
 
       const cardNumber = formData.cardNumber.trim();
       const card_last4 = cardNumber.slice(-4);
@@ -262,9 +263,8 @@ export const Setting = () => {
 
   const fetchCards = async () => {
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const userId =
-        sessionData?.session?.user?.id || localStorage.getItem("user_id");
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
 
       if (!userId) {
         toast.error("User not logged in");
