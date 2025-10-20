@@ -123,7 +123,6 @@ export const LeadRequest = () => {
         lead.policy.includes(pendingModalSearchTerm)
     );
 
-  // Define columns for pending leads table
   const pendingLeadsColumns = [
     { key: "name", label: "Name" },
     { key: "zipCode", label: "Zip Code" },
@@ -134,13 +133,11 @@ export const LeadRequest = () => {
     { key: "policy", label: "Policy" }
   ];
 
-  // Transform pending leads data for table
   const pendingLeadsTableData = filteredPendingLeads.map(lead => ({
     ...lead,
     name: `${lead.firstName} ${lead.lastName}`
   }));
 
-  // Define columns for assigned leads table
   const assignedLeadsColumns = [
     { key: "name", label: "Name" },
     { key: "zipCode", label: "Zip Code" },

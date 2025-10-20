@@ -1,42 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import {
-  Activity,
-  Phone,
-  Mail,
-  MapPin,
-  User,
-  ExternalLink,
-  DollarSign,
-  Hash,
-  Search,
-  Calendar,
-  Building,
-  FileText,
-  Users,
-} from "lucide-react";
+import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Search, Calendar, Building, FileText, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DetailPopup } from "@/components/ui/DetailPopup";
-import { dashboardCard, requestLeads } from "./Data";
+import { requestLeads } from "./Data";
 import Link from "next/link";
-import {
-  dashboardCardType,
-  LeadType,
-  requestLeadType,
-  ContractorType,
-} from "@/types/AdminTypes";
+import { LeadType, requestLeadType, ContractorType } from "@/types/AdminTypes";
 import { fetchLeads } from "./Data";
 import { fetchContractors } from "./Data";
 
 export const Dashboard = () => {
   const [selectedLead, setSelectedLead] = useState<LeadType>();
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
-  const [selectedRequestLead, setSelectedRequestLead] =
-    useState<requestLeadType>();
-  const [isRequestLeadModalOpen, setIsRequestLeadModalOpen] =
-    useState<boolean>(false);
+  const [selectedRequestLead, setSelectedRequestLead] = useState<requestLeadType>();
+  const [isRequestLeadModalOpen, setIsRequestLeadModalOpen] = useState<boolean>(false);
   const [leads, setLeads] = useState<LeadType[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
   const [contractors, setContractors] = useState<ContractorType[]>([]);

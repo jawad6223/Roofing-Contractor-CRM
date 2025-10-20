@@ -23,3 +23,8 @@ export interface FormDataType {
     requireAuth?: boolean;
     redirectTo?: string;
   }
+
+  export interface AdminFormDataType {
+    emailAddress: string;
+    password: string;
+  };

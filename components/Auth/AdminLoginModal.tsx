@@ -1,9 +1,7 @@
 "use client";
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { User, Eye, EyeOff, Mail, Lock } from "lucide-react";
@@ -11,23 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
-
-type FormDataType = {
-  emailAddress: string;
-  password: string;
-};
-
-const schema = yup.object().shape({
-  emailAddress: yup
-    .string()
-    .email('Invalid email address')
-    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-    .required(),
-  password: yup
-    .string()
-    .matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
-    .required(),
-});
+import { adminLoginValidationSchema } from "@/validations/Auth/schema";
+import { AdminFormDataType } from "@/types/AuthType";
 
 export default function AdminLoginModal() {
   const router = useRouter();
@@ -40,28 +23,11 @@ export default function AdminLoginModal() {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormDataType>({
-    resolver: yupResolver(schema),
+  } = useForm<AdminFormDataType>({
+    resolver: yupResolver(adminLoginValidationSchema),
   });
 
-  // const onSubmit = (data: FormDataType) => {
-  //   setIsLoading(true);
-  //   try{
-  //   if (data.emailAddress === process.env.NEXT_PUBLIC_ADMIN_EMAIL && data.password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-  //     toast.success("Login successful");
-  //     loginAdmin(data.emailAddress);
-  //     reset();
-  //     return;
-  //   }
-  //   toast.error("Invalid credentials");
-  //   } catch (error) {
-  //     toast.error("Invalid credentials");
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  const onSubmit = async (data: FormDataType) => {
+  const onSubmit = async (data: AdminFormDataType) => {
     setIsLoading(true);
     try {
         const { data: authData, error } = await supabase.auth.signInWithPassword({
@@ -79,7 +45,6 @@ export default function AdminLoginModal() {
           }
           return;
         }
-
         const { data: { user } } = await supabase.auth.getUser();
 
         // Check user role - only allow admin role
@@ -89,8 +54,6 @@ export default function AdminLoginModal() {
           setIsLoading(false);
           return;
         }
-
-        // 3️⃣ Successfully logged in
         const admin = authData.user;
         if (!admin) {
           toast.error("Admin not found after login.");
@@ -105,9 +68,7 @@ export default function AdminLoginModal() {
         // 4️⃣ Redirect to admin dashboard
         router.push("/admin/dashboard");
         return;
-      // }
 
-      // 5️⃣ If credentials don't match env vars, show error
       toast.error("Invalid admin credentials");
     } catch (err: any) {
       console.error("Admin login error:", err);
@@ -116,8 +77,6 @@ export default function AdminLoginModal() {
       setIsLoading(false);
     }
   };
-  
-  
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
@@ -179,7 +138,6 @@ export default function AdminLoginModal() {
               )}
             </div>
 
-            {/* Forgot Password Link */}
             <div className="text-right">
               <button
                 type="button"
@@ -202,4 +160,3 @@ export default function AdminLoginModal() {
     </div>
   );
 }
-

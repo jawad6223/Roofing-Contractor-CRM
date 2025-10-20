@@ -7,7 +7,25 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/types/Types";
 import { Pagination } from "@/components/ui/pagination";
-import { Search, Target, Plus, Download, Eye, ChevronDown, X, UserPlus, Check, FileText, MoreHorizontal, MapPin, Phone, Mail, User, Building, Hash } from "lucide-react";
+import {
+  Search,
+  Target,
+  Plus,
+  Download,
+  Eye,
+  ChevronDown,
+  X,
+  UserPlus,
+  Check,
+  FileText,
+  MoreHorizontal,
+  MapPin,
+  Phone,
+  Mail,
+  User,
+  Building,
+  Hash,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormPopup } from "@/components/ui/FormPopup";
@@ -17,7 +35,7 @@ import { fetchContractors, fetchLeads } from "./Data";
 import { LeadType, ContractorType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
 import * as ExcelJS from "exceljs";
-import * as yup from "yup";
+import { newLeadSchema } from "@/validations/admin/schema";
 
 export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,45 +54,6 @@ export const Leads = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [assignedContractor, setAssignedContractor] = useState<any>(null);
   const [loadingAssignedContractor, setLoadingAssignedContractor] = useState(false);
-  // Validation schema for new lead form
-  const newLeadSchema = yup.object().shape({
-    firstName: yup
-      .string()
-      .required("First name is required")
-      .min(2, "First name must be at least 2 characters")
-      .max(50, "First name must be less than 50 characters"),
-    lastName: yup
-      .string()
-      .required("Last name is required")
-      .min(2, "Last name must be at least 2 characters")
-      .max(50, "Last name must be less than 50 characters"),
-    phoneno: yup
-      .string()
-      .required("Phone number is required")
-      .matches(
-        /^\(\d{3}\) \d{3}-\d{4}$/,
-        "Please enter a valid phone number in format (555) 123-4567" ),
-    email: yup
-      .string()
-      .required("Email is required")
-      .email("Please enter a valid email address"),
-    zipCode: yup
-      .string()
-      .required("Address is required")
-      .min(5, "Please enter a valid address"),
-    company: yup
-      .string()
-      .required("Insurance company is required")
-      .min(2, "Company name must be at least 2 characters")
-      .max(100, "Company name must be less than 100 characters"),
-    policy: yup
-      .string()
-      .required("Policy number is required")
-      .min(2, "Policy number must be at least 2 characters")
-      .max(50, "Policy number must be less than 50 characters"),
-  });
-
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -97,7 +76,6 @@ export const Leads = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Filter leads for Open tab (shows leads with "Open" and "Cancel" status)
   const openLeads = filteredLeads.filter((lead) => {
     return (
       lead["Status"].toLowerCase() === "open" ||
@@ -569,10 +547,10 @@ export const Leads = () => {
                         Name
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zip Code
+                        Contect Info
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Contect Info
+                        Zip Code
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -588,7 +566,9 @@ export const Leads = () => {
                         <td colSpan={6} className="px-6 py-8 text-center">
                           <div className="flex flex-col items-center justify-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
-                            <p className="mt-2 text-sm text-gray-500">Loading leads...</p>
+                            <p className="mt-2 text-sm text-gray-500">
+                              Loading leads...
+                            </p>
                           </div>
                         </td>
                       </tr>
@@ -601,25 +581,19 @@ export const Leads = () => {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">
-                                {lead["Property ZIP Code"]}
-                              </span>
+                            <div className="flex items-center text-sm font-medium text-gray-600">
+                              <Phone className="h-3 w-3 mr-1 text-gray-400" />
+                              {lead["Phone Number"]}
+                            </div>
+                            <div className="flex items-center text-sm font-medium text-gray-600">
+                              <Mail className="h-3 w-3 mr-1 text-gray-400" />
+                              {lead["Email Address"]}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">
-                                {lead["Phone Number"]}
-                              </span>
-                            </div>
-                            <div className="flex items-center">
-                              <Mail className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">
-                                {lead["Email Address"]}
-                              </span>
+                            <div className="flex items-center text-sm font-medium text-gray-600">
+                              <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                              {lead["Property ZIP Code"]}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -706,10 +680,10 @@ export const Leads = () => {
                         Name
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zip Code
+                        Contect Info
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Contect Info
+                        Zip Code
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -730,14 +704,6 @@ export const Leads = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">
-                                {lead["Property ZIP Code"]}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
                               <Phone className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
                                 {lead["Phone Number"]}
@@ -750,6 +716,14 @@ export const Leads = () => {
                               </span>
                             </div>
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead["Property ZIP Code"]}
+                              </span>
+                            </div>
+                          </td>
                           <td className="px-6 py-4 whitespace-nowra text-sm font-medium">
                             <Badge
                               className={getStatusBadgeColor(lead["Status"])}
@@ -758,35 +732,15 @@ export const Leads = () => {
                             </Badge>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium flex items-center gap-2">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem
-                                  onClick={() => handleViewLead(lead)}
-                                  className="cursor-pointer"
-                                >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                            {/* <Button
+                            <Button
                               size="sm"
                               variant="outline"
-                              className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
-                              onClick={() => handleAssignLead(lead)}
+                              className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
+                              onClick={() => handleViewLead(lead)}
                             >
-                              <Target className="h-4 w-4 mr-1" />
-                              Assign
-                            </Button> */}
+                              <Eye className="h-4 w-4 mr-1" />
+                              View
+                            </Button>
                           </td>
                         </tr>
                       ))
@@ -925,42 +879,44 @@ export const Leads = () => {
               </div>
 
               {/* Assigned Contractor Section */}
-                <div className="mt-6 pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <User className="h-5 w-5 mr-2 text-[#286BBD]" />
-                    Assigned Contractor
-                  </h3>
-                  <div className="overflow-auto max-h-64">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                  <User className="h-5 w-5 mr-2 text-[#286BBD]" />
+                  Assigned Contractor
+                </h3>
+                <div className="overflow-auto max-h-64">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Email
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Phone no
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Business Address
+                        </th>
+                      </tr>
+                    </thead>
+                    {loadingAssignedContractor ? (
+                      <tbody className="bg-white divide-y divide-gray-200">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Email
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Phone no
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Business Address
-                          </th>
+                          <td colSpan={4} className="px-6 py-8 text-center">
+                            <div className="flex flex-col items-center justify-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                              <p className="mt-2 text-sm text-gray-500">
+                                Loading assigned contractor...
+                              </p>
+                            </div>
+                          </td>
                         </tr>
-                      </thead>
-                      {loadingAssignedContractor ? (
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          <tr>
-                            <td colSpan={4} className="px-6 py-8 text-center">
-                              <div className="flex flex-col items-center justify-center">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
-                                <p className="mt-2 text-sm text-gray-500">Loading assigned contractor...</p>
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      ) : assignedContractor ? (
-                        <tbody className="bg-white divide-y divide-gray-200">
+                      </tbody>
+                    ) : assignedContractor ? (
+                      <tbody className="bg-white divide-y divide-gray-200">
                         <tr>
                           <td className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                             {assignedContractor["Full Name"]}
@@ -976,19 +932,21 @@ export const Leads = () => {
                           </td>
                         </tr>
                       </tbody>
-                      ) : (
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          <tr>
-                            <td colSpan={4} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              No assigned contractor found
-                            </td>
-                          </tr>
-                        </tbody>
-                      )}
-                    </table>
-                  </div>
+                    ) : (
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        <tr>
+                          <td
+                            colSpan={4}
+                            className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          >
+                            No assigned contractor found
+                          </td>
+                        </tr>
+                      </tbody>
+                    )}
+                  </table>
                 </div>
-              
+              </div>
 
               {/* Action Buttons */}
               <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200">
@@ -1015,7 +973,7 @@ export const Leads = () => {
         submitButtonText={isSubmitting ? "Submitting..." : "Add Lead"}
         submitButtonIcon={Plus}
         onSubmit={handleFormSubmit}
-        validationSchema={newLeadSchema as yup.ObjectSchema<any>}
+        validationSchema={newLeadSchema}
         fields={addLeadFields as FormField[]}
       />
 

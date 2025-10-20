@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { MapPin, Eye, X, Phone, Mail, FileText, Building, Search, UserPlus, Hash, User, } from "lucide-react";
+import { MapPin, Eye, Phone, Mail, FileText, Building, Search, UserPlus, Hash, User, } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,9 @@ import { FormPopup } from "@/components/ui/FormPopup";
 import { Pagination } from "@/components/ui/pagination";
 import { crmDataType } from "@/types/DashboardTypes";
 import { toast } from "react-toastify";
-import * as yup from "yup";
 import { FormField } from "@/types/Types";
 import { supabase } from "@/lib/supabase";
+import { crmMemberSchema } from "@/validations/contractor/schema";
 
 export const CRM = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -41,38 +41,6 @@ export const CRM = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredData.slice(startIndex, endIndex);
-
-  // Validation schema for CRM member form
-  const crmMemberSchema = yup.object().shape({
-    name: yup
-      .string()
-      .required("Full name is required")
-      .min(2, "Name must be at least 2 characters")
-      .max(50, "Name must be less than 50 characters"),
-    phoneno: yup
-      .string()
-      .required("Phone number is required")
-      .matches(
-        /^\(\d{3}\) \d{3}-\d{4}$/,
-        "Please enter a valid phone number in format (555) 123-4567"
-      ),
-    email: yup
-      .string()
-      .required("Email is required")
-      .email("Please enter a valid email address"),
-    location: yup
-      .string()
-      .required("Location is required")
-      .min(2, "Location must be at least 2 characters"),
-    insuranceCompany: yup
-      .string()
-      .required("Insurance company is required")
-      .min(2, "Insurance company must be at least 2 characters"),
-    policy: yup
-      .string()
-      .required("Policy number is required")
-      .min(2, "Policy number must be at least 2 characters"),
-  });
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -315,10 +283,7 @@ export const CRM = () => {
                     Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Phone No
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
+                    Contact Info
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Zip Code
@@ -353,8 +318,6 @@ export const CRM = () => {
                           <Phone className="h-3 w-3 mr-1 text-gray-400" />
                           {lead["Phone Number"]}
                         </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm text-gray-900 flex items-center">
                           <Mail className="h-3 w-3 mr-1 text-gray-400" />
                           {lead["Email Address"]}

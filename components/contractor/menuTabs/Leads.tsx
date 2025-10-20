@@ -9,14 +9,13 @@ import { Pagination } from "@/components/ui/pagination";
 import { DetailPopup } from "@/components/ui/DetailPopup";
 import { useState } from "react";
 import { purchasedLeadType, sampleLeadType } from "@/types/DashboardTypes";
-import { purchasedLeads, sampleLeads } from "./Data";
+import { sampleLeads } from "./Data";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
 import { fetchContractorLeads } from "./Data";
 
 export const Leads = () => {
   const router = useRouter();
-  
   const [contractorLeads, setContractorLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -51,7 +50,6 @@ export const Leads = () => {
     setLoading(false);
   };
   
-
   useEffect(() => {
     fetchContractorLeadsData();
   }, []);
@@ -61,7 +59,7 @@ export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [statusFilter, setStatusFilter] = useState<string>("All");
   const itemsPerPage = 10;
-  // Filter data based on search term and status
+  
   const filteredData = contractorLeads.filter((lead) => {
     const leadStatus = lead["status"];
     
@@ -272,10 +270,7 @@ export const Leads = () => {
                     Zip Code
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Phone no
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
+                    Contact Info
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -314,8 +309,6 @@ export const Leads = () => {
                           Math.max(lead.phone.length - 2, 0)
                         )}`}</span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Mail className="h-3 w-3 text-gray-400 mr-1" />
                         <span className="text-sm text-gray-400 select-none">{`${lead.email?.slice(0, 2) || ""}${"*".repeat(
@@ -366,19 +359,17 @@ export const Leads = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                          <span className="text-sm font-medium text-gray-900">{lead["Zip Code"]}</span>
+                        <div className="flex items-center text-sm font-medium text-gray-600">
+                          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                          {lead["Zip Code"]}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-black">
-                        <div className="space-y-1 flex items-center">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="space-y-1 flex items-center text-sm font-medium text-gray-600">
                           <Phone className="h-3 w-3 text-gray-400 mr-1" />
                           {lead["Phone Number"]}
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-black">
-                        <div className="space-y-1 flex items-center">
+                        <div className="space-y-1 flex items-center text-sm font-medium text-gray-600">
                           <Mail className="h-3 w-3 text-gray-400 mr-1" />
                           {lead["Email Address"]}
                         </div>

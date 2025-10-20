@@ -6,7 +6,6 @@ import { Element } from 'react-scroll';
 import { ContractorForm } from './ContractorForm';
 import { stats, benefits } from '@/lib/componentData';
 export function Hero() {
-
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Element name="free-inspection-form">
@@ -57,14 +56,14 @@ export function Hero() {
           </div>
 
           {/* Form - Second on mobile, Second on desktop */}
-          <div className="lg:order-2 order-2 mb-2 lg:mb-0 relative z-10">
+          <div className="lg:order-2 order-2 mb-2 lg:mb-0 relative xl:top-12 2xl:top-20 z-10">
             <ContractorForm />
           </div>
 
           {/* Content - Text first on desktop */}
           <div className="lg:order-1 order-3 relative z-10">
             {/* Badge - Hidden on mobile */}
-            <div className="hidden lg:inline-flex items-center px-4 py-2 bg-[#2563eb]/90 text-white rounded-full text-sm font-medium mb-8 backdrop-blur-sm">
+            <div className="hidden lg:inline-flex items-center px-4 py-2 relative top-5 bg-[#2563eb]/90 text-white rounded-full text-sm font-medium mb-8 backdrop-blur-sm">
               Join 2,000+ Successful Contractors
             </div>
 

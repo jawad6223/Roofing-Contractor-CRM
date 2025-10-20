@@ -393,18 +393,18 @@ export const Contractors = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-sm text-gray-900 flex items-center">
+                        <span className="text-sm text-gray-600 flex items-center">
                           <Phone className="h-3 w-3 mr-1 text-gray-400" />
                           {contractor.phoneno}
                         </span>
-                        <span className="text-sm font-medium text-[#286BBD] flex items-center">
+                        <span className="text-sm font-medium text-gray-600 flex items-center">
                           <Mail className="h-3 w-3 mr-1 text-gray-400" />
                           {contractor.email}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {/* <div className="bg-red-500 w-10 break-all"> */}
-                        <span className="text-sm text-gray-900 flex items-center">
+                        <span className="text-sm text-gray-600 flex items-center">
                           <MapPin className="h-3 w-3 mr-1 text-gray-400" />
                           <span className="w-52 truncate">
                             {contractor.businessAddress}

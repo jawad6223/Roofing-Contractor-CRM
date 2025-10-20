@@ -9,12 +9,13 @@ import { Input } from "@/components/ui/input";
 import { FormPopup } from "@/components/ui/FormPopup";
 import { teamMemberType } from "@/types/DashboardTypes";
 import { toast } from "react-toastify";
-import * as yup from "yup";
+import { teamMemberSchema } from "@/validations/contractor/schema";
 import { FormField } from "@/types/Types";
 
 export const Team = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [teamMembers, setTeamMembers] = useState<teamMemberType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [editingMember, setEditingMember] = useState<number | null>(null);
   const [editedMember, setEditedMember] = useState<teamMemberType>({
     Full_Name: "",
@@ -25,26 +26,7 @@ export const Team = () => {
   const handleCloseModal = () => {
     setShowAddModal(false);
   };
-  // Custom validation schema
-  const teamMemberSchema = yup.object().shape({
-    name: yup
-      .string()
-      .required("Full name is required")
-      .min(2, "Name must be at least 2 characters")
-      .max(50, "Name must be less than 50 characters"),
-    email: yup
-      .string()
-      .required("Email is required")
-      .email("Please enter a valid email address"),
-    phoneno: yup
-      .string()
-      .required("Phone number is required")
-      .matches(
-        /^\(\d{3}\) \d{3}-\d{4}$/,
-        "Please enter a valid phone number in format (555) 123-4567"
-      ),
-  });
-
+ 
   const handleFormSubmit = async (formData: Record<string, any>) => {
     console.log("Form submitted with data:", formData);
     const { data: authData, error: authError } = await supabase.auth.getUser();
@@ -83,6 +65,7 @@ export const Team = () => {
   };
 
   const fetchTeamMembers = async () => {
+    setIsLoading(true);
     const { data: authData, error: authError } = await supabase.auth.getUser();
     if (authError || !authData?.user) {
       toast.error("User not logged in");
@@ -95,6 +78,7 @@ export const Team = () => {
       .eq("user_id", userId);
     if (error) throw error;
     setTeamMembers(data);
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -174,7 +158,7 @@ export const Team = () => {
         .eq("Email_Address", memberToDelete.Email_Address);
 
       if (error) throw error;
-      
+
       // setTeamMembers(prev => prev.filter((_, i) => i !== index));
       fetchTeamMembers();
       toast.success("Team member deleted successfully");
@@ -227,132 +211,153 @@ export const Team = () => {
         </div>
 
         <div className="space-y-4">
-          {teamMembers.map((member, index) => (
-            <Card key={index}>
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex items-center space-x-4 flex-1 min-w-0">
-                    <div className="w-12 h-12 bg-[#122E5F] rounded-full flex items-center justify-center flex-shrink-0">
-                      <User className="h-6 w-6 text-white" />
-                    </div>
-                    <div className="flex-1 min-w-0 max-w-xs">
-                      {editingMember === index ? (
-                        <div className="space-y-3">
-                          <Input
-                            value={editedMember.Full_Name}
-                            onChange={(e) =>
-                              handleEditInputChange("Full_Name", e.target.value)
-                            }
-                            className="h-8 text-sm font-bold w-full"
-                            placeholder="Full Name"
-                          />
-                          <Input
-                            value={editedMember.Email_Address}
-                            onChange={(e) =>
-                              handleEditInputChange(
-                                "Email_Address",
-                                e.target.value
-                              )
-                            }
-                            className="h-8 text-sm w-full"
-                            placeholder="Email Address"
-                          />
-                          <Input
-                            value={editedMember.Phone_Number}
-                            onChange={(e) =>
-                              handleEditInputChange(
-                                "Phone_Number",
-                                e.target.value
-                              )
-                            }
-                            className="h-8 text-sm font-medium w-full"
-                            placeholder="Phone Number"
-                          />
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+              <p className="mt-2 text-sm text-gray-500">
+                Loading team members...
+              </p>
+            </div>
+          </div>
+          ) : (
+            teamMembers.length > 0 ? (
+              teamMembers.map((member, index) => (
+                <Card key={index}>
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex items-center space-x-4 flex-1 min-w-0">
+                        <div className="w-12 h-12 bg-[#122E5F] rounded-full flex items-center justify-center flex-shrink-0">
+                          <User className="h-6 w-6 text-white" />
                         </div>
-                      ) : (
-                        <div className="flex flex-col space-y-1">
-                          <div className="text-sm font-bold text-[#286BBD]">
-                            {member.Full_Name}
-                          </div>
-                          <div className="text-sm text-[#286BBD]">
-                            {member.Email_Address}
-                          </div>
-                          <div className="text-sm font-medium text-[#286BBD]">
-                            {member.Phone_Number}
-                          </div>
+                        <div className="flex-1 min-w-0 max-w-xs">
+                          {editingMember === index ? (
+                            <div className="space-y-3">
+                              <Input
+                                value={editedMember.Full_Name}
+                                onChange={(e) =>
+                                  handleEditInputChange("Full_Name", e.target.value)
+                                }
+                                className="h-8 text-sm font-bold w-full"
+                                placeholder="Full Name"
+                              />
+                              <Input
+                                value={editedMember.Email_Address}
+                                onChange={(e) =>
+                                  handleEditInputChange(
+                                    "Email_Address",
+                                    e.target.value
+                                  )
+                                }
+                                className="h-8 text-sm w-full"
+                                placeholder="Email Address"
+                              />
+                              <Input
+                                value={editedMember.Phone_Number}
+                                onChange={(e) =>
+                                  handleEditInputChange(
+                                    "Phone_Number",
+                                    e.target.value
+                                  )
+                                }
+                                className="h-8 text-sm font-medium w-full"
+                                placeholder="Phone Number"
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex flex-col space-y-1">
+                              <div className="text-sm font-bold text-[#286BBD]">
+                                {member.Full_Name}
+                              </div>
+                              <div className="text-sm text-[#286BBD]">
+                                {member.Email_Address}
+                              </div>
+                              <div className="text-sm font-medium text-[#286BBD]">
+                                {member.Phone_Number}
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 flex-shrink-0">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle className="text-[#286BBD]">
-                            Delete Team Member
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete this team member?
-                            This action cannot be undone and they will lose
-                            access to the system.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className="text-[#286BBD]">
-                            Cancel
-                          </AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDeleteMember(index)}
-                            className="bg-red-500 hover:bg-red-600"
+                      </div>
+                      <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-3 flex-shrink-0">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-[#286BBD]">
+                                Delete Team Member
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete this team member?
+                                This action cannot be undone and they will lose
+                                access to the system.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="text-[#286BBD]">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteMember(index)}
+                                className="bg-red-500 hover:bg-red-600"
+                              >
+                                Yes, Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        {editingMember === index ? (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={handleCancelEdit}
+                              className="border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleSaveClick(index)}
+                              className="border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
+                            >
+                              <Save className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditClick(index, member)}
+                            className="border-[#122E5F] text-[#122E5F] hover:bg-[#0f2347] hover:text-white"
                           >
-                            Yes, Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    {editingMember === index ? (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleCancelEdit}
-                          className="border-gray-500 text-gray-500 hover:bg-gray-500 hover:text-white"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleSaveClick(index)}
-                          className="border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
-                        >
-                          <Save className="h-4 w-4" />
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEditClick(index, member)}
-                        className="border-[#122E5F] text-[#122E5F] hover:bg-[#0f2347] hover:text-white"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                    </CardContent>
+                  </Card>
+                ))
+            ):(
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <User className="h-8 w-8 text-gray-400" />
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Team Members Yet</h3>
+                <p className="text-gray-500 text-center mb-6">You haven't added any team members to your organization.</p>
+              </div>
+            )
+          )}
         </div>
       </div>
 

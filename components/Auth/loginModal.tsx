@@ -1,67 +1,28 @@
 "use client";
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
+import { loginValidationSchema } from "@/validations/Auth/schema";
 import { User, EyeOff, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormDataType } from "@/types/AuthType";
 import { toast } from "react-toastify";
 import { supabase } from "@/lib/supabase";
 
-// 1. Define validation schema
-const schema = yup.object().shape({
-  emailAddress: yup
-    .string()
-    .email("Invalid email address")
-    .matches(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address")
-    .required("Email is required"),
-  password: yup
-    .string()
-    .matches(
-      /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/,
-      "Password must be 8 characters, 1 uppercase, 1 number & 1 special character"
-    )
-    .required("Password is required"),
-});
-
-// 2. Form data type
-
 export default function LoginModal() {
   const router = useRouter();
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // 3. Setup react-hook-form
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormDataType>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(loginValidationSchema),
   });
-
-  // 4. On form submit
-  // const onSubmit = (data: FormDataType) => {
-
-  //   const existingUsers = JSON.parse(localStorage.getItem("userInfo") || "[]");
-  //   const isValid = existingUsers.some(
-  //     (user: FormDataType) =>
-  //       user.emailAddress.toLowerCase() === data.emailAddress.toLowerCase() && user.password === data.password
-  //   );
-
-  //   if (!isValid) {
-  //     toast.error("Invalid credentials. Please use the Correct credentials.");
-  //     return;
-  //   }
-  //   toast.success("Login successful.");
-  //   login(data.emailAddress);
-  //   reset();
-  // };
 
   const onSubmit = async (data: FormDataType) => {
     try {
-      // 1️⃣ Try to sign in user using Supabase Auth
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.emailAddress.toLowerCase(),
         password: data.password,
@@ -79,17 +40,12 @@ export default function LoginModal() {
       }
 
       const { data: { user: currentUser } } = await supabase.auth.getUser();
-
-        // Check user role - only allow user role
         if (currentUser?.user_metadata.role !== "user") {
           await supabase.auth.signOut();
           toast.error("Access denied. Only contractors can access this panel.");
-          // setIsLoading(false);
           return;
         }
-
-      // 2️⃣ Successfully logged in
-
+        
       const user = authData.user;
       if (!user) {
         toast.error("User not found after login.");
@@ -98,7 +54,6 @@ export default function LoginModal() {
       localStorage.setItem("user_id", user.id);
       toast.success("Login successful!");
 
-      // 3️⃣ Optionally fetch the user's Roofing_Auth record
       const { data: userRecord, error: recordError } = await supabase
         .from("Roofing_Auth")
         .select("*")
@@ -108,13 +63,10 @@ export default function LoginModal() {
       if (recordError) {
         console.warn("No Roofing_Auth data found for this user:", recordError);
       } else {
-        console.log("User Roofing_Auth data:", userRecord);
-        // you can save this to context, localStorage, or global state
         localStorage.setItem("userInfo", JSON.stringify(userRecord));
         localStorage.setItem("loggedInUser", authData.user?.email || "");
       }
 
-      // 4️⃣ Redirect to dashboard or thank-you page
       router.push("/contractor/dashboard");
     } catch (err: any) {
       console.error("Login error:", err);
@@ -124,7 +76,7 @@ export default function LoginModal() {
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4 overflow-y-auto"
+      className="fixed inset-0 bg-gray-100 backdrop-blur-sm flex items-center justify-center z-[60] p-4 overflow-y-auto"
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
     >
       <style>{`
@@ -146,9 +98,7 @@ export default function LoginModal() {
             <p className="text-gray-600">Access your professional dashboard</p>
           </div>
 
-          {/* 5. Form starts here */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            {/* emailAddress Field */}
             <div>
               <label className="block text-gray-700 text-sm font-semibold mb-2">
                 Email Address
@@ -166,7 +116,6 @@ export default function LoginModal() {
               )}
             </div>
 
-            {/* Password Field */}
             <div>
               <label className="block text-gray-700 text-sm font-semibold mb-2">
                 Password
@@ -197,7 +146,6 @@ export default function LoginModal() {
               )}
             </div>
 
-            {/* Forgot Password Link */}
             <div className="text-right">
               <button
                 type="button"
@@ -208,7 +156,6 @@ export default function LoginModal() {
               </button>
             </div>
 
-            {/* Buttons */}
             <div className="flex space-x-3">
               <button
                 type="submit"
@@ -216,17 +163,9 @@ export default function LoginModal() {
               >
                 Login
               </button>
-              {/* <button
-                type="button"
-                onClick={handleClose}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-3 px-4 rounded-xl transition-all duration-300"
-              >
-                Cancel
-              </button> */}
             </div>
           </form>
 
-          {/* Switch to Register */}
           <div className="text-center pt-4 border-t border-gray-200">
             <span className="text-sm text-gray-600">
               Don&apos;t have an account?{" "}
