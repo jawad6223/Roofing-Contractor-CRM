@@ -7,25 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/types/Types";
 import { Pagination } from "@/components/ui/pagination";
-import {
-  Search,
-  Target,
-  Plus,
-  Download,
-  Eye,
-  ChevronDown,
-  X,
-  UserPlus,
-  Check,
-  FileText,
-  MoreHorizontal,
-  MapPin,
-  Phone,
-  Mail,
-  User,
-  Building,
-  Hash,
-} from "lucide-react";
+import { Search, Target, Plus, Download, Eye, ChevronDown, X, UserPlus, Check, FileText, MoreHorizontal, MapPin, Phone, Mail, User, Building, Hash, } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormPopup } from "@/components/ui/FormPopup";
@@ -34,8 +16,9 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { fetchContractors, fetchLeads } from "./Data";
 import { LeadType, ContractorType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
-import * as ExcelJS from "exceljs";
+import { exportToExcel } from "./exportExcel";
 import { newLeadSchema } from "@/validations/admin/schema";
+import { addLeadFields } from "./formFeilds";
 
 export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -57,7 +40,6 @@ export const Leads = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Filter leads based on search term and status
   const filteredLeads = leads.filter((lead) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
@@ -83,15 +65,12 @@ export const Leads = () => {
     );
   });
 
-  // Filter leads for Close tab (shows leads with "Close" status)
   const closeLeads = filteredLeads.filter((lead) => {
     return lead["Status"].toLowerCase() === "close";
   });
 
-  // Get current tab data
   const currentTabData = activeTab === "open" ? openLeads : closeLeads;
 
-  // Pagination logic
   const totalPages = Math.ceil(currentTabData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -111,10 +90,9 @@ export const Leads = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setCurrentPage(1); // Reset to first page when switching tabs
+    setCurrentPage(1);
   };
 
-  // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter]);
@@ -143,7 +121,6 @@ export const Leads = () => {
     try {
       console.log("Fetching contractor for lead email:", leadEmail);
 
-      // First, get the contractor_id from Contractor_Leads table
       const { data: contractorLead, error: contractorLeadError } =
         await supabase
           .from("Contractor_Leads")
@@ -160,7 +137,6 @@ export const Leads = () => {
         return;
       }
 
-      // Then, get the contractor details from Roofing_Auth table
       const { data: contractorData, error: contractorError } = await supabase
         .from("Roofing_Auth")
         .select(
@@ -315,59 +291,7 @@ export const Leads = () => {
         .includes(contractorSearchTerm.toLowerCase())
   );
 
-  const handleExportToExcel = async () => {
-    try {
-      const workbook = new ExcelJS.Workbook();
-      const worksheet = workbook.addWorksheet("Leads");
-
-      // Add headers
-      worksheet.columns = [
-        { header: "First Name", key: "firstName", width: 15 },
-        { header: "Last Name", key: "lastName", width: 15 },
-        { header: "Phone Number", key: "phoneno", width: 15 },
-        { header: "Email", key: "email", width: 25 },
-        { header: "Zip Code", key: "zipCode", width: 10 },
-        { header: "Insurance Company", key: "company", width: 20 },
-        { header: "Policy Number", key: "policy", width: 15 },
-        { header: "Assigned To", key: "assignedTo", width: 20 },
-      ];
-
-      // Add data rows
-      filteredLeads.forEach((lead) => {
-        worksheet.addRow({
-          firstName: lead["First Name"],
-          lastName: lead["Last Name"],
-          phoneno: lead["Phone Number"],
-          email: lead["Email Address"],
-          zipCode: lead["Property ZIP Code"],
-          company: lead["Insurance Company"],
-          policy: lead["Policy Number"],
-          assignedTo: lead["Assigned To"] || "Unassigned",
-        });
-      });
-
-      // Generate filename with current date
-      const currentDate = new Date().toISOString().split("T")[0];
-      const filename = `leads_export_${currentDate}.xlsx`;
-
-      // Download the file
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      link.click();
-      window.URL.revokeObjectURL(url);
-
-      console.log(`Excel file "${filename}" downloaded successfully!`);
-    } catch (error) {
-      console.error("Error exporting to Excel:", error);
-      alert("Error exporting data to Excel. Please try again.");
-    }
-  };
+  
 
   const handleFormSubmit = async (formData: Record<string, any>) => {
     setIsSubmitting(true);
@@ -399,59 +323,6 @@ export const Leads = () => {
     }
   };
 
-  const addLeadFields = [
-    {
-      name: "firstName",
-      label: "First Name",
-      type: "text",
-      placeholder: "John",
-      required: true,
-    },
-    {
-      name: "lastName",
-      label: "Last Name",
-      type: "text",
-      placeholder: "Doe",
-      required: true,
-    },
-    {
-      name: "phoneno",
-      label: "Phone Number",
-      type: "tel",
-      placeholder: "(555) 123-4567",
-      required: true,
-    },
-    {
-      name: "email",
-      label: "Email Address",
-      type: "email",
-      placeholder: "john@example.com",
-      required: true,
-    },
-    {
-      name: "zipCode",
-      label: "Zip Code",
-      type: "text",
-      placeholder: "75201",
-      required: true,
-      maxLength: 5,
-    },
-    {
-      name: "company",
-      label: "Insurance Company",
-      type: "text",
-      placeholder: "ABC Insurance",
-      required: true,
-    },
-    {
-      name: "policy",
-      label: "Policy Number",
-      type: "text",
-      placeholder: "POL123456789",
-      required: true,
-    },
-  ];
-
   return (
     <div className="space-y-6">
       {/* Header with Actions */}
@@ -473,7 +344,7 @@ export const Leads = () => {
           <Button
             variant="outline"
             className="border-[#286BBD] text-[#286BBD] hover:bg-[#286BBD] hover:text-white"
-            onClick={handleExportToExcel}
+            onClick={() => exportToExcel(filteredLeads)}
           >
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -521,22 +392,21 @@ export const Leads = () => {
             onValueChange={handleTabChange}
             className="w-full"
           >
-            <div className="border-b border-gray-200">
-              <TabsList className="grid w-full grid-cols-2 bg-transparent h-auto p-0">
+            {/* <div className="border-b border-gray-200"> */}
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger
                   value="open"
-                  className="flex-1 py-4 px-6 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#286BBD] data-[state=active]:text-[#286BBD] data-[state=active]:bg-transparent rounded-none"
+                  className="text-sm font-medium"
                 >
                   Open Leads ({openLeads.length})
                 </TabsTrigger>
                 <TabsTrigger
                   value="close"
-                  className="flex-1 py-4 px-6 text-sm font-medium border-b-2 border-transparent data-[state=active]:border-[#286BBD] data-[state=active]:text-[#286BBD] data-[state=active]:bg-transparent rounded-none"
+                  className="text-sm font-medium"
                 >
                   Close Leads ({closeLeads.length})
                 </TabsTrigger>
               </TabsList>
-            </div>
 
             <TabsContent value="open" className="m-0">
               <div className="overflow-x-auto">

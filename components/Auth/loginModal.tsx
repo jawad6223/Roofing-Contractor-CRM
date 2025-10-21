@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { FormDataType } from "@/types/AuthType";
 import { toast } from "react-toastify";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 export default function LoginModal() {
   const router = useRouter();
@@ -85,12 +86,16 @@ export default function LoginModal() {
         }
       `}</style>
       <div className="relative my-auto w-full flex justify-center">
-        <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 border border-gray-200">
+        <div className="relative bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-lg p-8 border border-white/20">
           <div className="text-center mb-8">
-            <div className="relative inline-block mb-6">
-              <div className="w-16 h-16 bg-[#122E5F] rounded-2xl flex items-center justify-center shadow-lg mx-auto">
-                <User className="h-8 w-8 text-white" />
-              </div>
+            <div className="relative mb-8 flex justify-center">
+              <Image 
+                src="/roofingF-logo.png" 
+                alt="Roofing CRM Logo" 
+                width={200} 
+                height={50}
+                className="object-contain drop-shadow-lg"
+              />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               Contractor Login

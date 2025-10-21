@@ -12,10 +12,9 @@ import { toast } from "react-toastify";
 import { PlacePrediction } from "@/types/AuthType";
 import { ContractorType } from "@/types/Types";
 import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/hooks/useAuth";
-
-// Google Places API configuration
-const GOOGLE_PLACES_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY || "";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import { step1Schema, step2Schema } from "@/validations/Auth/schema";
 
 export function ContractorForm() {
   const router = useRouter();
@@ -23,7 +22,6 @@ export function ContractorForm() {
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [addressSuggestions, setAddressSuggestions] = useState<PlacePrediction[]>([]);
   const [showAddressSuggestions, setShowAddressSuggestions] = useState<boolean>(false);
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
@@ -32,6 +30,23 @@ export function ContractorForm() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const addressInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // React Hook Form setup
+  const form = useForm<ContractorType>({
+    mode: "onChange",
+    defaultValues: {
+      fullName: "",
+      title: "",
+      phoneNumber: "",
+      emailAddress: "",
+      businessAddress: "",
+      serviceRadius: "",
+      password: "",
+      confirmPassword: "",
+    }
+  });
+
+  const { register, handleSubmit, formState: { errors }, setValue, watch, trigger } = form;
 
   useEffect(() => {
     if (showSuccessModal) {
@@ -53,16 +68,6 @@ export function ContractorForm() {
     }
   }, [])
 
-  const [formData, setFormData] = useState<ContractorType>({
-    fullName: "",
-    title: "",
-    phoneNumber: "",
-    emailAddress: "",
-    businessAddress: "",
-    serviceRadius: "",
-    password: "",
-    confirmPassword: "",
-  });
 
   // Function to fetch Google Places suggestions
   const fetchAddressSuggestions = async (input: string) => {
@@ -95,10 +100,7 @@ export function ContractorForm() {
   };
 
   const handleAddressSelect = (prediction: PlacePrediction) => {
-    setFormData({
-      ...formData,
-      businessAddress: prediction.description,
-    });
+    setValue("businessAddress", prediction.description);
     setShowAddressSuggestions(false);
     setAddressSuggestions([]);
     setIsLoadingAddresses(false);
@@ -107,16 +109,8 @@ export function ContractorForm() {
     if (debounceTimer) {
       clearTimeout(debounceTimer);
     }
-
-    // Clear error when address is selected
-    if (errors.businessAddress) {
-      setErrors({
-        ...errors,
-        businessAddress: "",
-      });
-    }
   };
-  // Close suggestions when clicking outside
+  
   useEffect(() => {
     setIsMounted(true);
 
@@ -155,10 +149,8 @@ export function ContractorForm() {
       }
     }
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: processedValue,
-    }));
+    setValue(name as keyof ContractorType, processedValue);
+
     // Handle address autocomplete
     if (name === "businessAddress") {
       // Clear previous timer
@@ -181,95 +173,62 @@ export function ContractorForm() {
         setAddressSuggestions([]);
       }
     }
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors({
-        ...errors,
-        [name]: "",
-      });
-    }
   };
 
-  const validateStep1 = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Full name is required";
-    }
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-    if (!formData.phoneNumber.trim()) {
-      newErrors.phoneNumber = "Phone number is required";
-    }
-    if (!formData.emailAddress.trim()) {
-      newErrors.emailAddress = "Email address is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.emailAddress)) {
-      newErrors.emailAddress = "Please enter a valid email address";
-    }
-    if (!formData.businessAddress.trim()) {
-      newErrors.businessAddress = "Business address is required";
-    }
-    if (!formData.serviceRadius.trim()) {
-      newErrors.serviceRadius = "Service radius is required";
-    } else if (!/^\d+$/.test(formData.serviceRadius.trim())) {
-      newErrors.serviceRadius = "Allow numeric only";
-    } else if (Number(formData.serviceRadius) <= 0) {
-      newErrors.serviceRadius = "Please enter a valid number";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateStep2 = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.password.trim()) {
-      newErrors.password = "Password is required";
-    } else if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&-])[A-Za-z\d@$!%*?&-]{8,}$/.test(formData.password)) {
-      newErrors.password = "Password must be 8 characters, 1 uppercase, 1 number & 1 special character";
-    }
+  const handleContinue = async () => {
+    const formData = form.getValues();
+    const step1Data = {
+      fullName: formData.fullName,
+      title: formData.title,
+      phoneNumber: formData.phoneNumber,
+      emailAddress: formData.emailAddress,
+      businessAddress: formData.businessAddress,
+      serviceRadius: formData.serviceRadius
+    };
     
-    if (!formData.confirmPassword.trim()) {
-      newErrors.confirmPassword = "Please confirm your password";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
-    
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleContinue = () => {
-    if (validateStep1()) {
+    try {
+      await step1Schema.validate(step1Data, { abortEarly: false });
       setCurrentStep(2);
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        error.inner.forEach((err) => {
+          form.setError(err.path as keyof ContractorType, {
+            type: "validation",
+            message: err.message
+          });
+        });
+      }
     }
   };
 
   const handleBack = () => {
     setCurrentStep(1);
-    setErrors({});
   };
   
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: ContractorType) => {
+    setIsSubmitting(true);
     
-    if (!validateStep2()) {
-      const firstErrorField = document.querySelector(".border-red-500");
-      if (firstErrorField) {
-        firstErrorField.scrollIntoView({ behavior: "smooth", block: "center" });
+    // Validate step 2 before submission
+    try {
+      await step2Schema.validate({
+        password: data.password,
+        confirmPassword: data.confirmPassword
+      }, { abortEarly: false });
+    } catch (error) {
+      if (error instanceof yup.ValidationError) {
+        error.inner.forEach((err) => {
+          form.setError(err.path as keyof ContractorType, {
+            type: "validation",
+            message: err.message
+          });
+        });
       }
+      setIsSubmitting(false);
       return;
     }
-
-    setIsSubmitting(true);
   
     try {
-
-      const email = formData.emailAddress.toLowerCase();
+      const email = data.emailAddress.toLowerCase();
   
       // 1️⃣ Check if email already exists
       const checkRes = await fetch("/api/check-email", {
@@ -285,16 +244,16 @@ export function ContractorForm() {
       }
 
       // 1️⃣ Create Supabase Auth user (email confirmation enabled)
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.emailAddress.toLowerCase(),
-        password: formData.password,
+      const { data: authData, error } = await supabase.auth.signUp({
+        email: data.emailAddress.toLowerCase(),
+        password: data.password,
         options: {
           emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/login`,
           data: { role: "user" },
         },
       });
 
-      const user = data.user;
+      const user = authData.user;
       console.log(user);
       if (!user) {
         toast.error("User not found after login.");
@@ -302,20 +261,20 @@ export function ContractorForm() {
       }
   
       if (error) throw error;
-      if (!data.user) throw new Error("User not created");
+      if (!authData.user) throw new Error("User not created");
   
       // 2️⃣ Send data to your backend API route
       await fetch("/api/register-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: data.user.id,
-          fullName: formData.fullName,
-          title: formData.title,
-          phoneNumber: formData.phoneNumber,
-          emailAddress: formData.emailAddress.toLowerCase(),
-          businessAddress: formData.businessAddress,
-          serviceRadius: formData.serviceRadius,
+          user_id: authData.user.id,
+          fullName: data.fullName,
+          title: data.title,
+          phoneNumber: data.phoneNumber,
+          emailAddress: data.emailAddress.toLowerCase(),
+          businessAddress: data.businessAddress,
+          serviceRadius: data.serviceRadius,
         }),
       });
   
@@ -380,7 +339,7 @@ export function ContractorForm() {
         </CardHeader>
 
         <CardContent className="px-6 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {currentStep === 1 ? (
               <>
                 {/* Step 1 Fields */}
@@ -391,17 +350,14 @@ export function ContractorForm() {
                     </Label>
                     <Input
                       id="fullName"
-                      name="fullName"
                       type="text"
                       placeholder="John Smith"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      required
+                      {...register("fullName")}
                       className={`h-10 text-sm text-black ${
                         errors.fullName ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                       }`}
                     />
-                    {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
+                    {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName.message}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="title" className="text-sm font-semibold text-gray-700">
@@ -409,17 +365,14 @@ export function ContractorForm() {
                     </Label>
                     <Input
                       id="title"
-                      name="title"
                       type="text"
                       placeholder="Owner / Manager"
-                      value={formData.title}
-                      onChange={handleInputChange}
-                      required
+                      {...register("title")}
                       className={`h-10 text-sm text-black ${
                         errors.title ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                       }`}
                     />
-                    {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
+                    {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>}
                   </div>
                 </div>
 
@@ -430,17 +383,15 @@ export function ContractorForm() {
                     </Label>
                     <Input
                       id="phoneNumber"
-                      name="phoneNumber"
                       type="tel"
                       placeholder="(555) 123-4567"
-                      value={formData.phoneNumber}
+                      {...register("phoneNumber")}
                       onChange={handleInputChange}
-                      required
                       className={`h-10 text-sm text-black ${
                         errors.phoneNumber ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                       }`}
                     />
-                    {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber}</p>}
+                    {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="emailAddress" className="text-sm font-semibold text-gray-700">
@@ -448,17 +399,14 @@ export function ContractorForm() {
                     </Label>
                     <Input
                       id="emailAddress"
-                      name="emailAddress"
                       type="email"
                       placeholder="john@roofingco.com"
-                      value={formData.emailAddress}
-                      onChange={handleInputChange}
-                      required
+                      {...register("emailAddress")}
                       className={`h-10 text-sm text-black ${
                         errors.emailAddress ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                       }`}
                     />
-                    {errors.emailAddress && <p className="text-red-500 text-xs mt-1">{errors.emailAddress}</p>}
+                    {errors.emailAddress && <p className="text-red-500 text-xs mt-1">{errors.emailAddress.message}</p>}
                   </div>
                 </div>
 
@@ -469,24 +417,15 @@ export function ContractorForm() {
                     </Label>
                     <Input
                       id="businessAddress"
-                      name="businessAddress"
                       type="text"
                       placeholder="Start typing your business address..."
-                      value={formData.businessAddress}
+                      {...register("businessAddress")}
                       onChange={handleInputChange}
-                      required
                       className={`h-10 text-sm text-black ${
                         errors.businessAddress ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                       }`}
                     />
-                    {isMounted && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {GOOGLE_PLACES_API_KEY
-                          ? "Powered by Google Places - Start typing for suggestions"
-                          : "Demo mode - Add GOOGLE_PLACES_API_KEY for live suggestions"}
-                      </p>
-                    )}
-                    {errors.businessAddress && <p className="text-red-500 text-xs mt-1">{errors.businessAddress}</p>}
+                    {errors.businessAddress && <p className="text-red-500 text-xs mt-1">{errors.businessAddress.message}</p>}
 
                     {/* Address Suggestions Dropdown */}
                     {showAddressSuggestions && (
@@ -522,19 +461,6 @@ export function ContractorForm() {
                             No addresses found. Try a different search term.
                           </div>
                         )}
-
-                        {/* Footer */}
-                        {!isLoadingAddresses && addressSuggestions.length > 0 && (
-                          <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
-                            <p className="text-xs text-gray-500 flex items-center">
-                              <ChevronDown className="h-3 w-3 mr-1" />
-                              {isMounted &&
-                                (GOOGLE_PLACES_API_KEY
-                                  ? `${addressSuggestions.length} suggestions from Google Places`
-                                  : "Demo suggestions - Add API key for live data")}
-                            </p>
-                          </div>
-                        )}
                       </div>
                     )}
                   </div>
@@ -546,17 +472,14 @@ export function ContractorForm() {
                   </Label>
                   <Input
                     id="serviceRadius"
-                    name="serviceRadius"
                     type="number"
                     placeholder="25"
-                    value={formData.serviceRadius}
-                    onChange={handleInputChange}
-                    required
+                    {...register("serviceRadius")}
                     className={`h-10 text-sm text-black ${
                       errors.serviceRadius ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                     }`}
                   />
-                  {errors.serviceRadius && <p className="text-red-500 text-xs mt-1">{errors.serviceRadius}</p>}
+                  {errors.serviceRadius && <p className="text-red-500 text-xs mt-1">{errors.serviceRadius.message}</p>}
                 </div>
 
                 <Button
@@ -580,14 +503,14 @@ export function ContractorForm() {
                   <h3 className="text-sm font-bold text-gray-900 mb-2">Account Information</h3>
                   <div className="text-xs text-gray-700 space-y-1">
                     <p>
-                      <span className="font-semibold">Name:</span> {formData.fullName}
+                      <span className="font-semibold">Name:</span> {watch("fullName")}
                     </p>
                     <p>
-                      <span className="font-semibold">Username (Email):</span> {formData.emailAddress}
+                      <span className="font-semibold">Username (Email):</span> {watch("emailAddress")}
                     </p>
                     <p>
-                      <span className="font-semibold">Service Area:</span> {formData.serviceRadius} miles from{" "}
-                      {formData.businessAddress}
+                      <span className="font-semibold">Service Area:</span> {watch("serviceRadius")} miles from{" "}
+                      {watch("businessAddress")}
                     </p>
                   </div>
                 </div>
@@ -599,11 +522,9 @@ export function ContractorForm() {
                   <div className="relative">
                     <Input
                       id="password"
-                      name="password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a secure password"
-                      value={formData.password}
-                      onChange={handleInputChange}
+                      {...register("password")}
                       className={`h-10 pr-12 text-sm text-black ${
                         errors.password ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                       }`}
@@ -616,7 +537,7 @@ export function ContractorForm() {
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
-                  {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+                  {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
                   <p className="text-sm text-gray-500">Must be at least 8 characters long</p>
                 </div>
 
@@ -627,11 +548,9 @@ export function ContractorForm() {
                   <div className="relative">
                     <Input
                       id="confirmPassword"
-                      name="confirmPassword"
                       type={showConfirmPassword ? "text" : "password"}
                       placeholder="Confirm your password"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
+                      {...register("confirmPassword")}
                       className={`h-10 pr-12 text-sm text-black ${
                         errors.confirmPassword ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                       }`}
@@ -644,7 +563,7 @@ export function ContractorForm() {
                       {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
-                  {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+                  {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
                 </div>
 
                 <div className="flex space-x-3 pt-2">
@@ -686,63 +605,63 @@ export function ContractorForm() {
 
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300 my-8">
-            {/* Close Button */}
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
-              aria-label="Close modal"
-            >
-              <X className="h-4 w-4" />
-            </button>
+        <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 relative animate-in zoom-in-95 duration-300 my-8">
+          {/* Close Button */}
+          <button
+            onClick={handleCloseModal}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-700 transition-all duration-200"
+            aria-label="Close modal"
+          >
+            <X className="h-4 w-4" />
+          </button>
 
-            <div className="absolute inset-0 pointer-events-none z-0">
-              <svg className="absolute top-0 left-0 w-32 h-32 opacity-30" viewBox="0 0 100 100">
-                <circle cx="20" cy="20" r="6" fill="#60a5fa" />
-                <circle cx="80" cy="30" r="4" fill="#fbbf24" />
-                <circle cx="60" cy="80" r="5" fill="#34d399" />
-                <circle cx="90" cy="60" r="3" fill="#f472b6" />
-                <circle cx="10" cy="70" r="4" fill="#818cf8" />
-              </svg>
-              <svg className="absolute bottom-0 right-0 w-32 h-32 opacity-30" viewBox="0 0 100 100">
-                <circle cx="80" cy="80" r="6" fill="#60a5fa" />
-                <circle cx="20" cy="70" r="4" fill="#fbbf24" />
-                <circle cx="40" cy="20" r="5" fill="#34d399" />
-                <circle cx="10" cy="40" r="3" fill="#f472b6" />
-                <circle cx="90" cy="30" r="4" fill="#818cf8" />
-              </svg>
+          <div className="absolute inset-0 pointer-events-none z-0">
+            <svg className="absolute top-0 left-0 w-32 h-32 opacity-30" viewBox="0 0 100 100">
+              <circle cx="20" cy="20" r="6" fill="#60a5fa" />
+              <circle cx="80" cy="30" r="4" fill="#fbbf24" />
+              <circle cx="60" cy="80" r="5" fill="#34d399" />
+              <circle cx="90" cy="60" r="3" fill="#f472b6" />
+              <circle cx="10" cy="70" r="4" fill="#818cf8" />
+            </svg>
+            <svg className="absolute bottom-0 right-0 w-32 h-32 opacity-30" viewBox="0 0 100 100">
+              <circle cx="80" cy="80" r="6" fill="#60a5fa" />
+              <circle cx="20" cy="70" r="4" fill="#fbbf24" />
+              <circle cx="40" cy="20" r="5" fill="#34d399" />
+              <circle cx="10" cy="40" r="3" fill="#f472b6" />
+              <circle cx="90" cy="30" r="4" fill="#818cf8" />
+            </svg>
+          </div>
+
+          <div className="p-8 text-center">
+            {/* Success Icon */}
+            <div className="relative z-20 text-center mb-5">
+              <div className="w-20 h-20 bg-[#122E5F] rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg animate-bounce-slow">
+                <Mail className="h-10 w-10 text-white drop-shadow-lg" />
+              </div>
+              <p className="text-gray-500">
+                We&apos;ve sent a verification email to
+                <span className="font-semibold text-[#286BBD] block my-2">{watch("emailAddress")}</span>
+              </p>
+              <p className="text-gray-500 mt-5">
+                Please check your email and click the verification link
+                <br/>
+                to activate your account.
+              </p>
             </div>
 
-            <div className="p-8 text-center">
-              {/* Success Icon */}
-              <div className="relative z-20 text-center mb-5">
-                <div className="w-20 h-20 bg-[#122E5F] rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg animate-bounce-slow">
-                  <Mail className="h-10 w-10 text-white drop-shadow-lg" />
-                </div>
-                <p className="text-gray-500">
-                  We&apos;ve sent a verification email to
-                  <span className="font-semibold text-[#286BBD] block my-2">{formData.emailAddress}</span>
-                </p>
-                <p className="text-gray-500 mt-5">
-                  Please check your email and click the verification link
-                  <br/>
-                  to activate your account.
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="relative z-10 flex flex-col items-center">
-                <button
-                  type="button"
-                  className="bg-gradient-to-r from-[#122E5F] to-[#041738] hover:from-[#183B7A] hover:to-[#122E5F] transition-colors duration-200 text-white px-6 py-3 font-semibold rounded-xl shadow-md text-lg flex items-center gap-2"
-                >
-                  <Mail className="h-5 w-5 text-white" />
-                  <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer">Verify Email</a>
-                </button>
-              </div>
+            {/* Action Buttons */}
+            <div className="relative z-10 flex flex-col items-center">
+              <button
+                type="button"
+                className="bg-gradient-to-r from-[#122E5F] to-[#041738] hover:from-[#183B7A] hover:to-[#122E5F] transition-colors duration-200 text-white px-6 py-3 font-semibold rounded-xl shadow-md text-lg flex items-center gap-2"
+              >
+                <Mail className="h-5 w-5 text-white" />
+                <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer">Verify Email</a>
+              </button>
             </div>
           </div>
         </div>
+      </div>
       )}
     </>
   );
