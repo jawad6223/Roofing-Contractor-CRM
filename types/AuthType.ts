@@ -28,3 +28,15 @@ export interface FormDataType {
     emailAddress: string;
     password: string;
   };
+
+  // Address Suggestion Props
+  export interface AddressSuggestionProps {
+    value: string;
+    onChange: (value: string) => void;
+    onSelect: (prediction: PlacePrediction) => void;
+    placeholder?: string;
+    label?: string;
+    required?: boolean;
+    error?: string;
+    className?: string;
+  }

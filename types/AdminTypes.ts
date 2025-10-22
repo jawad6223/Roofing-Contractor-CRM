@@ -21,7 +21,7 @@ export interface LeadType {
   "Last Name": string;
   "Phone Number": string;
   "Email Address": string;
-  "Property ZIP Code": string;
+  "Property Address": string;
   "Address": string;
   "Status": string;
   "Assigned Date": string;
@@ -50,7 +50,7 @@ export interface dashboardCardType {
 
 export interface settingType {
   fullName: string;
-  email: string;
+  email?: string;
   businessAddress: string;
   leads: string;
 }

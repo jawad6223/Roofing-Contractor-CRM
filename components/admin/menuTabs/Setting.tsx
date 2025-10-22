@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { settingType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
 import { supabase } from "@/lib/supabase";
+import { AddressSuggestion } from "@/components/ui/AddressSuggestion";
+import { PlacePrediction } from "@/types/AuthType";
 
 export const Setting = () => {
 
@@ -26,7 +28,7 @@ export const Setting = () => {
 
         const { data, error } = await supabase
           .from("Admin_Data")
-          .select(`"Full Name", "Email Address", "Business Address", "Price Per Lead"`)
+          .select(`"Full Name", "Business Address", "Price Per Lead"`)
           .maybeSingle();
 
         if (error) throw error;
@@ -34,7 +36,6 @@ export const Setting = () => {
         if (data) {
           setFormData({
             fullName: data["Full Name"] || "",
-            email: data["Email Address"] || "",
             businessAddress: data["Business Address"] || "",
             leads: data["Price Per Lead"]?.toString() || "",
           });
@@ -54,78 +55,47 @@ export const Setting = () => {
     setIsEditing(true);
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     setIsEditing(false);
+    // Restore original data from Supabase
+    try {
+      const { data, error } = await supabase
+        .from("Admin_Data")
+        .select(`"Full Name", "Business Address", "Price Per Lead"`)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data) {
+        setFormData({
+          fullName: data["Full Name"] || "",
+          businessAddress: data["Business Address"] || "",
+          leads: data["Price Per Lead"]?.toString() || "",
+        });
+      }
+    } catch (err) {
+      console.error("Error restoring data:", err);
+      toast.error("Failed to restore data");
+    }
   };
 
   const handleUpdate = async () => {
     setLoading(true);
     try {
-      const oldEmail = localStorage.getItem("adminLoggedInUser");
-      const adminId = localStorage.getItem("admin_id");
-      
-      if (!oldEmail || !adminId) {
-        toast.error("Admin not logged in.");
-        return;
-      }
-
-      const newEmail = formData.email;
-
-      if (oldEmail !== newEmail) {
-        const response = await fetch("/api/update-admin-email", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: adminId,
-            oldEmail: oldEmail,
-            newEmail: newEmail,
-            fullName: formData.fullName,
-            businessAddress: formData.businessAddress,
-            pricePerLead: parseFloat(formData.leads) || null,
-          }),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          if (result.error?.includes("already registered") || result.error?.includes("duplicate")) {
-            toast.error("This email is already registered with another account");
-            return;
-          }
-          throw new Error(result.error || "Failed to update email");
-        }
-
-        toast.success("Email updated successfully! Please log in again with your new email.");
-        
-        await supabase.auth.signOut();
-        localStorage.removeItem("adminLoggedInUser");
-        localStorage.removeItem("admin_id");
-        
-        window.location.href = "/adminLogin";
-        return;
-      }
-
-      console.log("🟢 Updating Admin_Data for:", oldEmail, "→", formData.email);
-
       const { error: updateError } = await supabase
         .from("Admin_Data")
         .update({
           "Full Name": formData.fullName,
-          "Email Address": formData.email,
           "Business Address": formData.businessAddress,
           "Price Per Lead": parseFloat(formData.leads) || null,
         })
-        .eq("Email Address", oldEmail);
+        .eq("Email Address", formData.email);
 
       if (updateError) {
         console.error("❌ Supabase Admin_Data update error:", updateError);
         toast.error("Error updating Admin_Data table");
         return;
       }
-
-      localStorage.setItem("adminLoggedInUser", formData.email);
 
       toast.success("Admin profile updated successfully!");
       setIsEditing(false);
@@ -177,26 +147,30 @@ export const Setting = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <Input
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  readOnly={!isEditing}
-                  className={`text-gray-900 h-11 ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Business Address
-                </label>
-                <Input
-                  value={formData.businessAddress}
-                  onChange={(e) => handleInputChange('businessAddress', e.target.value)}
-                  readOnly={!isEditing}
-                  className={`text-gray-900 h-11 ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
-                />
+                {isEditing ? (
+                  <AddressSuggestion
+                    value={formData.businessAddress}
+                    onChange={(value) => handleInputChange("businessAddress", value)}
+                    onSelect={(prediction: PlacePrediction) => {
+                      handleInputChange("businessAddress", prediction.description);
+                    }}
+                    placeholder="Start typing your business address..."
+                    label="Business Address"
+                    required={false}
+                    error=""
+                  />
+                ) : (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Business Address
+                    </label>
+                    <Input
+                      value={formData.businessAddress}
+                      readOnly
+                      className="text-gray-900 h-11 bg-gray-50 cursor-not-allowed"
+                    />
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">

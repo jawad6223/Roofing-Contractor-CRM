@@ -28,12 +28,11 @@ export const addLeadFields = [
       required: true,
     },
     {
-      name: "zipCode",
-      label: "Zip Code",
+      name: "propertyAddress",
+      label: "Address",
       type: "text",
-      placeholder: "75201",
+      placeholder: "Start typing your business address...",
       required: true,
-      maxLength: 5,
     },
     {
       name: "company",

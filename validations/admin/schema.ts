@@ -23,10 +23,10 @@ export const newLeadSchema = yup.object().shape({
       .string()
       .required("Email is required")
       .email("Please enter a valid email address"),
-    zipCode: yup
+    propertyAddress: yup
       .string()
-      .required("Address is required")
-      .min(5, "Please enter a valid address"),
+      .required("Property address is required")
+      .min(5, "Please enter a valid property address"),
     company: yup
       .string()
       .required("Insurance company is required")

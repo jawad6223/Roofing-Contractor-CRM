@@ -13,7 +13,7 @@ export interface crmDataType {
   "Last Name": string;
   "Phone Number": string;
   "Email Address": string;
-  "Zip Code": string;
+  "Property Address": string;
   "Insurance Company": string;
   "Policy Number": string;
   "status": string;
@@ -25,7 +25,7 @@ export interface purchasedLeadType {
   "Last Name": string;
   "Phone Number": string;
   "Email Address": string;
-  "Zip Code": string;
+  "Property Address": string;
   "Insurance Company": string;
   "Policy Number": string;
   "Purchase Date": string;
@@ -36,14 +36,13 @@ export interface sampleLeadType {
   id: number;
   firstName: string;
   lastName: string;
-  zipCode: string;
+  propertyAddress: string;
   phone: string;
   email: string;
   price: number;
 }
 
 export interface purchaseFormType {
-  zipCode: string;
   quantity: string;
 }
 
@@ -65,7 +64,7 @@ export interface teamMemberType {
 
 export interface settingType {
   fullName: string;
-  email: string;
+  email?: string;
   serviceRadius: string;
   businessAddress: string;
 }

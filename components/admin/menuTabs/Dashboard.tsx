@@ -81,8 +81,8 @@ export const Dashboard = () => {
           breakAll: true,
         },
         {
-          label: "Zip Code",
-          value: selectedLead["Property ZIP Code"],
+          label: "Property Address",
+          value: selectedLead["Property Address"],
           icon: MapPin,
         },
         {

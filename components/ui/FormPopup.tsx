@@ -4,27 +4,15 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { X, MapPin, Loader2 } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { FormPopupProps } from "@/types/Types";
 import { FormField } from "@/types/Types";
-
-interface PlacePrediction {
-  place_id: string;
-  description: string;
-  structured_formatting: {
-    main_text: string;
-    secondary_text: string;
-  };
-  types: string[];
-  matched_substrings?: Array<{
-    length: number;
-    offset: number;
-  }>;
-}
+import { AddressSuggestion } from "@/components/ui/AddressSuggestion";
+import { PlacePrediction } from "@/types/AuthType";
 
 
 
@@ -142,43 +130,10 @@ export const FormPopup: React.FC<FormPopupProps> = ({
   const [zipSuggestions, setZipSuggestions] = useState<PlacePrediction[]>([]);
   const [showZipSuggestions, setShowZipSuggestions] = useState(false);
   const [isLoadingZips, setIsLoadingZips] = useState(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchZipCodeSuggestions = async (input: string) => {
-    try {
-      setIsLoadingZips(true);
   
-      const response = await fetch(`/api/places?input=${encodeURIComponent(input)}`);
-  
-      if (!response.ok) {
-        throw new Error("Failed to fetch ZIP code suggestions");
-      }
-  
-      const data = await response.json();
-  
-      if (data.status === "OK") {
-        const filteredPredictions = data.predictions
-          .filter((prediction: PlacePrediction) =>
-            prediction.types.includes("postal_code") ||
-            prediction.types.includes("locality") ||
-            prediction.types.includes("administrative_area_level_1") ||
-            prediction.types.includes("route") ||
-            prediction.types.includes("street_address")
-          )
-          .slice(0, 5);
-  
-        setZipSuggestions(filteredPredictions || []);
-      } else {
-        console.error("Google API error:", data.status);
-        setZipSuggestions([]);
-      }
-    } catch (error) {
-      console.error("Error fetching ZIP code suggestions:", error);
-      setZipSuggestions([]);
-    } finally {
-      setIsLoadingZips(false);
-    }
-  };
   // Create validation schema from fields if not provided
   const createValidationSchema = () => {
     if (validationSchema) return validationSchema;
@@ -247,8 +202,31 @@ export const FormPopup: React.FC<FormPopupProps> = ({
     };
   }, []);
 
+  const handleAddressSelect = async (prediction: PlacePrediction, fieldName: string) => {
+    try {
+      setValue(fieldName, prediction.description);
+  
+      const response = await fetch(`/api/place-details?place_id=${prediction.place_id}`);
+      const data = await response.json();
+      if (data.lat && data.lng) {
+        console.log("Selected Address Coordinates:", data.lat, data.lng);
+        setCoords({ lat: data.lat, lng: data.lng });
+      } else {
+        console.warn("No coordinates found for selected address");
+      }
+    } catch (error) {
+      console.error("Error fetching address coordinates:", error);
+    }
+  };
+
   const onFormSubmit = (data: Record<string, any>) => {
-    onSubmit(data);
+    // Include coordinates in the form data if available
+    const formDataWithCoords = {
+      ...data,
+      ...(coords && { latitude: coords.lat, longitude: coords.lng })
+    };
+    
+    onSubmit(formDataWithCoords);
     reset();
     onClose();
   };
@@ -284,9 +262,11 @@ export const FormPopup: React.FC<FormPopupProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {fields.map((field: FormField) => (
                 <div key={field.name} className={field.type === "textarea" ? "md:col-span-2" : ""}>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {field.label} {field.required && <span className="text-red-500">*</span>}
-                  </label>
+                  {!(field.name.toLowerCase().includes('address') || field.name.toLowerCase().includes('businessaddress')) && (
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      {field.label} {field.required && <span className="text-red-500">*</span>}
+                    </label>
+                  )}
                 
                 {field.type === "select" ? (
                   <Controller
@@ -320,6 +300,23 @@ export const FormPopup: React.FC<FormPopupProps> = ({
                         placeholder={field.placeholder}
                         maxLength={field.maxLength}
                         className={`h-20 text-sm ${field.className || ""}`}
+                      />
+                    )}
+                  />
+                ) : field.name.toLowerCase().includes('address') || field.name.toLowerCase().includes('businessaddress') ? (
+                  <Controller
+                    name={field.name}
+                    control={control}
+                    render={({ field: controllerField }) => (
+                      <AddressSuggestion
+                        value={controllerField.value || ""}
+                        onChange={controllerField.onChange}
+                        onSelect={(prediction) => handleAddressSelect(prediction, field.name)}
+                        placeholder={field.placeholder || "Start typing your address..."}
+                        label={field.label}
+                        required={field.required}
+                        error={errors[field.name]?.message as string}
+                        className={field.className}
                       />
                     )}
                   />
@@ -366,26 +363,6 @@ export const FormPopup: React.FC<FormPopupProps> = ({
                               controllerField.onChange(formatted);
                             } else {
                               controllerField.onChange(value);
-                              
-                              if (field.name === 'zipCode') {
-                                if (debounceTimer.current) {
-                                  clearTimeout(debounceTimer.current);
-                                }
-                                
-                                if (value.length >= 2) {
-                                  setShowZipSuggestions(true);
-                                  setIsLoadingZips(true);
-                                  
-                                  const timer = setTimeout(() => {
-                                    fetchZipCodeSuggestions(value);
-                                  }, 300);
-                                  
-                                  debounceTimer.current = timer;
-                                } else {
-                                  setShowZipSuggestions(false);
-                                  setZipSuggestions([]);
-                                }
-                              }
                             }
                           }}
                           onBlur={() => {
@@ -402,7 +379,7 @@ export const FormPopup: React.FC<FormPopupProps> = ({
                       )}
                     />
                     
-                    {field.name === 'zipCode' && showZipSuggestions && (
+                    {/* {field.name === 'zipCode' && showZipSuggestions && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
                         {isLoadingZips ? (
                           <div className="flex items-center justify-center p-3">
@@ -443,7 +420,7 @@ export const FormPopup: React.FC<FormPopupProps> = ({
                           </div>
                         )}
                       </div>
-                    )}
+                    )} */}
                   </div>
                 )}
                 

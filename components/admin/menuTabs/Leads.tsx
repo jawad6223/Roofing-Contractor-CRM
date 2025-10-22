@@ -43,7 +43,7 @@ export const Leads = () => {
   const filteredLeads = leads.filter((lead) => {
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
-      (lead["Property ZIP Code"]?.toLowerCase() || "").includes(searchLower) ||
+      (lead["Property Address"]?.toLowerCase() || "").includes(searchLower) ||
       (lead["First Name"]?.toLowerCase() || "").includes(searchLower) ||
       (lead["Last Name"]?.toLowerCase() || "").includes(searchLower) ||
       (lead["Phone Number"] || "").includes(searchTerm) ||
@@ -216,7 +216,7 @@ export const Leads = () => {
           "Last Name": leadToAssign["Last Name"],
           "Phone Number": leadToAssign["Phone Number"],
           "Email Address": leadToAssign["Email Address"],
-          "Zip Code": leadToAssign["Property ZIP Code"],
+          "Property Address": leadToAssign["Property Address"],
           "Insurance Company": leadToAssign["Insurance Company"],
           "Policy Number": leadToAssign["Policy Number"],
         },
@@ -299,7 +299,7 @@ export const Leads = () => {
       // 1️⃣ Insert data into Leads_Data table
       const { error } = await supabase.from("Leads_Data").insert([
         {
-          "Property ZIP Code": formData.zipCode,
+          "Property Address": formData.propertyAddress,
           "First Name": formData.firstName,
           "Last Name": formData.lastName,
           "Phone Number": formData.phoneno,
@@ -307,6 +307,8 @@ export const Leads = () => {
           "Insurance Company": formData.company,
           "Policy Number": formData.policy,
           Status: "open",
+          "Latitude": formData.latitude,
+          "Longitude": formData.longitude,
         },
       ]);
 
@@ -420,7 +422,7 @@ export const Leads = () => {
                         Contect Info
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zip Code
+                        Property Address
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -463,7 +465,7 @@ export const Leads = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center text-sm font-medium text-gray-600">
                               <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                              {lead["Property ZIP Code"]}
+                              {lead["Property Address"]}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -553,7 +555,7 @@ export const Leads = () => {
                         Contect Info
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zip Code
+                        Property Address
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
@@ -590,7 +592,7 @@ export const Leads = () => {
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
-                                {lead["Property ZIP Code"]}
+                                {lead["Property Address"]}
                               </span>
                             </div>
                           </td>
@@ -721,11 +723,11 @@ export const Leads = () => {
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1">
-                    Property ZIP Code
+                    Property Address
                   </label>
                   <p className="text-gray-900 break-all bg-gray-50 p-1.5 rounded-md text-sm flex items-center">
                     <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                    {selectedLead["Property ZIP Code"]}
+                    {selectedLead["Property Address"]}
                   </p>
                 </div>
                 <div>

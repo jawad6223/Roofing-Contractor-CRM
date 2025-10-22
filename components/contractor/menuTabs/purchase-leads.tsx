@@ -3,13 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
-import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
+import { purchaseFormType } from "@/types/DashboardTypes";
 
 const PurchaseLeads = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [purchaseForm, setPurchaseForm] = useState({
+  const router = useRouter();
+  const [purchaseForm, setPurchaseForm] = useState<purchaseFormType>({
     quantity: "1",
-    zipCode: "",
   });
 
   const handlePurchaseInputChange = (
@@ -48,7 +49,7 @@ const PurchaseLeads = () => {
       }
 
       const { url } = await response.json();
-      window.location.href = url;
+      router.push(url);
     } catch (error) {
       console.error("Checkout error:", error);
     } finally {
@@ -77,7 +78,6 @@ const PurchaseLeads = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handlePurchaseSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Quantity *</label>
                 <Input
@@ -91,18 +91,6 @@ const PurchaseLeads = () => {
                   required
                   className="h-10 text-sm"
                 />
-              </div>
-              <div className="space-y-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">Target Zip Code *</label>
-                <Input
-                  name="zipCode"
-                  value={purchaseForm.zipCode}
-                  onChange={handlePurchaseInputChange}
-                  placeholder="75201"
-                  required
-                  className="h-10 text-sm"
-                />
-              </div>
             </div>
 
             {/* Pricing Summary */}

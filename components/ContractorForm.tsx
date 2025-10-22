@@ -15,6 +15,7 @@ import { supabase } from "@/lib/supabase";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { step1Schema, step2Schema } from "@/validations/Auth/schema";
+import { AddressSuggestion } from "@/components/ui/AddressSuggestion";
 
 export function ContractorForm() {
   const router = useRouter();
@@ -22,14 +23,10 @@ export function ContractorForm() {
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
-  const [addressSuggestions, setAddressSuggestions] = useState<PlacePrediction[]>([]);
-  const [showAddressSuggestions, setShowAddressSuggestions] = useState<boolean>(false);
-  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
   const [isMobile, setIsMobile] = useState<boolean>(false);
-  const [debounceTimer, setDebounceTimer] = useState<NodeJS.Timeout | null>(null);
   const [isMounted, setIsMounted] = useState<boolean>(false);
-  const addressInputRef = useRef<HTMLInputElement>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
 
   // React Hook Form setup
   const form = useForm<ContractorType>({
@@ -68,62 +65,29 @@ export function ContractorForm() {
     }
   }, [])
 
-
-  // Function to fetch Google Places suggestions
-  const fetchAddressSuggestions = async (input: string) => {
+  const handleAddressSelect = async (prediction: PlacePrediction) => {
     try {
-      setIsLoadingAddresses(true);
-
-      const response = await fetch(`/api/places?input=${encodeURIComponent(input)}`);
-      if (!response.ok) throw new Error("Failed to fetch suggestions");
-
+      // Set the address text in the form
+      setValue("businessAddress", prediction.description);
+  
+      // Fetch latitude and longitude using the Place Details API
+      const response = await fetch(`/api/place-details?place_id=${prediction.place_id}`);
       const data = await response.json();
-      console.log(data);
-
-      if (data.predictions) {
-        const suggestions: PlacePrediction[] = data.predictions.map((prediction: PlacePrediction) => ({
-          place_id: prediction.place_id,
-          description: prediction.description,
-          structured_formatting: {
-            main_text: prediction.structured_formatting.main_text,
-            secondary_text: prediction.structured_formatting.secondary_text,
-          },
-        }));
-        setAddressSuggestions(suggestions);
+      if (data.lat && data.lng) {
+        console.log("Selected Address Coordinates:", data.lat, data.lng);
+        setCoords({ lat: data.lat, lng: data.lng });
+        
+      } else {
+        console.warn("No coordinates found for selected address");
       }
     } catch (error) {
-      console.error("Error fetching address suggestions:", error);
-      setAddressSuggestions([]);
-    } finally {
-      setIsLoadingAddresses(false);
-    }
-  };
-
-  const handleAddressSelect = (prediction: PlacePrediction) => {
-    setValue("businessAddress", prediction.description);
-    setShowAddressSuggestions(false);
-    setAddressSuggestions([]);
-    setIsLoadingAddresses(false);
-
-    // Clear debounce timer
-    if (debounceTimer) {
-      clearTimeout(debounceTimer);
+      console.error("Error fetching address coordinates:", error);
     }
   };
   
+  
   useEffect(() => {
     setIsMounted(true);
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (addressInputRef.current && !addressInputRef.current.contains(event.target as Node)) {
-        setShowAddressSuggestions(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,29 +114,6 @@ export function ContractorForm() {
     }
 
     setValue(name as keyof ContractorType, processedValue);
-
-    // Handle address autocomplete
-    if (name === "businessAddress") {
-      // Clear previous timer
-      if (debounceTimer) {
-        clearTimeout(debounceTimer);
-      }
-
-      if (value.length >= 2) {
-        setShowAddressSuggestions(true);
-        setIsLoadingAddresses(true);
-
-        // Debounce API calls to avoid too many requests
-        const timer = setTimeout(() => {
-          fetchAddressSuggestions(value);
-        }, 300); // 300ms delay
-
-        setDebounceTimer(timer);
-      } else {
-        setShowAddressSuggestions(false);
-        setAddressSuggestions([]);
-      }
-    }
   };
 
   const handleContinue = async () => {
@@ -256,12 +197,13 @@ export function ContractorForm() {
       const user = authData.user;
       console.log(user);
       if (!user) {
-        toast.error("User not found after login.");
+        toast.error("Email address is invalid.");
         return;
       }
   
       if (error) throw error;
-      if (!authData.user) throw new Error("User not created");
+      if (!authData.user) throw new Error("Email address is invalid.");
+      
   
       // 2️⃣ Send data to your backend API route
       await fetch("/api/register-user", {
@@ -275,6 +217,8 @@ export function ContractorForm() {
           emailAddress: data.emailAddress.toLowerCase(),
           businessAddress: data.businessAddress,
           serviceRadius: data.serviceRadius,
+          latitude: coords?.lat,
+          longitude: coords?.lng,
         }),
       });
   
@@ -410,61 +354,15 @@ export function ContractorForm() {
                   </div>
                 </div>
 
-                <div className="space-y-2" ref={addressInputRef}>
-                  <div className="relative">
-                    <Label htmlFor="businessAddress" className="text-sm font-semibold text-gray-700">
-                      Business Address * (US Only)
-                    </Label>
-                    <Input
-                      id="businessAddress"
-                      type="text"
-                      placeholder="Start typing your business address..."
-                      {...register("businessAddress")}
-                      onChange={handleInputChange}
-                      className={`h-10 text-sm text-black ${
-                        errors.businessAddress ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
-                      }`}
-                    />
-                    {errors.businessAddress && <p className="text-red-500 text-xs mt-1">{errors.businessAddress.message}</p>}
-
-                    {/* Address Suggestions Dropdown */}
-                    {showAddressSuggestions && (
-                      <div className="absolute z-50 w-full bg-white border border-gray-300 rounded-xl shadow-xl max-h-48 overflow-y-auto mt-1">
-                        {isLoadingAddresses ? (
-                          <div className="px-4 py-3 text-gray-600 text-center">
-                            <div className="flex items-center justify-center space-x-2">
-                              <div className="w-4 h-4 border-2 border-[#2563eb] border-t-transparent rounded-full animate-spin"></div>
-                              <span className="text-sm">Loading addresses...</span>
-                            </div>
-                          </div>
-                        ) : addressSuggestions.length > 0 ? (
-                          addressSuggestions.map((prediction, index) => (
-                            <button
-                              key={prediction.place_id}
-                              type="button"
-                              onClick={() => handleAddressSelect(prediction)}
-                              className="w-full text-left px-4 py-3 text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all duration-200 flex items-start space-x-3 border-b border-gray-200 last:border-b-0"
-                            >
-                              <div className="w-2 h-2 bg-[#2563eb] rounded-full mt-2 flex-shrink-0"></div>
-                              <div className="flex-1 min-w-0">
-                                <div className="text-sm font-medium text-gray-900 truncate">
-                                  {prediction.structured_formatting.main_text}
-                                </div>
-                                <div className="text-xs text-gray-500 truncate">
-                                  {prediction.structured_formatting.secondary_text}
-                                </div>
-                              </div>
-                            </button>
-                          ))
-                        ) : (
-                          <div className="px-4 py-3 text-gray-500 text-center text-sm">
-                            No addresses found. Try a different search term.
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <AddressSuggestion
+                  value={watch("businessAddress")}
+                  onChange={(value) => setValue("businessAddress", value)}
+                  onSelect={handleAddressSelect}
+                  placeholder="Start typing your business address..."
+                  label="Business Address (US Only)"
+                  required={true}
+                  error={errors.businessAddress?.message}
+                />
 
                 <div className="space-y-2">
                   <Label htmlFor="serviceRadius" className="text-sm font-semibold text-gray-700">

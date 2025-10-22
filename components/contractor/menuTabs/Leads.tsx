@@ -73,7 +73,7 @@ export const Leads = () => {
       (lead["Last Name"]?.toLowerCase() || "").includes(searchLower) ||
       (lead["Email Address"]?.toLowerCase() || "").includes(searchLower) ||
       (lead["Phone Number"] || "").includes(searchTerm) ||
-      (lead["Zip Code"] || "").includes(searchTerm) ||
+      (lead["Property Address"] || "").includes(searchTerm) ||
       (lead["Insurance Company"]?.toLowerCase() || "").includes(searchLower) ||
       (lead["Policy Number"] || "").includes(searchTerm);
 
@@ -120,8 +120,8 @@ export const Leads = () => {
       icon: User
     },
     {
-      label: "Zip Code",
-      value: selectedLead["Zip Code"],
+      label: "Property Address",
+      value: selectedLead["Property Address"],
       icon: MapPin
     },
     {
@@ -135,11 +135,6 @@ export const Leads = () => {
       icon: Mail,
       breakAll: true
     },
-    // {
-    //   label: "Location",
-    //   value: selectedLead["Location"],
-    //   icon: MapPin
-    // },
     {
       label: "Insurance Company",
       value: selectedLead["Insurance Company"],
@@ -150,11 +145,11 @@ export const Leads = () => {
       value: selectedLead["Policy Number"],
       icon: Hash
     },
-    {
-      label: "Purchase Date",
-      value: new Date(selectedLead["Purchase Date"]).toLocaleDateString(),
-      icon: Calendar
-    }
+    // {
+    //   label: "Purchase Date",
+    //   value: new Date(selectedLead["Purchase Date"]).toLocaleDateString(),
+    //   icon: Calendar
+    // }
   ] : [];
 
   async function handleBuyNow(lead: sampleLeadType) {
@@ -267,10 +262,10 @@ export const Leads = () => {
                     Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Zip Code
+                    Contact Info
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Contact Info
+                    Property Address
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -295,15 +290,6 @@ export const Leads = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-400 select-none">{`${lead.zipCode?.slice(
-                          0,
-                          2
-                        ) || ""}${"*".repeat(Math.max((lead.zipCode?.length || 0) - 2, 0))}`}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
                         <Phone className="h-3 w-3 text-gray-400 mr-1" />
                         <span className="text-sm text-gray-400 select-none">{`${lead.phone.slice(0, 2)}${"*".repeat(
                           Math.max(lead.phone.length - 2, 0)
@@ -316,8 +302,18 @@ export const Leads = () => {
                         )}`}</span>
                       </div>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                        <span className="text-sm font-medium text-gray-400 select-none">{`${lead.propertyAddress?.slice(
+                          0,
+                          2
+                        ) || ""}${"*".repeat(Math.max((lead.propertyAddress?.length || 0) - 2, 0))}`}</span>
+                      </div>
+                    </td>
+                    <td></td>
                     <td className="px-6 py-4 whitespace-nowrap" colSpan={2}>
-                      <div className="flex items-center justify-center space-x-2">
+                      <div className="flex space-x-2">
                         {/* <span className={`text-sm font-bold`}>${lead.price}</span> */}
                         <Button
                           disabled={loadingLeads.has(lead.id)}
@@ -359,12 +355,6 @@ export const Leads = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center text-sm font-medium text-gray-600">
-                          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                          {lead["Zip Code"]}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="space-y-1 flex items-center text-sm font-medium text-gray-600">
                           <Phone className="h-3 w-3 text-gray-400 mr-1" />
                           {lead["Phone Number"]}
@@ -372,6 +362,12 @@ export const Leads = () => {
                         <div className="space-y-1 flex items-center text-sm font-medium text-gray-600">
                           <Mail className="h-3 w-3 text-gray-400 mr-1" />
                           {lead["Email Address"]}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center text-sm font-medium text-gray-600">
+                          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
+                          {lead["Property Address"]}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

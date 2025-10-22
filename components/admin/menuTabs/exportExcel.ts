@@ -25,7 +25,7 @@ export const exportToExcel = async (filteredLeads: LeadType[]) => {
           lastName: lead["Last Name"],
           phoneno: lead["Phone Number"],
           email: lead["Email Address"],
-          zipCode: lead["Property ZIP Code"],
+          zipCode: lead["Property Address"],
           company: lead["Insurance Company"],
           policy: lead["Policy Number"],
           assignedTo: lead["Assigned To"] || "Unassigned",

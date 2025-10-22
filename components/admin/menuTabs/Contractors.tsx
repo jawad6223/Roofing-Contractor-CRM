@@ -245,7 +245,7 @@ export const Contractors = () => {
           "Last Name": lead["Last Name"],
           "Phone Number": lead["Phone Number"],
           "Email Address": lead["Email Address"],
-          "Zip Code": lead["Property ZIP Code"],
+          "Zip Code": lead["Property Address"],
           "Insurance Company": lead["Insurance Company"],
           "Policy Number": lead["Policy Number"],
           contractor_id: contractorId,
@@ -307,7 +307,7 @@ export const Contractors = () => {
     (lead) =>
       (lead["First Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead["Last Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead["Property ZIP Code"]
+        lead["Property Address"]
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         lead["Insurance Company"]
@@ -773,7 +773,7 @@ export const Contractors = () => {
                                 </h4>
                                 <p className="text-sm text-gray-600">
                                   {lead["Insurance Company"]} •{" "}
-                                  {lead["Property ZIP Code"]}
+                                  {lead["Property Address"]}
                                 </p>
                               </div>
                             </div>

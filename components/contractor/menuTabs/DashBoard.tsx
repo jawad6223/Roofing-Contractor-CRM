@@ -27,46 +27,42 @@ export const DashBoard = () => {
     ? [
         {
           label: "Full Name",
-          value: `${selectedLead.firstName} ${selectedLead.lastName}`,
+          // value: `${selectedLead.firstName} ${selectedLead.lastName}`,
+          value: `${selectedLead["First Name"]} ${selectedLead["Last Name"]}`,
           icon: User,
         },
         {
           label: "Phone",
-          value: selectedLead.phoneno,
+          value: selectedLead["Phone Number"],
           icon: Phone,
         },
         {
           label: "Email",
-          value: selectedLead.email,
+          value: selectedLead["Email Address"],
           icon: Mail,
           breakAll: true,
         },
         {
-          label: "Location",
-          value: selectedLead.location,
+          label: "Property Address",
+          value: selectedLead["Property Address"],
           icon: MapPin,
         },
         {
           label: "Insurance Company",
-          value: selectedLead.company,
+          value: selectedLead["Insurance Company"],
           icon: Building,
           whitespaceNowrap: true,
         },
         {
           label: "Policy Number",
-          value: selectedLead.policy,
+          value: selectedLead["Policy Number"],
           icon: Hash,
         },
-        {
-          label: "Purchase Date",
-          value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
-          icon: Calendar,
-        },
-        {
-          label: "Zip Code",
-          value: selectedLead.zipCode,
-          icon: MapPin,
-        },
+        // {
+        //   label: "Purchase Date",
+        //   value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
+        //   icon: Calendar,
+        // },
       ]
     : [];
 
@@ -109,7 +105,7 @@ export const DashBoard = () => {
   }
 
   const handleLeadClick = (lead: any) => {
-    console.log("lead", lead);
+    console.log("lead==", lead);
     setSelectedLead(lead);
     setIsLeadModalOpen(true);
   };
@@ -245,7 +241,7 @@ export const DashBoard = () => {
                           <div className="flex items-center space-x-4 text-sm text-gray-600">
                             <div className="flex items-center space-x-1">
                               <MapPin className="h-3 w-3" />
-                              <span>{lead["Zip Code"]}</span>
+                              <span>{lead["Property Address"]}</span>
                             </div>
                           </div>
                         </div>
@@ -317,11 +313,11 @@ export const DashBoard = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs text-gray-500">
                         <div className="flex items-center">
                           <MapPin className="h-3 w-3 mr-1" />
-                          <span className="select-none">{`${lead.zipCode.slice(
+                          <span className="select-none">{`${lead.propertyAddress.slice(
                             0,
                             2
                           )}${"*".repeat(
-                            Math.max(lead.zipCode.length - 2, 0)
+                            Math.max(lead.propertyAddress.length - 2, 0)
                           )}`}</span>
                         </div>
                         <div className="flex items-center">

@@ -9,7 +9,7 @@ const supabaseServer = createClient(supabaseUrl, serviceRoleKey);
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { user_id, fullName, title, phoneNumber, emailAddress, businessAddress, serviceRadius } = body;
+    const { user_id, fullName, title, phoneNumber, emailAddress, businessAddress, serviceRadius, latitude, longitude } = body;
 
     const { error } = await supabaseServer.from("Roofing_Auth").insert([
       {
@@ -20,6 +20,8 @@ export async function POST(req: Request) {
         "Email Address": emailAddress,
         "Business Address": businessAddress,
         "Service Radius": serviceRadius,
+        "Latitude": latitude,
+        "Longitude": longitude,
       },
     ]);
 

@@ -11,6 +11,7 @@ import { teamMemberType } from "@/types/DashboardTypes";
 import { toast } from "react-toastify";
 import { teamMemberSchema } from "@/validations/contractor/schema";
 import { FormField } from "@/types/Types";
+import * as yup from "yup";
 
 export const Team = () => {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -22,6 +23,11 @@ export const Team = () => {
     Email_Address: "",
     Phone_Number: "",
   });
+  const [fieldErrors, setFieldErrors] = useState<{
+    Full_Name?: string;
+    Email_Address?: string;
+    Phone_Number?: string;
+  }>({});
 
   const handleCloseModal = () => {
     setShowAddModal(false);
@@ -93,10 +99,43 @@ export const Team = () => {
       Email_Address: member.Email_Address,
       Phone_Number: member.Phone_Number,
     });
+    // Clear any previous errors when starting to edit
+    setFieldErrors({});
   };
 
   const handleSaveClick = async (index: number) => {
     try {
+      // Clear previous errors
+      setFieldErrors({});
+
+      // Validate edited member data with schema
+      const formDataToValidate = {
+        name: editedMember.Full_Name,
+        email: editedMember.Email_Address,
+        phoneno: editedMember.Phone_Number,
+      };
+
+      try {
+        await teamMemberSchema.validate(formDataToValidate, { abortEarly: false });
+      } catch (error) {
+        if (error instanceof yup.ValidationError) {
+          const newErrors: { [key: string]: string } = {};
+          error.inner.forEach((err) => {
+            if (err.path === 'name') {
+              newErrors.Full_Name = err.message;
+            } else if (err.path === 'email') {
+              newErrors.Email_Address = err.message;
+            } else if (err.path === 'phoneno') {
+              newErrors.Phone_Number = err.message;
+            }
+          });
+          setFieldErrors(newErrors);
+          return;
+        }
+        toast.error("Validation failed. Please check your input.");
+        return;
+      }
+
       const originalMember = teamMembers[index];
       const { data: authData, error: authError } =
         await supabase.auth.getUser();
@@ -133,10 +172,32 @@ export const Team = () => {
   };
 
   const handleEditInputChange = (field: string, value: string) => {
+    let processedValue = value;
+
+    if (field === "Phone_Number") {
+      const digits = value.replace(/\D/g, "");
+
+      if (digits.length <= 3) {
+        processedValue = digits;
+      } else if (digits.length <= 6) {
+        processedValue = `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+      } else if (digits.length <= 10) {
+        processedValue = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+      } else {
+        processedValue = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+      }
+    }
+
     setEditedMember((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: processedValue,
     }));
+    if (fieldErrors[field as keyof typeof fieldErrors]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [field]: undefined,
+      }));
+    }
   };
 
   const handleDeleteMember = async (index: number) => {
@@ -233,36 +294,57 @@ export const Team = () => {
                         <div className="flex-1 min-w-0 max-w-xs">
                           {editingMember === index ? (
                             <div className="space-y-3">
-                              <Input
-                                value={editedMember.Full_Name}
-                                onChange={(e) =>
-                                  handleEditInputChange("Full_Name", e.target.value)
-                                }
-                                className="h-8 text-sm font-bold w-full"
-                                placeholder="Full Name"
-                              />
-                              <Input
-                                value={editedMember.Email_Address}
-                                onChange={(e) =>
-                                  handleEditInputChange(
-                                    "Email_Address",
-                                    e.target.value
-                                  )
-                                }
-                                className="h-8 text-sm w-full"
-                                placeholder="Email Address"
-                              />
-                              <Input
-                                value={editedMember.Phone_Number}
-                                onChange={(e) =>
-                                  handleEditInputChange(
-                                    "Phone_Number",
-                                    e.target.value
-                                  )
-                                }
-                                className="h-8 text-sm font-medium w-full"
-                                placeholder="Phone Number"
-                              />
+                              <div>
+                                <Input
+                                  value={editedMember.Full_Name}
+                                  onChange={(e) =>
+                                    handleEditInputChange("Full_Name", e.target.value)
+                                  }
+                                  className={`h-8 text-sm font-bold w-full ${
+                                    fieldErrors.Full_Name ? "border-red-500" : ""
+                                  }`}
+                                  placeholder="Full Name"
+                                />
+                                {fieldErrors.Full_Name && (
+                                  <p className="text-red-500 text-xs mt-1">{fieldErrors.Full_Name}</p>
+                                )}
+                              </div>
+                              <div>
+                                <Input
+                                  value={editedMember.Email_Address}
+                                  onChange={(e) =>
+                                    handleEditInputChange(
+                                      "Email_Address",
+                                      e.target.value
+                                    )
+                                  }
+                                  className={`h-8 text-sm w-full ${
+                                    fieldErrors.Email_Address ? "border-red-500" : ""
+                                  }`}
+                                  placeholder="Email Address"
+                                />
+                                {fieldErrors.Email_Address && (
+                                  <p className="text-red-500 text-xs mt-1">{fieldErrors.Email_Address}</p>
+                                )}
+                              </div>
+                              <div>
+                                <Input
+                                  value={editedMember.Phone_Number}
+                                  onChange={(e) =>
+                                    handleEditInputChange(
+                                      "Phone_Number",
+                                      e.target.value
+                                    )
+                                  }
+                                  className={`h-8 text-sm font-medium w-full ${
+                                    fieldErrors.Phone_Number ? "border-red-500" : ""
+                                  }`}
+                                  placeholder="Phone Number"
+                                />
+                                {fieldErrors.Phone_Number && (
+                                  <p className="text-red-500 text-xs mt-1">{fieldErrors.Phone_Number}</p>
+                                )}
+                              </div>
                             </div>
                           ) : (
                             <div className="flex flex-col space-y-1">
@@ -297,8 +379,6 @@ export const Team = () => {
                               </AlertDialogTitle>
                               <AlertDialogDescription>
                                 Are you sure you want to delete this team member?
-                                This action cannot be undone and they will lose
-                                access to the system.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

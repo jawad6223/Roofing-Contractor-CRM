@@ -30,7 +30,7 @@ export const CRM = () => {
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         lead["Phone Number"]?.includes(searchTerm) ||
-        lead["Zip Code"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        lead["Property Address"]?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         lead["Insurance Company"]
           ?.toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
@@ -87,8 +87,8 @@ export const CRM = () => {
           breakAll: true,
         },
         {
-          label: "Zip Code",
-          value: selectedLead["Zip Code"],
+          label: "Property Address",
+          value: selectedLead["Property Address"],
           icon: MapPin,
         },
         {
@@ -135,10 +135,10 @@ export const CRM = () => {
       required: true,
     },
     {
-      name: "zipCode",
-      label: "Zip Code",
+      name: "propertyAddress",
+      label: "Property Address",
       type: "text",
-      placeholder: "75201",
+      placeholder: "Start typing your business address...",
       required: true,
       maxLength: 5,
     },
@@ -203,11 +203,12 @@ export const CRM = () => {
 
   const handleFormSubmit = async (formData: Record<string, any>) => {
     try {
-      const userId = localStorage.getItem("user_id");
-      if (!userId) {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) {
         toast.error("User not logged in");
         return;
       }
+      const userId = authData.user.id;
 
       const { error } = await supabase.from("Contractor_Leads").insert({
         contractor_id: userId,
@@ -215,10 +216,12 @@ export const CRM = () => {
         "Last Name": formData.lastName,
         "Phone Number": formData.phoneno,
         "Email Address": formData.email,
-        "Zip Code": formData.zipCode,
+        "Property Address": formData.propertyAddress,
         "Insurance Company": formData.insuranceCompany,
         "Policy Number": formData.policy,
         status: "close",
+        "Latitude": formData.latitude,
+        "Longitude": formData.longitude,
       });
 
       if (error) throw error;
@@ -286,7 +289,7 @@ export const CRM = () => {
                     Contact Info
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Zip Code
+                    Property Address
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Action
@@ -326,7 +329,7 @@ export const CRM = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="text-sm text-gray-900 flex items-center">
                           <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                          {lead["Zip Code"]}
+                          {lead["Property Address"]}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">

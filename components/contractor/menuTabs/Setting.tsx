@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FormPopup } from "@/components/ui/FormPopup";
+import { AddressSuggestion } from "@/components/ui/AddressSuggestion";
 import { settingType } from "@/types/DashboardTypes";
 import { FormField } from "@/types/Types";
 import { toast } from "react-toastify";
@@ -13,6 +14,7 @@ import { paymentMethodSchema } from "@/validations/contractor/schema";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { paymentMethodType } from "@/types/DashboardTypes";
+import { PlacePrediction } from "@/types/AuthType";
 
 export const Setting = () => {
   const router = useRouter();
@@ -43,7 +45,7 @@ export const Setting = () => {
         const { data, error } = await supabase
           .from("Roofing_Auth")
           .select(
-            `"Full Name", "Email Address", "Service Radius", "Business Address"`
+            `"Full Name", "Service Radius", "Business Address"`
           )
           .eq("user_id", userId)
           .maybeSingle();
@@ -55,7 +57,6 @@ export const Setting = () => {
 
         setFormData({
           fullName: data["Full Name"] || "",
-          email: data["Email Address"] || "",
           serviceRadius: data["Service Radius"] || "",
           businessAddress: data["Business Address"] || "",
         });
@@ -74,8 +75,34 @@ export const Setting = () => {
     setIsEditing(true);
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     setIsEditing(false);
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData?.user) {
+        toast.error("User not logged in");
+        return;
+      }
+      const userId = authData.user.id;
+
+      const { data, error } = await supabase
+        .from("Roofing_Auth")
+        .select(
+          `"Full Name", "Service Radius", "Business Address"`
+        )
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (data) {
+        setFormData({
+          fullName: data["Full Name"] || "",
+          serviceRadius: data["Service Radius"] || "",
+          businessAddress: data["Business Address"] || "",
+        });
+      }
+    } catch (err) {
+      console.error("Error restoring data:", err);
+    }
   };
 
   const handleUpdate = async () => {
@@ -87,60 +114,10 @@ export const Setting = () => {
       }
       const userId = authData.user.id;
 
-      const { data: currentUser } = await supabase.auth.getUser();
-      const currentEmail = currentUser?.user?.email;
-      const newEmail = formData.email;
-
-      if (currentEmail !== newEmail) {
-        const response = await fetch("/api/update-user-email", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            userId: userId,
-            newEmail: newEmail,
-          }),
-        });
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          if (result.error?.includes("already registered") || result.error?.includes("duplicate")) {
-            toast.error("This email is already registered with another account");
-            return;
-          }
-          throw new Error(result.error || "Failed to update email");
-        }
-
-        const { error: dbError } = await supabase
-          .from("Roofing_Auth")
-          .update({
-            "Full Name": formData.fullName,
-            "Email Address": formData.email,
-            "Service Radius": formData.serviceRadius,
-            "Business Address": formData.businessAddress,
-          })
-          .eq("user_id", userId);
-
-        if (dbError) throw dbError;
-
-        toast.success("Email updated successfully! Please log in again with your new email.");
-        
-        await supabase.auth.signOut();
-        localStorage.removeItem("user_id");
-        localStorage.removeItem("loggedInUser");
-        localStorage.removeItem("userInfo");
-        
-        router.push("/login");
-        return;
-      }
-
       const { error: dbError } = await supabase
         .from("Roofing_Auth")
         .update({
           "Full Name": formData.fullName,
-          "Email Address": formData.email,
           "Service Radius": formData.serviceRadius,
           "Business Address": formData.businessAddress,
         })
@@ -338,19 +315,6 @@ export const Setting = () => {
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address
-                </label>
-                <Input
-                  value={isProfileLoading ? "Loading..." : formData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
-                  readOnly={!isEditing}
-                  className={`text-gray-900 h-11 ${
-                    !isEditing ? "bg-gray-50 cursor-not-allowed" : ""
-                  }`}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Service Radius
                 </label>
                 <div className="relative">
@@ -370,19 +334,30 @@ export const Setting = () => {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Business Address
-                </label>
-                <Input
-                  value={isProfileLoading ? "Loading..." : formData.businessAddress}
-                  onChange={(e) =>
-                    handleInputChange("businessAddress", e.target.value)
-                  }
-                  readOnly={!isEditing}
-                  className={`text-gray-900 h-11 ${
-                    !isEditing ? "bg-gray-50 cursor-not-allowed" : ""
-                  }`}
-                />
+                {isEditing ? (
+                  <AddressSuggestion
+                    value={formData.businessAddress}
+                    onChange={(value) => handleInputChange("businessAddress", value)}
+                    onSelect={(prediction: PlacePrediction) => {
+                      handleInputChange("businessAddress", prediction.description);
+                    }}
+                    placeholder="Start typing your business address..."
+                    label="Business Address"
+                    required={false}
+                    error=""
+                  />
+                ) : (
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Business Address
+                    </label>
+                    <Input
+                      value={isProfileLoading ? "Loading..." : formData.businessAddress}
+                      readOnly
+                      className="text-gray-900 h-11 bg-gray-50 cursor-not-allowed"
+                    />
+                  </div>
+                )}
               </div>
             </div>
             {!isEditing ? (

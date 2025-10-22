@@ -2,9 +2,91 @@
 
 import { useRouter } from "next/navigation";
 import { CheckCircle, ArrowRight } from "lucide-react";
+import { useEffect } from "react";
+import { supabase } from "@/lib/supabase";
 
 export default function SuccessPage() {
   const router = useRouter();
+
+  const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+    const toRad = (angle: number) => (angle * Math.PI) / 180;
+    const R = 3958.8; // Earth radius in miles
+  
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+  
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) ** 2;
+  
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in miles
+  }
+  
+
+  useEffect(() => {
+    const getUserAfterPayment = async () => {
+      try {
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (!authData?.user) throw new Error("User not found");
+    
+        const userId = authData.user.id;
+    
+        // 1. Get contractor location and radius (in miles)
+        const { data: userData, error: userError } = await supabase
+          .from("Roofing_Auth")
+          .select('"Latitude", "Longitude", "Service Radius"')
+          .eq("user_id", userId)
+          .single();
+    
+        if (userError || !userData) {
+          console.error("Error fetching user coordinates:", userError);
+          return;
+        }
+    
+        const contractorLat = userData["Latitude"];
+        const contractorLng = userData["Longitude"];
+        const contractorRadius = userData["Service Radius"]; // in miles
+    
+        console.log("Contractor location and radius:", contractorLat, contractorLng, contractorRadius);
+    
+        // 2. Fetch all leads (clients)
+        const { data: leads, error: leadsError } = await supabase
+      .from("Leads_Data")
+      .select('id, "Latitude", "Longitude", Status')
+      .eq("Status", "open");
+    
+        if (leadsError || !leads) {
+          console.error("Error fetching leads:", leadsError);
+          return;
+        }
+    
+        // 3. Filter leads within contractor's radius
+        const matchingLeads = leads.filter(lead => {
+          const distance = haversineDistance(
+            contractorLat,
+            contractorLng,
+            lead["Latitude"],
+            lead["Longitude"]
+          );
+    
+          return distance <= contractorRadius;
+        });
+    
+        console.log("Matched leads within service area:", matchingLeads);
+        
+        // Optional: return or store matched leads
+        return matchingLeads;
+    
+      } catch (error) {
+        console.error("Error fetching user after payment:", error);
+      }
+    };
+    
+
+    getUserAfterPayment();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center px-4 relative overflow-hidden">
