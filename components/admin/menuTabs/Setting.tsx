@@ -28,7 +28,7 @@ export const Setting = () => {
 
         const { data, error } = await supabase
           .from("Admin_Data")
-          .select(`"Full Name", "Business Address", "Price Per Lead"`)
+          .select(`"Full Name", "Business Address", "Price Per Lead", "Email Address"`)
           .maybeSingle();
 
         if (error) throw error;
@@ -36,6 +36,7 @@ export const Setting = () => {
         if (data) {
           setFormData({
             fullName: data["Full Name"] || "",
+            email: data["Email Address"] || "",
             businessAddress: data["Business Address"] || "",
             leads: data["Price Per Lead"]?.toString() || "",
           });

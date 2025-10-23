@@ -45,7 +45,7 @@ export const Setting = () => {
         const { data, error } = await supabase
           .from("Roofing_Auth")
           .select(
-            `"Full Name", "Service Radius", "Business Address"`
+            `"Full Name", "Service Radius", "Business Address", "Email Address"`
           )
           .eq("user_id", userId)
           .maybeSingle();
@@ -57,6 +57,7 @@ export const Setting = () => {
 
         setFormData({
           fullName: data["Full Name"] || "",
+          email: data["Email Address"] || "",
           serviceRadius: data["Service Radius"] || "",
           businessAddress: data["Business Address"] || "",
         });

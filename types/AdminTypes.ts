@@ -29,6 +29,8 @@ export interface LeadType {
   "Policy Number": string;
   "Assigned To": string | null;
   "Purchase Date": string;
+  "Latitude"?: number;
+  "Longitude"?: number;
 }
 
 export interface ContractorType {
@@ -57,15 +59,16 @@ export interface settingType {
 
 export interface requestLeadType {
   id: string;
-  firstName: string;
-  lastName: string;
-  phoneno: string;
-  noOfLeads: number;
-  price: number;
-  date: string;
-  assignedDate: string;
-  receivedLeads: number | string;
-  pendingLeads: number | string;
-  zipCode: string;
-  status: string;
+  contractor_id: string;
+  "First Name": string;
+  "Last Name": string;
+  "Phone Number": string;
+  "No. of Leads": number;
+  "Price": number;
+  "Purchase Date": string;
+  "Assigned Date": string;
+  "Send Leads": number | string;
+  "Pending Leads": number | string;
+  "Property Address": string;
+  "Status": string;
 }

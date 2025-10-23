@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Search,
   Users,
@@ -19,10 +19,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-import { requestLeads, allLeads } from "./Data";
+import { allLeads } from "./Data";
 import { requestLeadType, LeadType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
 import { TablePopup } from "@/components/ui/TablePopup";
+import { supabase } from "@/lib/supabase";
 
 export const LeadRequest = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -33,36 +34,69 @@ export const LeadRequest = () => {
   const [assignedModalSearchTerm, setAssignedModalSearchTerm] = useState("");
   const [pendingModalSearchTerm, setPendingModalSearchTerm] = useState("");
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [selectedAssignLeads, setSelectedAssignLeads] = useState<Set<number>>(new Set());
+  const [selectedAssignLeads, setSelectedAssignLeads] = useState<Set<number>>(
+    new Set()
+  );
   const [assignModalSearchTerm, setAssignModalSearchTerm] = useState("");
-  const [selectedContractorRequest, setSelectedContractorRequest] = useState<any>(null);
-  
+  const [selectedContractorRequest, setSelectedContractorRequest] =
+    useState<any>(null);
+  const [requestLeads, setRequestLeads] = useState<any[]>([]);
   // Pagination state
   const [assignCurrentPage, setAssignCurrentPage] = useState(1);
   const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  useEffect(() => {
+    fetchRequestLeads();
+  }, []);
+
+  const fetchRequestLeads = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("Leads_Request")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        throw error;
+      } else {
+        setRequestLeads(data || []);
+      }
+    } catch (error) {
+      toast.error("Failed to fetch request leads");
+    }
+  };
+
   const filteredLeads = requestLeads.filter(
     (lead) =>
-      lead.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.zipCode.includes(searchTerm) ||
-      lead.phoneno.includes(searchTerm)
+      lead["Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead["Business Address"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lead["Price"].includes(searchTerm) ||
+      lead["Purchase Date"].includes(searchTerm) ||
+      lead["No. of Leads"].includes(searchTerm) ||
+      lead["Send Leads"].includes(searchTerm) ||
+      lead["Status"].includes(searchTerm)
   );
 
   // Pagination logic for Assign tab
-  const assignLeads = filteredLeads.filter((lead) => lead.status === "Assign");
+  const assignLeads = filteredLeads.filter((lead) => lead["Status"] === "assigned");
   const assignTotalPages = Math.ceil(assignLeads.length / itemsPerPage);
   const assignStartIndex = (assignCurrentPage - 1) * itemsPerPage;
   const assignEndIndex = assignStartIndex + itemsPerPage;
   const assignCurrentData = assignLeads.slice(assignStartIndex, assignEndIndex);
 
   // Pagination logic for Pending tab
-  const pendingLeads = filteredLeads.filter((lead) => lead.status === "Pending");
+  const pendingLeads = filteredLeads.filter(
+    (lead) => lead["Status"] === "pending"
+  );
   const pendingTotalPages = Math.ceil(pendingLeads.length / itemsPerPage);
   const pendingStartIndex = (pendingCurrentPage - 1) * itemsPerPage;
   const pendingEndIndex = pendingStartIndex + itemsPerPage;
-  const pendingCurrentData = pendingLeads.slice(pendingStartIndex, pendingEndIndex);
+  const pendingCurrentData = pendingLeads.slice(
+    pendingStartIndex,
+    pendingEndIndex
+  );
+
 
   // Pagination handlers
   const handleAssignPageChange = (page: number) => {
@@ -95,33 +129,49 @@ export const LeadRequest = () => {
     setPendingCurrentPage(1);
   }, [searchTerm]);
 
-  // Filter leads for assigned modal
-  const filteredAssignedLeads = allLeads
-    .slice(0, 3)
-    .filter(
-      (lead) =>
-        lead.firstName.toLowerCase().includes(assignedModalSearchTerm.toLowerCase()) ||
-        lead.lastName.toLowerCase().includes(assignedModalSearchTerm.toLowerCase()) ||
-        lead.zipCode.includes(assignedModalSearchTerm) ||
-        lead.phoneno.includes(assignedModalSearchTerm) ||
-        lead.email.toLowerCase().includes(assignedModalSearchTerm.toLowerCase()) ||
-        lead.company.toLowerCase().includes(assignedModalSearchTerm.toLowerCase()) ||
-        lead.policy.includes(assignedModalSearchTerm)
-    );
+  // Filter leads for assigned modal - use selectedAssignedLead if it's an array, otherwise use allLeads
+  const assignedLeadsData = Array.isArray(selectedAssignedLead) ? selectedAssignedLead : allLeads;
+  
+  const filteredAssignedLeads = assignedLeadsData.filter(
+    (lead) =>
+      lead.firstName
+        ?.toLowerCase()
+        .includes(assignedModalSearchTerm.toLowerCase()) ||
+      lead.lastName
+        ?.toLowerCase()
+        .includes(assignedModalSearchTerm.toLowerCase()) ||
+      lead.zipCode?.includes(assignedModalSearchTerm) ||
+      lead.phoneno?.includes(assignedModalSearchTerm) ||
+      lead.email
+        ?.toLowerCase()
+        .includes(assignedModalSearchTerm.toLowerCase()) ||
+      lead.company
+        ?.toLowerCase()
+        .includes(assignedModalSearchTerm.toLowerCase()) ||
+      lead.policy?.includes(assignedModalSearchTerm)
+  );
 
-  // Filter leads for pending modal
-  const filteredPendingLeads = allLeads
-    .slice(3, 5)
-    .filter(
-      (lead) =>
-        lead.firstName.toLowerCase().includes(pendingModalSearchTerm.toLowerCase()) ||
-        lead.lastName.toLowerCase().includes(pendingModalSearchTerm.toLowerCase()) ||
-        lead.zipCode.includes(pendingModalSearchTerm) ||
-        lead.phoneno.includes(pendingModalSearchTerm) ||
-        lead.email.toLowerCase().includes(pendingModalSearchTerm.toLowerCase()) ||
-        lead.company.toLowerCase().includes(pendingModalSearchTerm.toLowerCase()) ||
-        lead.policy.includes(pendingModalSearchTerm)
-    );
+  // Filter leads for pending modal - use selectedPendingLead if it's an array, otherwise use allLeads
+  const pendingLeadsData = Array.isArray(selectedPendingLead) ? selectedPendingLead : allLeads.slice(3, 5);
+  
+  const filteredPendingLeads = pendingLeadsData.filter(
+    (lead) =>
+      lead.firstName
+        ?.toLowerCase()
+        .includes(pendingModalSearchTerm.toLowerCase()) ||
+      lead.lastName
+        ?.toLowerCase()
+        .includes(pendingModalSearchTerm.toLowerCase()) ||
+      lead.zipCode?.includes(pendingModalSearchTerm) ||
+      lead.phoneno?.includes(pendingModalSearchTerm) ||
+      lead.email
+        ?.toLowerCase()
+        .includes(pendingModalSearchTerm.toLowerCase()) ||
+      lead.company
+        ?.toLowerCase()
+        .includes(pendingModalSearchTerm.toLowerCase()) ||
+      lead.policy?.includes(pendingModalSearchTerm)
+  );
 
   const pendingLeadsColumns = [
     { key: "name", label: "Name" },
@@ -130,12 +180,13 @@ export const LeadRequest = () => {
     { key: "email", label: "Email" },
     { key: "assignedDate", label: "Assigned Date" },
     { key: "company", label: "Company" },
-    { key: "policy", label: "Policy" }
+    { key: "policy", label: "Policy" },
   ];
 
-  const pendingLeadsTableData = filteredPendingLeads.map(lead => ({
+  const pendingLeadsTableData = filteredPendingLeads.map((lead) => ({
     ...lead,
-    name: `${lead.firstName} ${lead.lastName}`
+    name: `${lead.firstName} ${lead.lastName}`,
+    assignedDate: lead.assignedDate || new Date().toISOString().split('T')[0]
   }));
 
   const assignedLeadsColumns = [
@@ -145,43 +196,124 @@ export const LeadRequest = () => {
     { key: "email", label: "Email" },
     { key: "assignedDate", label: "Assigned Date" },
     { key: "company", label: "Company" },
-    { key: "policy", label: "Policy" }
+    { key: "policy", label: "Policy" },
   ];
 
   // Transform assigned leads data for table
-  const assignedLeadsTableData = filteredAssignedLeads.map(lead => ({
+  const assignedLeadsTableData = filteredAssignedLeads.map((lead) => ({
     ...lead,
-    name: `${lead.firstName} ${lead.lastName}`
+    name: `${lead.firstName} ${lead.lastName}`,
+    assignedDate: lead.assignedDate || new Date().toISOString().split('T')[0]
   }));
 
   // Filter leads for assign modal
   const filteredAssignLeads = allLeads.filter(
     (lead) =>
-      lead.firstName.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
-      lead.lastName.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
+      lead.firstName
+        .toLowerCase()
+        .includes(assignModalSearchTerm.toLowerCase()) ||
+      lead.lastName
+        .toLowerCase()
+        .includes(assignModalSearchTerm.toLowerCase()) ||
       lead.zipCode.includes(assignModalSearchTerm) ||
       lead.phoneno.includes(assignModalSearchTerm) ||
       lead.email.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
-      lead.company.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
+      lead.company
+        .toLowerCase()
+        .includes(assignModalSearchTerm.toLowerCase()) ||
       lead.policy.includes(assignModalSearchTerm)
   );
 
-  const handleViewAssignedLead = (lead: requestLeadType) => {
-    const matchingLead = allLeads.find(
-      (allLead) =>
-        allLead.firstName === lead.firstName && allLead.lastName === lead.lastName && allLead.zipCode === lead.zipCode
-    );
-    setSelectedAssignedLead(matchingLead || lead);
-    setShowAssignedModal(true);
+  const handleViewAssignedLead = async (lead: requestLeadType) => {
+    try {
+      // Get the contractor's user ID from the lead
+      const contractorId = lead.contractor_id;
+      
+      if (!contractorId) {
+        toast.error("Contractor ID not found");
+        return;
+      }
+
+      // Fetch assigned leads from Assigned_Leads table for this contractor
+      const { data: assignedLeads, error } = await supabase
+        .from("Assigned_Leads")
+        .select("*")
+        .eq("contractor_id", contractorId)
+        .order("Assigned Date", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching assigned leads:", error);
+        toast.error("Failed to fetch assigned leads");
+        return;
+      }
+
+      console.log("Fetched assigned leads:", assignedLeads);
+      
+      // Transform the data to match the expected format
+      const transformedLeads = assignedLeads.map(lead => ({
+        id: lead.id,
+        firstName: lead["First Name"],
+        lastName: lead["Last Name"],
+        zipCode: lead["Property Address"]?.split(',').pop()?.trim() || "",
+        phoneno: lead["Phone Number"],
+        email: lead["Email Address"],
+        company: lead["Insurance Company"],
+        policy: lead["Policy Number"],
+        assignedDate: lead["Assigned Date"]
+      }));
+
+      setSelectedAssignedLead(transformedLeads);
+      setShowAssignedModal(true);
+    } catch (error) {
+      console.error("Error in handleViewAssignedLead:", error);
+      toast.error("Failed to load assigned leads");
+    }
   };
 
-  const handleViewPendingLead = (lead: requestLeadType) => {
-    const matchingLead = allLeads.find(
-      (allLead) =>
-        allLead.firstName === lead.firstName && allLead.lastName === lead.lastName && allLead.zipCode === lead.zipCode
-    );
-    setSelectedPendingLead(matchingLead || lead);
-    setShowPendingModal(true);
+  const handleViewPendingLead = async (lead: requestLeadType) => {
+    try {
+      // Get the contractor's user ID from the lead
+      const contractorId = lead.contractor_id;
+      
+      if (!contractorId) {
+        toast.error("Contractor ID not found");
+        return;
+      }
+
+      // Fetch assigned leads from Assigned_Leads table for this contractor
+      const { data: assignedLeads, error } = await supabase
+        .from("Assigned_Leads")
+        .select("*")
+        .eq("contractor_id", contractorId)
+        .order("Assigned Date", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching assigned leads:", error);
+        toast.error("Failed to fetch assigned leads");
+        return;
+      }
+
+      console.log("Fetched assigned leads for pending view:", assignedLeads);
+      
+      // Transform the data to match the expected format
+      const transformedLeads = assignedLeads.map(lead => ({
+        id: lead.id,
+        firstName: lead["First Name"],
+        lastName: lead["Last Name"],
+        zipCode: lead["Property Address"]?.split(',').pop()?.trim() || "",
+        phoneno: lead["Phone Number"],
+        email: lead["Email Address"],
+        company: lead["Insurance Company"],
+        policy: lead["Policy Number"],
+        assignedDate: lead["Assigned Date"]
+      }));
+
+      setSelectedPendingLead(transformedLeads);
+      setShowPendingModal(true);
+    } catch (error) {
+      console.error("Error in handleViewPendingLead:", error);
+      toast.error("Failed to load assigned leads");
+    }
   };
 
   const handleCloseAssignedModal = () => {
@@ -238,7 +370,9 @@ export const LeadRequest = () => {
         <div className="w-12 h-12 bg-[#122E5F]/10 rounded-full flex items-center justify-center mx-auto mb-3">
           <FileText className="h-6 w-6 text-[#122E5F]" />
         </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-1">Requested Leads</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-1">
+          Requested Leads
+        </h2>
         <p className="text-sm text-gray-600">Browse and manage lead requests</p>
       </div>
 
@@ -259,16 +393,17 @@ export const LeadRequest = () => {
       {/* Tabs */}
       <Tabs defaultValue="pending" className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
-          <TabsTrigger value="assign" className="text-sm font-medium">
+          <TabsTrigger value="assigned" className="text-sm font-medium">
             Completed
           </TabsTrigger>
           <TabsTrigger value="pending" className="text-sm font-medium">
-            Pending ({filteredLeads.filter((lead) => lead.status === "Pending").length})
+            Pending (
+            {filteredLeads.filter((lead) => lead["Status"] === "pending").length})
           </TabsTrigger>
         </TabsList>
 
         {/* Completed Tab */}
-        <TabsContent value="assign">
+        <TabsContent value="assigned">
           <Card className="border-0 shadow-lg">
             <CardContent className="p-0">
               <div className="overflow-auto max-h-64">
@@ -279,7 +414,7 @@ export const LeadRequest = () => {
                         Name
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zip Code
+                        Business Address
                       </th>
                       {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Phone
@@ -306,23 +441,25 @@ export const LeadRequest = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {assignCurrentData.length > 0 ? (
-                      assignCurrentData.map((lead: requestLeadType) => (
+                      assignCurrentData.map((lead: any) => (
                         <tr key={lead.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex flex-col items-center">
                               <div className="text-sm font-bold text-[#122E5F]">
-                                {lead.firstName} {lead.lastName}
+                                {lead["Name"]}
                               </div>
                               <div className="flex items-center text-sm text-gray-400">
-                              <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                              {lead.phoneno}
-                            </div>
+                                <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                {lead["Phone Number"]}
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead["Business Address"]}
+                              </span>
                             </div>
                           </td>
                           {/* <td className="px-6 py-4 whitespace-nowrap text-black">
@@ -331,23 +468,33 @@ export const LeadRequest = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <div className="flex items-center">
                               <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
-                              <span className="text-sm font-medium text-gray-900">{lead.price}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead["Price"]}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
                             <div className="flex items-center">
                               <Calendar className="h-3 w-3 text-gray-400 mr-1" />
-                              <span className="text-sm font-medium text-gray-900">{lead.date}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead["Purchase Date"]}
+                              </span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
-                            <span className="text-sm font-medium text-gray-900">{lead.noOfLeads}</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {lead["No. of Leads"]}
+                            </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-center">
-                            <span className="text-sm font-medium text-gray-900">{lead.receivedLeads}</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {lead["Send Leads"]}
+                            </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-bold text-green-500">{lead.status}</span>
+                            <span className="text-sm font-bold text-green-500">
+                              {lead["Status"]}
+                            </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <Button
@@ -413,7 +560,7 @@ export const LeadRequest = () => {
                         Name
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Zip Code
+                        Business Address
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Price
@@ -437,46 +584,58 @@ export const LeadRequest = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {pendingCurrentData.length > 0 ? (
-                      pendingCurrentData.map((lead: requestLeadType) => (
+                      pendingCurrentData.map((lead: any) => (
                         <tr key={lead.id} className="hover:bg-gray-50">
                           <td className="px-4 py-2 whitespace-nowrap">
                             <div className="flex flex-col items-start">
                               <div className="flex items-center text-sm text-start font-bold text-[#122E5F]">
                                 <User className="h-3 w-3 text-gray-400 mr-1" />
-                                {lead.firstName} {lead.lastName}
+                                {lead["Name"]}
                               </div>
                               <div className="flex items-center text-sm text-gray-400">
-                              <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                              {lead.phoneno}
-                            </div>
+                                <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                  {lead["Phone Number"]}
+                              </div>
                             </div>
                           </td>
                           <td className="px-2 py-2 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">{lead.zipCode}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead["Business Address"]}
+                              </span>
                             </div>
                           </td>
                           <td className="px-2 py-2 whitespace-nowrap text-center">
                             <div className="flex items-center">
                               <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
-                              <span className="text-sm font-medium text-gray-900">{lead.price}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead["Price"]}
+                              </span>
                             </div>
                           </td>
                           <td className="px-2 py-2 whitespace-nowrap text-center">
                             <div className="flex items-center">
                               <Calendar className="h-3 w-3 text-gray-400 mr-1" />
-                              <span className="text-sm font-medium text-gray-900">{lead.date}</span>
+                              <span className="text-sm font-medium text-gray-900">
+                                {lead["Purchase Date"]}
+                              </span>
                             </div>
                           </td>
                           <td className="py-2 whitespace-nowrap text-center">
-                            <span className="text-sm font-medium text-gray-900">{lead.noOfLeads}</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {lead["No. of Leads"]}
+                            </span>
                           </td>
                           <td className="py-2 whitespace-nowrap text-center">
-                            <span className="text-sm font-medium text-gray-900">{lead.pendingLeads}</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {lead["Pending Leads"]}
+                            </span>
                           </td>
                           <td className="py-2 whitespace-nowrap">
-                            <span className="text-sm font-bold text-yellow-500">{lead.status}</span>
+                            <span className="text-sm font-bold text-yellow-500">
+                              {lead["Status"]}
+                            </span>
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap">
                             <div className="flex flex-row items-center gap-2">
@@ -578,12 +737,15 @@ export const LeadRequest = () => {
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <FileText className="h-6 w-6 text-[#122E5F]" />
                 </div>
-                <h2 className="text-xl font-bold text-gray-900 mb-1">Assign Leads</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-1">
+                  Assign Leads
+                </h2>
                 <p className="text-sm text-gray-600">
                   Select leads to assign to contractors
                   {selectedContractorRequest && (
                     <span className="block mt-1 text-xs text-blue-600 font-medium">
-                      Pending leads limit: {selectedContractorRequest.pendingLeads}
+                      Pending leads limit:{" "}
+                      {selectedContractorRequest.pendingLeads}
                     </span>
                   )}
                 </p>
@@ -649,19 +811,29 @@ export const LeadRequest = () => {
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="text-sm font-bold text-[#122E5F]">{lead.zipCode}</span>
+                          <span className="text-sm font-bold text-[#122E5F]">
+                            {lead.zipCode}
+                          </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className="text-sm text-gray-900">{lead.phoneno}</span>
+                          <span className="text-sm text-gray-900">
+                            {lead.phoneno}
+                          </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.email}</span>
+                          <span className="text-sm text-gray-900">
+                            {lead.email}
+                          </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.company}</span>
+                          <span className="text-sm text-gray-900">
+                            {lead.company}
+                          </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <span className="text-sm text-gray-900">{lead.policy}</span>
+                          <span className="text-sm text-gray-900">
+                            {lead.policy}
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -674,32 +846,37 @@ export const LeadRequest = () => {
                 <div className="text-sm text-gray-600">
                   {selectedAssignLeads.size > 0 && (
                     <span className="font-medium text-blue-600">
-                      {selectedAssignLeads.size} lead{selectedAssignLeads.size !== 1 ? "s" : ""} selected
+                      {selectedAssignLeads.size} lead
+                      {selectedAssignLeads.size !== 1 ? "s" : ""} selected
                     </span>
                   )}
                   {/* Exceeds pending limit */}
-                  {selectedContractorRequest && selectedAssignLeads.size > selectedContractorRequest.pendingLeads && (
-                    <span className="font-medium text-red-600 ml-2">
-                      (Exceeds pending limit: {selectedContractorRequest.pendingLeads})
-                    </span>
-                  )}
+                  {selectedContractorRequest &&
+                    selectedAssignLeads.size >
+                      selectedContractorRequest.pendingLeads && (
+                      <span className="font-medium text-red-600 ml-2">
+                        (Exceeds pending limit:{" "}
+                        {selectedContractorRequest.pendingLeads})
+                      </span>
+                    )}
                 </div>
                 <div className="flex gap-3">
-                  <Button
-                    onClick={handleCloseAssignModal}
-                    variant="outline"
-                  >
+                  <Button onClick={handleCloseAssignModal} variant="outline">
                     Close
                   </Button>
                   <Button
                     onClick={handleAssignSelectedLeads}
                     disabled={
                       selectedAssignLeads.size === 0 ||
-                      (selectedContractorRequest && selectedAssignLeads.size > selectedContractorRequest.pendingLeads)
+                      (selectedContractorRequest &&
+                        selectedAssignLeads.size >
+                          selectedContractorRequest.pendingLeads)
                     }
                     className={`px-6 py-2 text-white ${
                       selectedAssignLeads.size === 0 ||
-                      (selectedContractorRequest && selectedAssignLeads.size > selectedContractorRequest.pendingLeads)
+                      (selectedContractorRequest &&
+                        selectedAssignLeads.size >
+                          selectedContractorRequest.pendingLeads)
                         ? "bg-gray-300 cursor-not-allowed"
                         : "bg-[#122E5F] hover:bg-[#122E5F]/80"
                     }`}
