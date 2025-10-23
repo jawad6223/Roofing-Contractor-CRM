@@ -38,7 +38,7 @@ export const adminLoginValidationSchema = yup.object().shape({
       .required("Email address is required")
       .email("Please enter a valid email address")
       .matches(/\.(?:com|edu|org|net|gov)$/, "Please enter a valid email address"),
-    businessAddress: yup.string().required("Business address is required").min(5, "Please enter a complete address"),
+    businessAddress: yup.string().required("Business address is required"),
     serviceRadius: yup.string().required("Service radius is required").matches(/^\d+$/, "Please enter a valid number").test("min-value", "Service radius must be at least 1 mile", (value) => Number(value) >= 1).test("max-value", "Service radius cannot exceed 500 miles", (value) => Number(value) <= 500)
   });
   

@@ -27,6 +27,7 @@ export function ContractorForm() {
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [isAddressSelected, setIsAddressSelected] = useState(false);
 
   // React Hook Form setup
   const form = useForm<ContractorType>({
@@ -69,8 +70,13 @@ export function ContractorForm() {
     try {
       // Set the address text in the form
       setValue("businessAddress", prediction.description);
+      setIsAddressSelected(true);
+      
+      // Clear any existing error for businessAddress
+      form.clearErrors("businessAddress");
+      
+      trigger("businessAddress");
   
-      // Fetch latitude and longitude using the Place Details API
       const response = await fetch(`/api/place-details?place_id=${prediction.place_id}`);
       const data = await response.json();
       if (data.lat && data.lng) {
@@ -90,13 +96,18 @@ export function ContractorForm() {
     setIsMounted(true);
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleInputChange = (field: keyof ContractorType, value: string) => {
+    setValue(field, value);
+    trigger(field);
+
+    if (field === "businessAddress") {
+      setIsAddressSelected(false);
+    }
 
     let processedValue = value;
 
     // Format phone number as user types
-    if (name === "phoneNumber") {
+    if (field === "phoneNumber") {
       // Remove all non-digits
       const digits = value.replace(/\D/g, "");
 
@@ -113,7 +124,7 @@ export function ContractorForm() {
       }
     }
 
-    setValue(name as keyof ContractorType, processedValue);
+    setValue(field, processedValue);
   };
 
   const handleContinue = async () => {
@@ -126,6 +137,15 @@ export function ContractorForm() {
       businessAddress: formData.businessAddress,
       serviceRadius: formData.serviceRadius
     };
+    
+    // Check if address was selected from suggestions
+    if (formData.businessAddress && !isAddressSelected) {
+      form.setError("businessAddress", {
+        type: "validation",
+        message: "Please select an address from the suggestions"
+      });
+      return;
+    }
     
     try {
       await step1Schema.validate(step1Data, { abortEarly: false });
@@ -330,7 +350,7 @@ export function ContractorForm() {
                       type="tel"
                       placeholder="(555) 123-4567"
                       {...register("phoneNumber")}
-                      onChange={handleInputChange}
+                      onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
                       className={`h-10 text-sm text-black ${
                         errors.phoneNumber ? "border-red-500 focus:border-red-500 focus:ring-red-500" : ""
                       }`}
@@ -356,7 +376,8 @@ export function ContractorForm() {
 
                 <AddressSuggestion
                   value={watch("businessAddress")}
-                  onChange={(value) => setValue("businessAddress", value)}
+                  // onChange={(value) => {setValue("businessAddress", value);}}
+                  onChange={(value) => handleInputChange("businessAddress", value)}
                   onSelect={handleAddressSelect}
                   placeholder="Start typing your business address..."
                   label="Business Address (US Only)"
