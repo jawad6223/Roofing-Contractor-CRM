@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { DetailPopup } from "@/components/ui/DetailPopup";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
-import { sampleLeads } from "./Data";
-import { purchasedLeadType, sampleLeadType } from "@/types/DashboardTypes";
+import { purchasedLeadType, premiumLeadType } from "@/types/DashboardTypes";
 import Link from "next/link";
-import { fetchContractorLeads } from "./Data";
+import { supabase } from "@/lib/supabase";
+import { toast } from "react-toastify";
+import { fetchContractorLeads, fetchMatchLeads } from "./Data";
+import { fetchLeadPrice } from "@/lib/leadPrice";
 export const DashBoard = () => {
   const { getCurrentUserFullName } = useAuth();
   const currentUserFullName = getCurrentUserFullName();
@@ -18,10 +20,22 @@ export const DashBoard = () => {
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [contractorLeads, setContractorLeads] = useState<any[]>([]);
+  const [premiumLeads, setPremiumLeads] = useState<any[]>([]);
+  const [pricePerLead, setPricePerLead] = useState<number>(0);
   const handleCloseModal = () => {
     setIsLeadModalOpen(false);
     setSelectedLead(null);
   };
+
+  useEffect(() => {
+    const fetchLeadPriceData = async () => {
+      const leadPriceData = await fetchLeadPrice();
+      if (leadPriceData) {
+        setPricePerLead((leadPriceData)['Price Per Lead']);
+      }
+    };
+    fetchLeadPriceData();
+  }, []);
 
   const leadFields = selectedLead
     ? [
@@ -79,18 +93,41 @@ export const DashBoard = () => {
     fetchContractorLeadsData();
   }, []);
 
-  async function handleBuyNow(lead: sampleLeadType) {
+  useEffect(() => {
+    const fetchMatchLeadsData = async () => {
+      setIsLoading(true);
+      const matchingLeads = await fetchMatchLeads();
+      if (matchingLeads) {
+        setPremiumLeads(matchingLeads);
+      }
+    };
+    fetchMatchLeadsData();
+  }, []);
+
+  async function handleBuyNow(lead: premiumLeadType) {
     setLoadingLeads((prev) => new Set(prev).add(lead.id));
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+      const email = authData?.user?.email;
+  
+      if (!userId || !email) {
+        toast.error("User not logged in");
+        return;
+      }
+  
       const response = await fetch("/api/create-single-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          leadAmount: 50,
-          leadName: "Test Lead",
-          email: localStorage.getItem("loggedInUser"),
+          leadAmount: pricePerLead,
+          leadName: `${lead["First Name"].slice(0, 2)}${"***"} ${lead["Last Name"].slice(0, 2)}${"***"}`,
+          email,
+          user_id: userId,
+          lead_id: lead.id,
         }),
       });
+  
       const { url } = await response.json();
       window.location.href = url;
     } catch (error) {
@@ -239,7 +276,7 @@ export const DashBoard = () => {
                             </h4>
                           </div>
                           <div className="flex items-center space-x-4 text-sm text-gray-600">
-                            <div className="flex items-center space-x-1">
+                            <div className="flex items-center space-x-1 w-72">
                               <MapPin className="h-3 w-3" />
                               <span>{lead["Property Address"]}</span>
                             </div>
@@ -294,7 +331,29 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {sampleLeads.map((lead: sampleLeadType) => (
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center">
+                <div className="flex flex-col items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Loading leads...
+                  </p>
+                </div>
+              </div>
+              ) : premiumLeads.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Search className="h-8 w-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No premium leads available
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    There are currently no leads within your service radius
+                  </p>
+                </div>
+              ) : (
+                premiumLeads.map((lead: premiumLeadType) => (
                 <div
                   key={lead.id}
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
@@ -303,48 +362,25 @@ export const DashBoard = () => {
                     <div className="flex-1">
                       <div className="flex items-center space-x-3 mb-2">
                         <div className="text-sm font-bold text-gray-400 select-none">
-                          {`${lead.firstName.slice(0, 2)}${"*".repeat(
-                            Math.max(lead.firstName.length - 2, 0)
-                          )} ${lead.lastName.slice(0, 2)}${"*".repeat(
-                            Math.max(lead.lastName.length - 2, 0)
-                          )}`}
+                          {`${lead["First Name"].slice(0, 2)}${"***"} ${lead["Last Name"].slice(0, 2)}${"***"}`}
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 text-xs text-gray-500">
                         <div className="flex items-center">
                           <MapPin className="h-3 w-3 mr-1" />
-                          <span className="select-none">{`${lead.propertyAddress.slice(
-                            0,
-                            2
-                          )}${"*".repeat(
-                            Math.max(lead.propertyAddress.length - 2, 0)
-                          )}`}</span>
+                          <span className="select-none">{`${lead["Property Address"].slice(0,2)}${"***"}`}</span>
                         </div>
                         <div className="flex items-center">
                           <Phone className="h-3 w-3 mr-1" />
-                          <span className="select-none">{`${lead.phone.slice(
-                            0,
-                            2
-                          )}${"*".repeat(
-                            Math.max(lead.phone.length - 2, 0)
-                          )}`}</span>
+                          <span className="select-none">{`${lead["Phone Number"].slice(0,2)}${"***"}`}</span>
                         </div>
                         <div className="flex items-center">
                           <Mail className="h-3 w-3 mr-1" />
-                          <span className="select-none">{`${lead.email.slice(
-                            0,
-                            2
-                          )}${"*".repeat(
-                            Math.max(lead.email.length - 2, 0)
-                          )}`}</span>
+                          <span className="select-none">{`${lead["Email Address"].slice(0,2)}${"***"}`}</span>
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between md:justify-end space-x-3 md:ml-4">
-                      <div className="text-left md:text-right">
-                        {/* <div className="text-lg font-bold text-[#286BBD]">${lead.price}</div>
-                        <div className="text-xs text-gray-500">per lead</div> */}
-                      </div>
                       <Button
                         size="sm"
                         onClick={() => handleBuyNow(lead)}
@@ -358,7 +394,8 @@ export const DashBoard = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+                ))
+              )}
               <div className="text-center pt-2">
                 <Link href="/contractor/leads">
                   <Button

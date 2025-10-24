@@ -16,7 +16,7 @@ export interface sidebarItemsType {
 }
 
 export interface LeadType {
-  id: string;
+  id: number;
   "First Name": string;
   "Last Name": string;
   "Phone Number": string;
@@ -55,13 +55,14 @@ export interface settingType {
   email?: string;
   businessAddress: string;
   leads: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface requestLeadType {
   id: string;
   contractor_id: string;
-  "First Name": string;
-  "Last Name": string;
+  "Name": string;
   "Phone Number": string;
   "No. of Leads": number;
   "Price": number;
@@ -69,6 +70,6 @@ export interface requestLeadType {
   "Assigned Date": string;
   "Send Leads": number | string;
   "Pending Leads": number | string;
-  "Property Address": string;
+  "Business Address": string;
   "Status": string;
 }

@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShoppingCart, CheckCircle, Calendar, DollarSign, X, Eye, FileText, MapPin, Phone, Mail, Hash, Search, Building, } from "lucide-react";
-import { LeadsInfo, purchasedLeads } from "./Data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { leadsInfoType, purchasedLeadType } from "@/types/DashboardTypes";
+import { leadsInfoType } from "@/types/DashboardTypes";
 import { Pagination } from "@/components/ui/pagination";
 import { TablePopup } from "@/components/ui/TablePopup";
+import { supabase } from "@/lib/supabase";
+import { toast } from "react-toastify";
 
 export const LeadPurchaseInfo = () => {
   const [showModal, setShowModal] = useState(false);
@@ -14,23 +15,49 @@ export const LeadPurchaseInfo = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [modalSearchTerm, setModalSearchTerm] = useState("");
+  const [leadsInfo, setLeadsInfo] = useState<any[]>([]);
+  const [assignedLeads, setAssignedLeads] = useState<any[]>([]);
   const itemsPerPage = 10;
 
-  const totalLeads = LeadsInfo.reduce((sum, lead) => sum + lead.noOfLeads, 0);
-  const totalPrice = LeadsInfo.reduce(
-    (sum, lead) => sum + lead.price * lead.noOfLeads,
-    0
-  );
+  useEffect(()=>{
+    const fetchRequestLeads= async() => {
+      try {
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError || !authData?.user) {
+          toast.error("User not logged in");
+          return;
+        }
+        const userId = authData.user.id;
+  
+        const { data, error } = await supabase
+          .from("Leads_Request")
+          .select("*")
+          .eq("contractor_id", userId)
+          .order("created_at", { ascending: false });
+  
+        if (error) throw error;
+  
+        setLeadsInfo(data || []);
+      } catch (error) {
+        console.error("Error fetching contractor leads:", error);
+        toast.error("Failed to fetch leads");
+      }
+    };
+    fetchRequestLeads();
+  }, []);
 
-  const filteredLeads = LeadsInfo.filter((lead) => {
+  const totalLeads = leadsInfo.reduce((sum, lead) => sum + (lead["No. of Leads"] || 0), 0);
+  const totalPrice = leadsInfo.reduce((sum, lead) => sum + (lead["Price"] || 0) * (lead["No. of Leads"] || 0), 0);
+
+  const filteredLeads = leadsInfo.filter((lead) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      lead.zipCode.toLowerCase().includes(searchLower) ||
-      lead.date.toLowerCase().includes(searchLower) ||
-      lead.price.toString().includes(searchTerm) ||
-      lead.noOfLeads.toString().includes(searchTerm) ||
-      lead.receivedLeads.toString().includes(searchTerm) ||
-      lead.pendingLeads.toString().includes(searchTerm)
+      lead["Business Address"].toLowerCase().includes(searchLower) ||
+      lead["Purchase Date"].toLowerCase().includes(searchLower) ||
+      lead["Price"].toString().includes(searchTerm) ||
+      lead["No. of Leads"].toString().includes(searchTerm) ||
+      lead["Send Leads"].toString().includes(searchTerm) ||
+      lead["Pending Leads"].toString().includes(searchTerm)
     );
   });
 
@@ -39,18 +66,50 @@ export const LeadPurchaseInfo = () => {
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredLeads.slice(startIndex, endIndex);
 
-  const handleViewLeads = (lead: leadsInfoType) => {
+  const handleViewLeads = async (lead: leadsInfoType) => {
+    console.log('lead id', lead.id);
     setSelectedLeadData(lead);
-    setShowModal(true);
+    
+    try {
+      const { data: assignedLeadsData, error } = await supabase
+        .from("Assigned_Leads")
+        .select("*")
+        .eq("request_id", lead.id)
+        .order("Assigned Date", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching assigned leads:", error);
+        toast.error("Failed to fetch assigned leads");
+        return;
+      }
+
+      console.log("Fetched assigned leads for request:", lead.id, assignedLeadsData);
+      
+      // Transform the data to match the expected format
+      const transformedLeads = assignedLeadsData.map(lead => ({
+        id: lead.id,
+        firstName: lead["First Name"],
+        lastName: lead["Last Name"],
+        phoneno: lead["Phone Number"],
+        email: lead["Email Address"],
+        location: lead["Property Address"],
+        company: lead["Insurance Company"],
+        policy: lead["Policy Number"]
+      }));
+
+      setAssignedLeads(transformedLeads);
+      setShowModal(true);
+    } catch (error) {
+      console.error("Error in handleViewLeads:", error);
+      toast.error("Failed to load assigned leads");
+    }
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
     setSelectedLeadData(null);
-  };
-
-  const getLeadsForZipCode = (zipCode: string) => {
-    return purchasedLeads.filter((lead) => lead.zipCode === zipCode);
+    setAssignedLeads([]);
+    setModalSearchTerm("");
   };
 
   // Define columns for lead details table
@@ -64,12 +123,11 @@ export const LeadPurchaseInfo = () => {
   ];
 
   // Get filtered leads for modal with search
-  const getFilteredLeadsForModal = (zipCode: string) => {
-    const leads = getLeadsForZipCode(zipCode);
-    if (!modalSearchTerm) return leads;
+  const getFilteredLeadsForModal = () => {
+    if (!modalSearchTerm) return assignedLeads;
     
     const searchLower = modalSearchTerm.toLowerCase();
-    return leads.filter((lead) =>
+    return assignedLeads.filter((lead: any) =>
       lead.firstName.toLowerCase().includes(searchLower) ||
       lead.lastName.toLowerCase().includes(searchLower) ||
       lead.phoneno.includes(modalSearchTerm) ||
@@ -81,8 +139,8 @@ export const LeadPurchaseInfo = () => {
   };
 
   // Transform leads data for table
-  const getLeadDetailsTableData = (zipCode: string) => {
-    return getFilteredLeadsForModal(zipCode).map(lead => ({
+  const getLeadDetailsTableData = () => {
+    return getFilteredLeadsForModal().map(lead => ({
       ...lead,
       name: `${lead.firstName} ${lead.lastName}`
     }));
@@ -214,18 +272,6 @@ export const LeadPurchaseInfo = () => {
                 />
               </div>
             </div>
-            {searchTerm && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchTerm("");
-                  setCurrentPage(1);
-                }}
-                className="border-gray-300 text-gray-700 hover:bg-gray-50"
-              >
-                Clear
-              </Button>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -238,7 +284,7 @@ export const LeadPurchaseInfo = () => {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Zip Code
+                      Business Address
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
@@ -262,41 +308,41 @@ export const LeadPurchaseInfo = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {currentData.length > 0 ? (
-                    currentData.map((lead: leadsInfoType, index: number) => (
+                    currentData.map((lead: leadsInfoType) => (
                       <tr key={lead.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <MapPin className="h-3 w-3 text-gray-400 mr-1" />
                             <span className="text-sm font-medium text-gray-900">
-                              {lead.zipCode}
+                              {lead["Business Address"]}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-black">
                           <div className="flex items-center">
                             <Calendar className="h-3 w-3 text-gray-400 mr-1" />
-                            {lead.date}
+                            {lead["Purchase Date"]}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-black">
                           <div className="flex items-center">
                             <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
-                            {lead.price}
+                            {lead["Price"] * (lead["No. of Leads"])}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                           <span className="text-sm font-medium text-gray-900">
-                            {lead.noOfLeads}
+                            {lead["No. of Leads"]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                           <span className="text-sm font-bold text-[#286BBD]">
-                            {lead.receivedLeads}
+                            {lead["Send Leads"]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                           <span className="text-sm text-red-500">
-                            {lead.pendingLeads}
+                            {lead["Pending Leads"]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -357,10 +403,10 @@ export const LeadPurchaseInfo = () => {
         isOpen={showModal}
         onClose={handleCloseModal}
         title="Lead Details"
-        subtitle={selectedLeadData ? `Zip Code: ${selectedLeadData.zipCode} | Date: ${selectedLeadData.date}` : "Lead information"}
+        subtitle={selectedLeadData ? `Request ID: ${selectedLeadData.id} | Date: ${selectedLeadData["Purchase Date"]}` : "Lead information"}
         titleIcon={FileText}
         columns={leadDetailsColumns}
-        data={selectedLeadData ? getLeadDetailsTableData(selectedLeadData.zipCode) : []}
+        data={getLeadDetailsTableData()}
         searchTerm={modalSearchTerm}
         onSearchChange={setModalSearchTerm}
         searchPlaceholder="Search leads..."

@@ -28,6 +28,8 @@ export const Setting = () => {
     email: "",
     serviceRadius: "",
     businessAddress: "",
+    latitude: 0,
+    longitude: 0,
   });
 
   useEffect(() => {
@@ -121,6 +123,8 @@ export const Setting = () => {
           "Full Name": formData.fullName,
           "Service Radius": formData.serviceRadius,
           "Business Address": formData.businessAddress,
+          "Latitude": formData.latitude,
+          "Longitude": formData.longitude,
         })
         .eq("user_id", userId);
 
@@ -139,6 +143,32 @@ export const Setting = () => {
       ...prev,
       [field]: value,
     }));
+  };
+
+  const handleAddressSelect = async (prediction: PlacePrediction) => {
+    try {
+      // Set the address text in the form
+      setFormData((prev) => ({
+        ...prev,
+        businessAddress: prediction.description,
+      }));
+      
+      const response = await fetch(`/api/place-details?place_id=${prediction.place_id}`);
+      const data = await response.json();
+      if (data.lat && data.lng) {
+        console.log("Selected Address Coordinates:", data.lat, data.lng);
+        setFormData((prev) => ({
+          ...prev,
+          latitude: data.lat,
+          longitude: data.lng,
+        }));
+        
+      } else {
+        console.warn("No coordinates found for selected address");
+      }
+    } catch (error) {
+      console.error("Error fetching address coordinates:", error);
+    }
   };
 
   const handleAddPaymentMethod = () => {
@@ -339,9 +369,10 @@ export const Setting = () => {
                   <AddressSuggestion
                     value={formData.businessAddress}
                     onChange={(value) => handleInputChange("businessAddress", value)}
-                    onSelect={(prediction: PlacePrediction) => {
-                      handleInputChange("businessAddress", prediction.description);
-                    }}
+                    // onSelect={(prediction: PlacePrediction) => {
+                    //   handleInputChange("businessAddress", prediction.description);
+                    // }}
+                    onSelect={handleAddressSelect}
                     placeholder="Start typing your business address..."
                     label="Business Address"
                     required={false}

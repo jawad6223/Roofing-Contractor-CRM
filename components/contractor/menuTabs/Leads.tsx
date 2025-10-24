@@ -8,16 +8,28 @@ import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
 import { DetailPopup } from "@/components/ui/DetailPopup";
 import { useState } from "react";
-import { purchasedLeadType, sampleLeadType } from "@/types/DashboardTypes";
-import { sampleLeads } from "./Data";
+import { purchasedLeadType, premiumLeadType } from "@/types/DashboardTypes";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
-import { fetchContractorLeads } from "./Data";
+import { fetchContractorLeads, fetchMatchLeads } from "./Data";
+import { fetchLeadPrice } from "@/lib/leadPrice";
 
 export const Leads = () => {
   const router = useRouter();
   const [contractorLeads, setContractorLeads] = useState<any[]>([]);
+  const [premiumLeads, setPremiumLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [pricePerLead, setPricePerLead] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchLeadPriceData = async () => {
+      const leadPriceData = await fetchLeadPrice();
+      if (leadPriceData) {
+        setPricePerLead((leadPriceData)['Price Per Lead']);
+      }
+    };
+    fetchLeadPriceData();
+  }, []);
 
   const handleStatusChange = async (leadId: string, status: string) => {
     try {
@@ -52,6 +64,16 @@ export const Leads = () => {
   
   useEffect(() => {
     fetchContractorLeadsData();
+  }, []);
+
+  useEffect(() => {
+    const fetchMatchLeadsData = async () => {
+      const matchingLeads = await fetchMatchLeads();
+      if (matchingLeads) {
+        setPremiumLeads(matchingLeads);
+      }
+    };
+    fetchMatchLeadsData();
   }, []);
 
   const [loadingLeads, setLoadingLeads] = useState<Set<number>>(new Set());
@@ -152,30 +174,66 @@ export const Leads = () => {
     // }
   ] : [];
 
-  async function handleBuyNow(lead: sampleLeadType) {
-    setLoadingLeads((prev) => new Set(prev).add(lead.id));
+  // async function handleBuyNow(lead: premiumLeadType) {
+  //   setLoadingLeads((prev) => new Set(prev).add(lead.id));
 
+  //   try {
+  //     const response = await fetch("/api/create-single-checkout-session", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         // leadAmount: lead.price,
+  //         leadAmount: 50,
+  //         leadName: `${lead.firstName} ${lead.lastName}`,
+  //       }),
+  //     });
+
+  //     if (!response.ok) {
+  //       const errorData = await response.json();
+  //       console.error("Checkout error:", errorData.error);
+  //       return;
+  //     }
+
+  //     const { url } = await response.json();
+  //     window.location.href = url;
+  //   } catch (error) {
+  //     console.error("Stripe checkout error:", error);
+  //   } finally {
+  //     setLoadingLeads((prev) => {
+  //       const newSet = new Set(prev);
+  //       newSet.delete(lead.id);
+  //       return newSet;
+  //     });
+  //   }
+  // }
+  async function handleBuyNow(lead: premiumLeadType) {
+    setLoadingLeads((prev) => new Set(prev).add(lead.id));
     try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+      const email = authData?.user?.email;
+  
+      if (!userId || !email) {
+        toast.error("User not logged in");
+        return;
+      }
+  
       const response = await fetch("/api/create-single-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          // leadAmount: lead.price,
-          leadAmount: 50,
-          leadName: `${lead.firstName} ${lead.lastName}`,
+          leadAmount: pricePerLead,
+          leadName: `${lead["First Name"].slice(0, 2)}${"***"} ${lead["Last Name"].slice(0, 2)}${"***"}`,
+          email,
+          user_id: userId,
+          lead_id: lead.id,
         }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Checkout error:", errorData.error);
-        return;
-      }
-
+  
       const { url } = await response.json();
       window.location.href = url;
     } catch (error) {
-      console.error("Stripe checkout error:", error);
+      console.error(error);
     } finally {
       setLoadingLeads((prev) => {
         const newSet = new Set(prev);
@@ -277,38 +335,38 @@ export const Leads = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {/* Sample Leads - Blurred Preview */}
-                {sampleLeads.map((lead: sampleLeadType) => (
+                {premiumLeads.map((lead: premiumLeadType) => (
                   <tr key={lead.id} className={`border-l-4`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">
                         <div className="text-sm font-bold text-gray-400 select-none">
-                          {`${lead.firstName?.slice(0, 2) || ""}${"*".repeat(
-                            Math.max((lead.firstName?.length || 0) - 2, 0)
-                          )} ${lead.lastName?.slice(0, 2) || ""}${"*".repeat(Math.max((lead.lastName?.length || 0) - 2, 0))}`}
+                          {`${lead["First Name"]?.slice(0, 2) || ""}${"*".repeat(
+                            Math.max((lead["First Name"]?.length || 0) - 2, 0)
+                          )} ${lead["Last Name"]?.slice(0, 2) || ""}${"*".repeat(Math.max((lead["Last Name"]?.length || 0) - 2, 0))}`}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                        <span className="text-sm text-gray-400 select-none">{`${lead.phone.slice(0, 2)}${"*".repeat(
-                          Math.max(lead.phone.length - 2, 0)
+                        <span className="text-sm text-gray-400 select-none">{`${lead["Phone Number"].slice(0, 2)}${"*".repeat(
+                          Math.max(lead["Phone Number"].length - 2, 0)
                         )}`}</span>
                       </div>
                       <div className="flex items-center">
                         <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                        <span className="text-sm text-gray-400 select-none">{`${lead.email?.slice(0, 2) || ""}${"*".repeat(
-                          Math.max((lead.email?.length || 0) - 2, 0)
+                        <span className="text-sm text-gray-400 select-none">{`${lead["Email Address"]?.slice(0, 2) || ""}${"*".repeat(
+                          Math.max((lead["Email Address"]?.length || 0) - 2, 0)
                         )}`}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-400 select-none">{`${lead.propertyAddress?.slice(
+                        <span className="text-sm font-medium text-gray-400 select-none">{`${lead["Property Address"]?.slice(
                           0,
                           2
-                        ) || ""}${"*".repeat(Math.max((lead.propertyAddress?.length || 0) - 2, 0))}`}</span>
+                        ) || ""}${"*".repeat(Math.max((lead["Property Address"]?.length || 0) - 2, 0))}`}</span>
                       </div>
                     </td>
                     <td></td>
@@ -316,7 +374,7 @@ export const Leads = () => {
                       <div className="flex space-x-2">
                         {/* <span className={`text-sm font-bold`}>${lead.price}</span> */}
                         <Button
-                          disabled={loadingLeads.has(lead.id)}
+                          disabled={loadingLeads.has(lead["id"])}
                           size="sm"
                           className={`text-white bg-[#122E5F] hover:bg-[#0f2347]/80 text-xs px-3 py-1`}
                           onClick={() => handleBuyNow(lead)}

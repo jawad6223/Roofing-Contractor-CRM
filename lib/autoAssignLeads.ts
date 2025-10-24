@@ -63,7 +63,8 @@ export async function autoAssignLeads(quantity: number) {
     console.log("📋 Selected leads:", leadsToAssign);
 
     // 5️⃣ Insert into Leads_Request table
-    const { error: insertError } = await supabase.from("Leads_Request").insert([
+    const { data: newRequest, error: insertError } = await supabase.from("Leads_Request")
+    .insert([
       {
         Name: contractor["Full Name"],
         "Phone Number": contractorPhone,
@@ -76,9 +77,13 @@ export async function autoAssignLeads(quantity: number) {
         Status: status,
         contractor_id: userId,
       },
-    ]);
+    ])
+    .select("id")
+    .single();
 
     if (insertError) throw insertError;
+
+    const requestId = newRequest.id;
 
     console.log(`📦 Lead request added with status: ${status}`);
 
@@ -113,6 +118,7 @@ export async function autoAssignLeads(quantity: number) {
     // add leads to the assigned leads table
     const { error: insertAssignedLeadsError } = await supabase.from("Assigned_Leads").insert(leadsToAssign.map(lead => ({
         contractor_id: userId,
+        request_id: requestId,
         "First Name": lead["First Name"],
         "Last Name": lead["Last Name"],
         "Phone Number": lead["Phone Number"],

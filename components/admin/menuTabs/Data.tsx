@@ -53,6 +53,23 @@ export const fetchLeads = async () => {
   }
 };
 
+export const fetchRequestLeads = async () => {
+  try {
+    const { data, error } = await supabase
+      .from("Leads_Request")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      throw error;
+    } else {
+      return data || [];
+    }
+  } catch (error) {
+    toast.error("Failed to fetch request leads");
+  }
+};
+
 // Leads Data
 export const allLeads = [
   {

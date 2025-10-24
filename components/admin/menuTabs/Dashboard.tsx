@@ -5,10 +5,9 @@ import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Se
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DetailPopup } from "@/components/ui/DetailPopup";
-import { requestLeads } from "./Data";
+import { fetchRequestLeads, fetchLeads} from "./Data";
 import Link from "next/link";
 import { LeadType, requestLeadType, ContractorType } from "@/types/AdminTypes";
-import { fetchLeads } from "./Data";
 import { fetchContractors } from "./Data";
 
 export const Dashboard = () => {
@@ -19,6 +18,7 @@ export const Dashboard = () => {
   const [leads, setLeads] = useState<LeadType[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
   const [contractors, setContractors] = useState<ContractorType[]>([]);
+  const [requestLeads, setRequestLeads] = useState<requestLeadType[]>([]);
   const handleLeadClick = (lead: LeadType) => {
     setSelectedLead(lead);
     setIsLeadModalOpen(true);
@@ -39,6 +39,17 @@ export const Dashboard = () => {
     setIsRequestLeadModalOpen(false);
     setSelectedRequestLead(undefined);
   };
+
+  useEffect(() => {
+    const fetchRequestLeadsData = async () => {
+      const requestLeadsData = await fetchRequestLeads();
+      if (requestLeadsData) {
+        setRequestLeads(requestLeadsData);
+      }
+    };
+
+    fetchRequestLeadsData();
+  }, []);
 
   useEffect(() => {
     const fetchLeadsData = async () => {
@@ -107,41 +118,41 @@ export const Dashboard = () => {
   const requestLeadFields = selectedRequestLead
     ? [
         {
-          label: "Full Name",
-          value: `${selectedRequestLead.firstName} ${selectedRequestLead.lastName}`,
+          label: "Name",
+          value: `${selectedRequestLead["Name"]}`,
           icon: User,
         },
         {
           label: "Phone",
-          value: selectedRequestLead.phoneno,
+          value: selectedRequestLead["Phone Number"],
           icon: Phone,
         },
         {
-          label: "Zip Code",
-          value: selectedRequestLead.zipCode,
+          label: "Business Address",
+          value: selectedRequestLead["Business Address"],
           icon: MapPin,
         },
         {
           label: "Price",
-          value: selectedRequestLead.price,
+          value: selectedRequestLead["Price"],
           icon: DollarSign,
         },
         {
-          label: "Date",
-          value: selectedRequestLead.date,
+          label: "Purchase Date",
+          value: selectedRequestLead["Purchase Date"],
           icon: Calendar,
         },
         {
-          label: "No of Leads",
-          value: selectedRequestLead.noOfLeads,
+          label: "No. of Leads",
+          value: selectedRequestLead["No. of Leads"],
         },
         {
           label: "Pending Leads",
-          value: selectedRequestLead.pendingLeads,
+          value: selectedRequestLead["Pending Leads"],
         },
         {
           label: "Status",
-          value: selectedRequestLead.status,
+          value: selectedRequestLead["Status"],
         },
       ]
     : [];
@@ -317,11 +328,11 @@ export const Dashboard = () => {
           <CardContent>
             <div className="space-y-4">
               {requestLeads
-                .filter((reqLead) => reqLead.status === "Pending")
+                .filter((reqLead) => reqLead["Status"] === "pending")
                 .slice(0, 3)
                 .map((reqLead: requestLeadType) => (
                   <div
-                    key={reqLead.id}
+                    key={reqLead["id"]}
                     onClick={() => handleRequestLeadClick(reqLead)}
                     className="flex flex-col lg:flex-row items-center justify-center md:justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-200"
                   >
@@ -329,18 +340,18 @@ export const Dashboard = () => {
                       <div className="text-sm flex items-center font-semibold text-gray-900 transition-colors">
                         <User className="h-4 w-4 mr-1" />
                         <span className="font-medium">
-                          {reqLead.firstName} {reqLead.lastName}
+                          {reqLead["Name"]}
                         </span>
                       </div>
                       <div className="text-sm mt-1 flex items-center font-semibold text-gray-900 transition-colors">
                         <MapPin className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{reqLead.zipCode}</span>
+                        <span className="font-medium">{reqLead["Business Address"]}</span>
                       </div>
                     </div>
                     <div className="flex w-full md:w-auto flex-col mt-2 space-y-2">
                       <div className="text-sm text-[#286BBD] flex hover:text-[#1d4ed8] transition-colors">
                         <Phone className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{reqLead.phoneno}</span>
+                        <span className="font-medium">{reqLead["Phone Number"]}</span>
                       </div>
                     </div>
                   </div>

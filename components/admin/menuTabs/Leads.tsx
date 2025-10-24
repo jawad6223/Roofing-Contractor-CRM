@@ -116,6 +116,10 @@ export const Leads = () => {
     setLoadingLeads(false);
   };
 
+  useEffect(() => {
+    fetchLeadsData();
+  }, []);
+
   const fetchAssignedContractor = async (leadEmail: string) => {
     setLoadingAssignedContractor(true);
     try {
@@ -157,10 +161,6 @@ export const Leads = () => {
       setLoadingAssignedContractor(false);
     }
   };
-
-  useEffect(() => {
-    fetchLeadsData();
-  }, []);
 
   const handleViewLead = (lead: LeadType): void => {
     setSelectedLead(lead);

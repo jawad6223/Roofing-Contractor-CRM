@@ -1,26 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { purchaseFormType } from "@/types/DashboardTypes";
+import { fetchLeadPrice } from "@/lib/leadPrice";
 
 const PurchaseLeads = () => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [pricePerLead, setPricePerLead] = useState<number>(0);
   const router = useRouter();
   const [purchaseForm, setPurchaseForm] = useState<purchaseFormType>({
     quantity: "1",
   });
 
+  useEffect(() => {
+    const fetchLeadPriceData = async () => {
+      const leadPriceData = await fetchLeadPrice();
+      if (leadPriceData) {
+        setPricePerLead((leadPriceData)['Price Per Lead']);
+      }
+    };
+    fetchLeadPriceData();
+  }, []);
+  
+
   const handlePurchaseInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setPurchaseForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    if (name === "quantity") {
+      const numericValue = value.replace(/[^0-9]/g, "");
+      setPurchaseForm((prev) => ({
+        ...prev,
+        [name]: numericValue,
+      }));
+    } else {
+      setPurchaseForm((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handlePurchaseSubmit = (e: React.FormEvent) => {
@@ -38,7 +60,7 @@ const PurchaseLeads = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           quantity: purchaseForm.quantity,
-          leadAmount: 50,
+          leadAmount: pricePerLead,
         }),
       });
 
@@ -83,10 +105,13 @@ const PurchaseLeads = () => {
                 <Input
                   name="quantity"
                   type="number"
-                  min="1"
-                  max="50"
                   value={purchaseForm.quantity}
                   onChange={handlePurchaseInputChange}
+                  onKeyDown={(e) => {
+                    if (!/[0-9]/.test(e.key) && !['Backspace', 'Delete', 'Tab', 'Enter', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder="1"
                   required
                   className="h-10 text-sm"
@@ -98,7 +123,7 @@ const PurchaseLeads = () => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-gray-900">Lead Price:</span>
-                  <span className="text-lg font-bold text-[#286BBD]">$50 per lead</span>
+                  <span className="text-lg font-bold text-[#286BBD]">${pricePerLead} per lead</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-gray-900">Quantity:</span>
@@ -108,7 +133,7 @@ const PurchaseLeads = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-gray-900">Total:</span>
                     <span className="text-xl font-bold text-[#286BBD]">
-                      ${(parseInt(purchaseForm.quantity || "1") * 50).toLocaleString()}
+                      ${(parseInt(purchaseForm.quantity) * pricePerLead).toLocaleString()}
                     </span>
                   </div>
                 </div>
@@ -118,7 +143,7 @@ const PurchaseLeads = () => {
             {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-4">
               <Button
-                disabled={isLoading}
+                disabled={isLoading || purchaseForm.quantity === "0" || purchaseForm.quantity === ""}
                 type="submit"
                 className="px-6 py-2 text-sm bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
                 onClick={handlePurchaseSubmitStripe}

@@ -32,14 +32,14 @@ export interface purchasedLeadType {
   "status": string;
 }
 
-export interface sampleLeadType {
+export interface premiumLeadType {
   id: number;
-  firstName: string;
-  lastName: string;
-  propertyAddress: string;
-  phone: string;
-  email: string;
-  price: number;
+  "First Name": string;
+  "Last Name": string;
+  "Property Address": string;
+  "Phone Number": string;
+  "Email Address": string;
+  "Price": number;
 }
 
 export interface purchaseFormType {
@@ -48,12 +48,12 @@ export interface purchaseFormType {
 
 export interface leadsInfoType {
   id: string;
-  zipCode: string;
-  date: string;
-  price: number;
-  noOfLeads: number;
-  receivedLeads: number;
-  pendingLeads: number;
+  "Business Address": string;
+  "Purchase Date": string;
+  "Price": number;
+  "No. of Leads": number;
+  "Send Leads": number;
+  "Pending Leads": number;
 }
 
 export interface teamMemberType {
@@ -67,6 +67,8 @@ export interface settingType {
   email?: string;
   serviceRadius: string;
   businessAddress: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface  paymentMethodType {

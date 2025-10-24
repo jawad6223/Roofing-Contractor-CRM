@@ -4,70 +4,60 @@ import { useRouter } from "next/navigation";
 import { CheckCircle, ArrowRight } from "lucide-react";
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { autoAssignLeads } from "@/lib/autoAssignLeads";
 import { supabase } from "@/lib/supabase";
 
 export default function SuccessPage() {
-  const router = useRouter();
+const router = useRouter();
 
-  const searchParams = useSearchParams();
-  const [status, setStatus] = useState("checking");
+const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const verifyAndAssign = async () => {
-      const sessionId = searchParams.get("session_id");
-      if (!sessionId) {
-        setStatus("invalid");
-        return;
-      }
+useEffect(() => {
+  const verifyAndAssignLead = async () => {
+    const sessionId = searchParams.get("session_id");
+    if (!sessionId) return;
 
-      // ✅ Check if this session has already been processed
-      const { data: existing, error: checkError } = await supabase
-        .from("Processed_Sessions")
-        .select("id")
-        .eq("session_id", sessionId)
-        .maybeSingle();
+    const res = await fetch(`/api/verify-premium-session?session_id=${sessionId}`);
+    const { paid, lead_id, user_id } = await res.json();
 
-      if (checkError) {
-        console.error("Error checking session:", checkError);
-        return;
-      }
+    if (paid && lead_id && user_id) {
+      console.log("✅ Payment confirmed for lead:", lead_id);
 
-      if (existing) {
-        console.error("⚠️ Session already processed — skipping lead assignment");
-        setStatus("already-processed");
-        return;
-      }
+      // Get lead details
+      const { data: lead } = await supabase
+        .from("Leads_Data")
+        .select("*")
+        .eq("id", lead_id)
+        .single();
 
-      // ✅ Verify Stripe session
-      const res = await fetch(`/api/verify-session?session_id=${sessionId}`);
-      const { paid, quantity } = await res.json();
+      if (!lead) return;
 
-      if (paid) {
-        console.log("✅ Payment confirmed, assigning leads...");
-        console.log("📊 Quantity purchased:", quantity);
+      // Add to Contractor_Leads
+      await supabase.from("Contractor_Leads").insert([
+        {
+          contractor_id: user_id,
+          "First Name": lead["First Name"],
+          "Last Name": lead["Last Name"],
+          "Phone Number": lead["Phone Number"],
+          "Email Address": lead["Email Address"],
+          "Property Address": lead["Property Address"],
+          "Insurance Company": lead["Insurance Company"],
+          "Policy Number": lead["Policy Number"],
+          "Latitude": lead["Latitude"],
+          "Longitude": lead["Longitude"],
+          status: "open",
+        },
+      ]);
 
-        await autoAssignLeads(quantity);
+      // Close the lead in Leads_Data
+      await supabase.from("Leads_Data").update({ Status: "closed" }).eq("id", lead_id);
+    }
+  };
 
-        // 🧠 Mark this session as processed
-        const { data: userData } = await supabase.auth.getUser();
-        const userId = userData?.user?.id;
+  verifyAndAssignLead();
+}, [searchParams]);
 
-        await supabase.from("Processed_Sessions").insert([
-          { session_id: sessionId, contractor_id: userId },
-        ]);
 
-        setStatus("success");
-      } else {
-        setStatus("failed");
-      }
-    };
 
-    verifyAndAssign();
-  }, [searchParams]);
-
-  
   return (
     <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center px-4 relative overflow-hidden">
       <div className="text-center max-w-lg w-full relative z-10">
