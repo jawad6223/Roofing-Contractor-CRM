@@ -2,11 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { CheckCircle, ArrowRight } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 
-export default function SuccessPage() {
+function SuccessContent() {
 const router = useRouter();
 
 const searchParams = useSearchParams();
@@ -113,5 +113,17 @@ useEffect(() => {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+      </div>
+    }>
+      <SuccessContent />
+    </Suspense>
   );
 }
