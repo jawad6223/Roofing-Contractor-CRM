@@ -290,7 +290,7 @@ export function ContractorForm() {
                 Join Our Elite Contractor Network
               </CardTitle>
               <CardDescription className="text-sm text-gray-600 leading-relaxed">
-                Get started with 5 free premium leads - no credit card required
+                Get started with 3 free premium leads - no credit card required
               </CardDescription>
             </>
           ) : (
