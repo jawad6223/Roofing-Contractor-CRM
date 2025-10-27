@@ -335,7 +335,7 @@ export const Leads = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {/* Sample Leads - Blurred Preview */}
-                {premiumLeads.map((lead: premiumLeadType) => (
+                {premiumLeads.slice(0, 3).map((lead: premiumLeadType) => (
                   <tr key={lead.id} className={`border-l-4`}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center space-x-3">

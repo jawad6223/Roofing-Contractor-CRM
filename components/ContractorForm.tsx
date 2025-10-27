@@ -239,6 +239,7 @@ export function ContractorForm() {
           serviceRadius: data.serviceRadius,
           latitude: coords?.lat,
           longitude: coords?.lng,
+          isVerified: 'not_confirmed',
         }),
       });
   

@@ -498,9 +498,9 @@ export const Leads = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center text-sm font-medium text-gray-600">
+                            <div className="flex items-center w-52 text-sm font-medium text-gray-600">
                               <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                              {lead["Property Address"]}
+                              <span className="truncate">{lead["Property Address"]}</span>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -624,9 +624,9 @@ export const Leads = () => {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
+                            <div className="flex items-center w-52">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                              <span className="text-sm font-medium text-gray-900">
+                              <span className="text-sm font-medium text-gray-900 truncate">
                                 {lead["Property Address"]}
                               </span>
                             </div>

@@ -64,6 +64,15 @@ export default function LoginModal() {
       if (recordError) {
         console.warn("No Roofing_Auth data found for this user:", recordError);
       } else {
+        const { error: updateError } = await supabase
+          .from("Roofing_Auth")
+          .update({ "Is Verified": "confirmed" })
+          .eq("user_id", authData.user?.id);
+
+        if (updateError) {
+          console.error("Error updating verification status:", updateError);
+        }
+
         localStorage.setItem("userInfo", JSON.stringify(userRecord));
         localStorage.setItem("loggedInUser", authData.user?.email || "");
       }

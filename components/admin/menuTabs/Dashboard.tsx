@@ -9,6 +9,7 @@ import { fetchRequestLeads, fetchLeads} from "./Data";
 import Link from "next/link";
 import { LeadType, requestLeadType, ContractorType } from "@/types/AdminTypes";
 import { fetchContractors } from "./Data";
+import { supabase } from "@/lib/supabase";
 
 export const Dashboard = () => {
   const [selectedLead, setSelectedLead] = useState<LeadType>();
@@ -61,6 +62,42 @@ export const Dashboard = () => {
       setLoadingLeads(false);
     };
     fetchLeadsData();
+  }, []);
+
+  const [totalSales, setTotalSales] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchTotalSales = async () => {
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1;
+      const currentYear = currentDate.getFullYear();
+      
+      const startOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
+      const endOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-31`;
+      
+      const { data, error } = await supabase
+        .from("Leads_Request")
+        .select("Price, \"No. of Leads\"")
+        .gte("Purchase Date", startOfMonth)
+        .lte("Purchase Date", endOfMonth);
+      
+      if (error) {
+        console.error("Error fetching sales data:", error);
+        return;
+      }
+      
+      if (data) {
+        const totalSalesAmount = data.reduce((sum, item) => {
+          const price = item.Price || 0;
+          const numberOfLeads = item["No. of Leads"] || 0;
+          return sum + (price * numberOfLeads);
+        }, 0);
+        
+        setTotalSales(totalSalesAmount);
+      }
+    };
+    
+    fetchTotalSales();
   }, []);
 
   useEffect(() => {
@@ -180,7 +217,7 @@ export const Dashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active Contractors</p>
+                <p className="text-sm font-medium text-gray-600">Total Contractors</p>
                 <p className="text-2xl font-bold text-gray-900">{contractors.length}</p>
               </div>
               <div
@@ -196,9 +233,9 @@ export const Dashboard = () => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-medium underline text-gray-500">Last Month</span>
+                <span className="text-xs font-medium underline text-gray-500">This Month</span>
                 <p className="text-sm font-medium text-gray-600">Total Sales</p>
-                <p className="text-2xl font-bold text-gray-900">100</p>
+                <p className="text-2xl font-bold text-gray-900">${totalSales.toLocaleString()}</p>
               </div>
               <div
                 className={`w-12 h-12 bg-[#122E5F] rounded-xl flex items-center justify-center`}

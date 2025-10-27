@@ -313,8 +313,8 @@ export const Contractors = () => {
       return { text: "No Coordinates", color: "bg-gray-100 text-gray-800" };
     }
 
-    const serviceRadius = contractor.serviceRadius || "50 miles";
-    const radiusValue = parseFloat(serviceRadius.replace(/\D/g, '')) || 50;
+    const serviceRadius = contractor.serviceRadius;
+    const radiusValue = parseFloat(serviceRadius.replace(/\D/g, ''));
     
     const distance = calculateDistance(
       contractor.latitude,

@@ -281,7 +281,7 @@ export const LeadRequest = () => {
       return { text: "No Coordinates", color: "bg-gray-100 text-gray-800" };
     }
 
-    const serviceRadius = contractor["Service Radius"] || "50 miles";
+    const serviceRadius = contractor["Service Radius"];
     const radiusValue = parseFloat(serviceRadius.replace(/\D/g, '')) || 50;
     
     const distance = calculateDistance(

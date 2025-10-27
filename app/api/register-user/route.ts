@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // use service key, not anon key
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
 const supabaseServer = createClient(supabaseUrl, serviceRoleKey);
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { user_id, fullName, title, phoneNumber, emailAddress, businessAddress, serviceRadius, latitude, longitude } = body;
+    const { user_id, fullName, title, phoneNumber, emailAddress, businessAddress, serviceRadius, latitude, longitude, isVerified } = body;
 
     const { error } = await supabaseServer.from("Roofing_Auth").insert([
       {
@@ -22,6 +22,7 @@ export async function POST(req: Request) {
         "Service Radius": serviceRadius,
         "Latitude": latitude,
         "Longitude": longitude,
+        "Is Verified": isVerified,
       },
     ]);
 

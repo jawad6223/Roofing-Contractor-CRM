@@ -1,7 +1,10 @@
 import { supabase } from "@/lib/supabase";
 import { calculateDistance } from "@/lib/distanceFormula";
+import { fetchLeadPrice } from "./leadPrice";
 
 export async function autoAssignLeads(quantity: number) {
+  const leadPriceData = await fetchLeadPrice();
+  const pricePerLead = leadPriceData ? leadPriceData['Price Per Lead'] : 0;
   try {
     const { data: authData } = await supabase.auth.getUser();
     const userId = authData?.user?.id;
@@ -19,7 +22,7 @@ export async function autoAssignLeads(quantity: number) {
 
     const contractorLat = contractor["Latitude"];
     const contractorLng = contractor["Longitude"];
-    const contractorRadius = parseFloat(contractor["Service Radius"]) || 0;
+    const contractorRadius = parseFloat(contractor["Service Radius"]);
     const contractorPhone = contractor["Phone Number"];
     const contractorBusinessAddress = contractor["Business Address"];
 
@@ -56,7 +59,7 @@ export async function autoAssignLeads(quantity: number) {
         Name: contractor["Full Name"],
         "Phone Number": contractorPhone,
         "Business Address": contractorBusinessAddress,
-        Price: 50,
+        Price: pricePerLead,
         "Purchase Date": new Date().toISOString(),
         "No. of Leads": quantity,
         "Send Leads": leadsToAssign.length,

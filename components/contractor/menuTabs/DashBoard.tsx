@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Home, FileText, DollarSign, BarChart3, Users, User, CheckCircle, Phone, Mail, MapPin, Calendar, Hash, Building, Search, } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,8 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
 import { fetchContractorLeads, fetchMatchLeads } from "./Data";
 import { fetchLeadPrice } from "@/lib/leadPrice";
+import { freeLeadsAssign } from "@/lib/freeLeadsAssign";
+
 export const DashBoard = () => {
   const { getCurrentUserFullName } = useAuth();
   const currentUserFullName = getCurrentUserFullName();
@@ -22,7 +24,8 @@ export const DashBoard = () => {
   const [contractorLeads, setContractorLeads] = useState<any[]>([]);
   const [premiumLeads, setPremiumLeads] = useState<any[]>([]);
   const [pricePerLead, setPricePerLead] = useState<number>(0);
-  const handleCloseModal = () => {
+  const hasRun = useRef(false);
+    const handleCloseModal = () => {
     setIsLeadModalOpen(false);
     setSelectedLead(null);
   };
@@ -141,6 +144,30 @@ export const DashBoard = () => {
     }
   }
 
+  useEffect(() => {
+    const verifyAndAssignLeads = async () => {
+      if (hasRun.current) return;
+      hasRun.current = true;
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+      if (!userId) return;
+      console.log("userId", userId);
+  
+      const { data: userRecord } = await supabase
+        .from("Roofing_Auth")
+        .select('"Is Verified"')
+        .eq("user_id", userId)
+        .single();
+  
+      if (userRecord?.["Is Verified"] === "confirmed") {
+        console.log("✅ User is verified, auto assigning leads...");
+        await freeLeadsAssign(userId);
+        fetchContractorLeadsData();
+      }
+    };
+    verifyAndAssignLeads();
+  }, []);
+
   const handleLeadClick = (lead: any) => {
     console.log("lead==", lead);
     setSelectedLead(lead);
@@ -200,7 +227,7 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-green-600 font-bold mb-1">
-              {contractorLeads.filter((lead) => lead.status !== "close").length}
+              {contractorLeads.length ? contractorLeads.filter((lead) => lead.status !== "close").length : "..."}
             </div>
           </CardContent>
         </Card>
@@ -353,7 +380,7 @@ export const DashBoard = () => {
                   </p>
                 </div>
               ) : (
-                premiumLeads.map((lead: premiumLeadType) => (
+                premiumLeads.slice(0, 3).map((lead: premiumLeadType) => (
                 <div
                   key={lead.id}
                   className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
