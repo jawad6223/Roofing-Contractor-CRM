@@ -16,7 +16,7 @@ export const fetchContractors = async () => {
     const { data, error } = await supabase
       .from("Roofing_Auth")
       .select(
-        `"Full Name", "Title", "Phone Number", "Email Address", "Business Address", "Service Radius", user_id`
+        `"Full Name", "Title", "Phone Number", "Email Address", "Business Address", "Service Radius", "Latitude", "Longitude", user_id`
       );
 
     if (error) throw error;
@@ -30,6 +30,8 @@ export const fetchContractors = async () => {
         email: item["Email Address"] || "",
         businessAddress: item["Business Address"] || "",
         serviceRadius: item["Service Radius"] || "",
+        latitude: item["Latitude"] || null,
+        longitude: item["Longitude"] || null,
       })) || [];
 
     return mappedData;

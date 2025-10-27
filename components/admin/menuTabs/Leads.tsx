@@ -19,6 +19,7 @@ import { toast } from "react-toastify";
 import { exportToExcel } from "./exportExcel";
 import { newLeadSchema } from "@/validations/admin/schema";
 import { addLeadFields } from "./formFeilds";
+import { calculateDistance } from "@/lib/distanceFormula";
 
 export const Leads = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -290,6 +291,40 @@ export const Leads = () => {
         .toLowerCase()
         .includes(contractorSearchTerm.toLowerCase())
   );
+
+  const getDistanceBadge = (contractor: ContractorType, lead: LeadType) => {
+    if (!contractor || !lead) {
+      return { text: "Loading...", color: "bg-gray-100 text-gray-800" };
+    }
+
+    if (!lead["Latitude"] || !lead["Longitude"] || !contractor.latitude || !contractor.longitude) {
+      return { text: "No Coordinates", color: "bg-gray-100 text-gray-800" };
+    }
+
+    const serviceRadius = contractor.serviceRadius || "50 miles";
+    const radiusValue = parseFloat(serviceRadius.replace(/\D/g, '')) || 50;
+    
+    const distance = calculateDistance(
+      contractor.latitude,
+      contractor.longitude,
+      lead["Latitude"],
+      lead["Longitude"]
+    );
+    
+    if (distance <= radiusValue) {
+      const distancePercentage = (distance / radiusValue) * 100;
+      
+      if (distancePercentage <= 20) {
+        return { text: "Nearest", color: "bg-green-100 text-green-800" };
+      } else if (distancePercentage <= 60) {
+        return { text: "Near", color: "bg-yellow-100 text-yellow-800" };
+      } else {
+        return { text: "Within Range", color: "bg-blue-100 text-blue-800" };
+      }
+    } else {
+      return { text: "Out of Range", color: "bg-red-100 text-red-800" };
+    }
+  };
 
   
 
@@ -923,6 +958,11 @@ export const Leads = () => {
                               <p className="text-sm text-gray-600">
                                 {contractor.phoneno}
                               </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDistanceBadge(contractor, leadToAssign).color}`}>
+                                  {getDistanceBadge(contractor, leadToAssign).text}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>

@@ -41,6 +41,8 @@ export interface ContractorType {
   email: string;
   businessAddress: string;
   serviceRadius: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface dashboardCardType {

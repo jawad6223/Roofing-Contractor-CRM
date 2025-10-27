@@ -25,6 +25,7 @@ import { ContractorType, LeadType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
 import { supabase } from "@/lib/supabase";
 import { fetchContractors, fetchLeads } from "./Data";
+import { calculateDistance } from "@/lib/distanceFormula";
 
 export const Contractors = () => {
   const [selectedContractor, setSelectedContractor] =
@@ -301,6 +302,40 @@ export const Contractors = () => {
   ) => {
     setContractorSearchTerm(e.target.value);
     setCurrentPage(1);
+  };
+
+  const getDistanceBadge = (lead: LeadType, contractor: ContractorType) => {
+    if (!contractor) {
+      return { text: "Loading...", color: "bg-gray-100 text-gray-800" };
+    }
+
+    if (!lead["Latitude"] || !lead["Longitude"] || !contractor.latitude || !contractor.longitude) {
+      return { text: "No Coordinates", color: "bg-gray-100 text-gray-800" };
+    }
+
+    const serviceRadius = contractor.serviceRadius || "50 miles";
+    const radiusValue = parseFloat(serviceRadius.replace(/\D/g, '')) || 50;
+    
+    const distance = calculateDistance(
+      contractor.latitude,
+      contractor.longitude,
+      lead["Latitude"],
+      lead["Longitude"]
+    );
+    
+    if (distance <= radiusValue) {
+      const distancePercentage = (distance / radiusValue) * 100;
+      
+      if (distancePercentage <= 20) {
+        return { text: "Nearest", color: "bg-green-100 text-green-800" };
+      } else if (distancePercentage <= 60) {
+        return { text: "Near", color: "bg-yellow-100 text-yellow-800" };
+      } else {
+        return { text: "Within Range", color: "bg-blue-100 text-blue-800" };
+      }
+    } else {
+      return { text: "Out of Range", color: "bg-red-100 text-red-800" };
+    }
   };
 
   const filteredLeads = leads.filter(
@@ -775,6 +810,9 @@ export const Contractors = () => {
                                   {lead["Insurance Company"]} •{" "}
                                   {lead["Property Address"]}
                                 </p>
+                                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDistanceBadge(lead, selectedContractor).color}`}>
+                                    {getDistanceBadge(lead, selectedContractor).text}
+                                  </span>
                               </div>
                             </div>
                             <div className="flex justify-between space-x-16 md:space-x-4 mt-4 md:mt-0">
