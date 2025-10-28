@@ -16,6 +16,7 @@ export interface sidebarItemsType {
 }
 
 export interface LeadType {
+  created_at?: string;
   id: number;
   "First Name": string;
   "Last Name": string;

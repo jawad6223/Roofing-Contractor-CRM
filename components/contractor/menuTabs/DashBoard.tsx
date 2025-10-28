@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { Home, FileText, DollarSign, BarChart3, Users, User, CheckCircle, Phone, Mail, MapPin, Calendar, Hash, Building, Search, } from "lucide-react";
+import { Home, FileText, DollarSign, BarChart3, Users, User, CheckCircle, Phone, Mail, MapPin, Hash, Building, Search, } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DetailPopup } from "@/components/ui/DetailPopup";
@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import { fetchContractorLeads, fetchMatchLeads } from "./Data";
 import { fetchLeadPrice } from "@/lib/leadPrice";
 import { freeLeadsAssign } from "@/lib/freeLeadsAssign";
+import LoadingDots from "@/lib/LoadingDots";
 
 export const DashBoard = () => {
   const { getCurrentUserFullName } = useAuth();
@@ -44,7 +45,6 @@ export const DashBoard = () => {
     ? [
         {
           label: "Full Name",
-          // value: `${selectedLead.firstName} ${selectedLead.lastName}`,
           value: `${selectedLead["First Name"]} ${selectedLead["Last Name"]}`,
           icon: User,
         },
@@ -75,11 +75,6 @@ export const DashBoard = () => {
           value: selectedLead["Policy Number"],
           icon: Hash,
         },
-        // {
-        //   label: "Purchase Date",
-        //   value: new Date(selectedLead.purchaseDate).toLocaleDateString(),
-        //   icon: Calendar,
-        // },
       ]
     : [];
 
@@ -211,7 +206,9 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-[#286BBD] font-bold mb-1">
-              {contractorLeads.length}
+              {contractorLeads.length ? contractorLeads.length : (
+                  <LoadingDots />
+              )}
             </div>
           </CardContent>
         </Card>
@@ -227,7 +224,10 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-green-600 font-bold mb-1">
-              {contractorLeads.length ? contractorLeads.filter((lead) => lead.status !== "close").length : "..."}
+              {contractorLeads.length ? 
+              contractorLeads.filter((lead) => lead.status !== "close").length : (
+                <LoadingDots />
+              )}
             </div>
           </CardContent>
         </Card>
@@ -243,7 +243,9 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-red-600 font-bold mb-1">
-              {contractorLeads.filter((lead) => lead.status === "close").length}
+              {contractorLeads.length ?  contractorLeads.filter((lead) => lead.status === "close").length : (
+                <LoadingDots />
+              )}
             </div>
           </CardContent>
         </Card>
@@ -287,46 +289,76 @@ export const DashBoard = () => {
                   .filter((lead) => lead.status !== "close")
                   .slice(0, 3)
                   .map((lead: purchasedLeadType, index: number) => (
+                    // <div
+                    //   key={index}
+                    //   onClick={() => handleLeadClick(lead)}
+                    //   className="flex flex-col lg:flex-row items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                    // >
+                    //   <div className="flex items-center space-x-4">
+                    //     <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#286BBD]/10 to-[#2563eb]/10 flex items-center justify-center group-hover:from-[#286BBD]/20 group-hover:to-[#2563eb]/20 transition-all duration-200">
+                    //       <User className="h-6 w-6 text-[#286BBD]" />
+                    //     </div>
+                    //     <div className="flex-1">
+                    //       <div className="flex items-center space-x-2 mb-1">
+                    //         <h4 className="font-semibold text-gray-900 text-base">
+                    //           {lead["First Name"]} {lead["Last Name"]}
+                    //         </h4>
+                    //       </div>
+                    //       <div className="flex items-center space-x-4 text-sm text-gray-600">
+                    //         <div className="flex items-center space-x-1 w-72">
+                    //           <MapPin className="h-3 w-3" />
+                    //           <span>{lead["Property Address"]}</span>
+                    //         </div>
+                    //       </div>
+                    //     </div>
+                    //   </div>
+
+                    //   <div className="flex flex-col items-end space-y-2">
+                    //     <div className="flex flex-col items-end space-y-1">
+                    //       <div className="text-sm text-[#286BBD] flex items-center hover:text-[#1d4ed8] transition-colors">
+                    //         <Phone className="h-4 w-4 mr-1" />
+                    //         <span className="font-medium">
+                    //           {lead["Phone Number"]}
+                    //         </span>
+                    //       </div>
+                    //       <div className="text-sm text-gray-600 flex items-center break-all hover:text-gray-800 transition-colors">
+                    //         <Mail className="h-4 w-4 mr-1" />
+                    //         <span className="font-medium">
+                    //           {lead["Email Address"]}
+                    //         </span>
+                    //       </div>
+                    //     </div>
+                    //   </div>
+                    // </div>
                     <div
                       key={index}
                       onClick={() => handleLeadClick(lead)}
-                      className="flex flex-col lg:flex-row items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-[#286BBD]/30 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                      className="flex flex-col lg:flex-row items-center justify-center md:justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-200"
                     >
-                      <div className="flex items-center space-x-4">
-                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-[#286BBD]/10 to-[#2563eb]/10 flex items-center justify-center group-hover:from-[#286BBD]/20 group-hover:to-[#2563eb]/20 transition-all duration-200">
-                          <User className="h-6 w-6 text-[#286BBD]" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <h4 className="font-semibold text-gray-900 text-base">
-                              {lead["First Name"]} {lead["Last Name"]}
-                            </h4>
-                          </div>
-                          <div className="flex items-center space-x-4 text-sm text-gray-600">
-                            <div className="flex items-center space-x-1 w-72">
-                              <MapPin className="h-3 w-3" />
-                              <span>{lead["Property Address"]}</span>
-                            </div>
-                          </div>
+                      <div className="w-full md:w-auto">
+                      <div className="text-sm flex items-center font-semibold text-gray-900 transition-colors">
+                        <User className="h-4 w-4 mr-1" />
+                        <h4 className="font-semibold text-gray-900 text-base">
+                          {lead["First Name"]} {lead["Last Name"]}
+                        </h4>
+                      </div>
+                      <div className="mt-1 flex items-center text-sm text-gray-600 transition-colors">
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="h-3 w-3" />
+                          <span>{lead["Property Address"]}</span>
                         </div>
                       </div>
-
-                      <div className="flex flex-col items-end space-y-2">
-                        <div className="flex flex-col items-end space-y-1">
-                          <div className="text-sm text-[#286BBD] flex items-center hover:text-[#1d4ed8] transition-colors">
-                            <Phone className="h-4 w-4 mr-1" />
-                            <span className="font-medium">
-                              {lead["Phone Number"]}
-                            </span>
-                          </div>
-                          <div className="text-sm text-gray-600 flex items-center break-all hover:text-gray-800 transition-colors">
-                            <Mail className="h-4 w-4 mr-1" />
-                            <span className="font-medium">
-                              {lead["Email Address"]}
-                            </span>
-                          </div>
-                        </div>
+                    </div>
+                    <div className="flex w-full md:w-auto flex-col mt-2 space-y-2">
+                      <div className="text-sm text-[#286BBD] flex md:justify-end hover:text-[#1d4ed8] transition-colors">
+                        <Phone className="h-4 w-4 mr-1" />
+                        <span className="font-medium">{lead["Phone Number"]}</span>
                       </div>
+                      <div className="text-sm text-gray-600 flex items-center hover:text-gray-800 transition-colors">
+                        <Mail className="h-4 w-4 mr-1" />
+                        <span className="font-medium">{lead["Email Address"]}</span>
+                      </div>
+                    </div>
                     </div>
                   ))
               ) : (

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginValidationSchema } from "@/validations/Auth/schema";
-import { User, EyeOff, Eye } from "lucide-react";
+import { EyeOff, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { FormDataType } from "@/types/AuthType";
 import { toast } from "react-toastify";

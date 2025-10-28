@@ -40,7 +40,7 @@ export const DetailPopup: React.FC<DetailPopupProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 -top-8 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 relative h-[80vh] md:h-auto overflow-auto animate-in zoom-in-95 duration-300">
         <button
           onClick={onClose}

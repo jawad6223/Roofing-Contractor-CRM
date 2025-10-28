@@ -35,6 +35,7 @@ useEffect(() => {
       await supabase.from("Contractor_Leads").insert([
         {
           contractor_id: user_id,
+          lead_id: lead.id,
           "First Name": lead["First Name"],
           "Last Name": lead["Last Name"],
           "Phone Number": lead["Phone Number"],

@@ -11,6 +11,7 @@ export async function autoAssignLeads(quantity: number) {
     if (!userId) throw new Error("User not logged in");
 
     console.log("🎯 Auto-assigning leads for quantity:", quantity);
+    console.log('userId', userId);
 
     const { data: contractor } = await supabase
       .from("Roofing_Auth")
@@ -89,6 +90,7 @@ export async function autoAssignLeads(quantity: number) {
     // add leads to contractor leads table
     const { error: insertLeadsError } = await supabase.from("Contractor_Leads").insert(leadsToAssign.map(lead => ({
         contractor_id: userId,
+        lead_id: lead.id,
         "First Name": lead["First Name"],
         "Last Name": lead["Last Name"],
         "Phone Number": lead["Phone Number"],

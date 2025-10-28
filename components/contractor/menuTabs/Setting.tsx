@@ -11,13 +11,12 @@ import { settingType } from "@/types/DashboardTypes";
 import { FormField } from "@/types/Types";
 import { toast } from "react-toastify";
 import { paymentMethodSchema } from "@/validations/contractor/schema";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { paymentMethodType } from "@/types/DashboardTypes";
 import { PlacePrediction } from "@/types/AuthType";
+import LoadingDots from "@/lib/LoadingDots";
 
 export const Setting = () => {
-  const router = useRouter();
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState<boolean>(false);
   const [cards, setCards] = useState<paymentMethodType[]>([]);
@@ -156,7 +155,6 @@ export const Setting = () => {
       const response = await fetch(`/api/place-details?place_id=${prediction.place_id}`);
       const data = await response.json();
       if (data.lat && data.lng) {
-        console.log("Selected Address Coordinates:", data.lat, data.lng);
         setFormData((prev) => ({
           ...prev,
           latitude: data.lat,
@@ -369,9 +367,6 @@ export const Setting = () => {
                   <AddressSuggestion
                     value={formData.businessAddress}
                     onChange={(value) => handleInputChange("businessAddress", value)}
-                    // onSelect={(prediction: PlacePrediction) => {
-                    //   handleInputChange("businessAddress", prediction.description);
-                    // }}
                     onSelect={handleAddressSelect}
                     placeholder="Start typing your business address..."
                     label="Business Address"

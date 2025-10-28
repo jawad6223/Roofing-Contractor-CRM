@@ -31,7 +31,7 @@ export const adminLoginValidationSchema = yup.object().shape({
 
   // Validation schema for contractor form
   export const step1Schema = yup.object().shape({
-    fullName: yup.string().required("Full name is required").min(2, "Name must be at least 2 characters").matches(/^[A-Za-z\s]+$/, "Title can only contain letters"),
+    fullName: yup.string().required("Full name is required").min(2, "Name must be at least 2 characters").matches(/^[A-Za-z\s]+$/, "Name can only contain letters"),
     title: yup.string().required("Title is required").min(2, "Title must be at least 2 characters").matches(/^[A-Za-z\s]+$/, "Title can only contain letters"),
     phoneNumber: yup.string().required("Phone number is required").matches(/^\(\d{3}\) \d{3}-\d{4}$/, "Please enter a valid phone number"),
     emailAddress: yup.string()

@@ -59,6 +59,7 @@ export async function freeLeadsAssign(userId: string) {
     const { error: insertError } = await supabase.from("Contractor_Leads").insert(
       leadsToAssign.map((lead) => ({
         contractor_id: userId,
+        lead_id: lead.id,
         "First Name": lead["First Name"],
         "Last Name": lead["Last Name"],
         "Phone Number": lead["Phone Number"],

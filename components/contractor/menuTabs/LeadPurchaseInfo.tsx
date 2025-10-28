@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ShoppingCart, CheckCircle, Calendar, DollarSign, X, Eye, FileText, MapPin, Phone, Mail, Hash, Search, Building, } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,8 +46,8 @@ export const LeadPurchaseInfo = () => {
     fetchRequestLeads();
   }, []);
 
-  const totalLeads = leadsInfo.reduce((sum, lead) => sum + (lead["No. of Leads"] || 0), 0);
-  const totalPrice = leadsInfo.reduce((sum, lead) => sum + (lead["Price"] || 0) * (lead["No. of Leads"] || 0), 0);
+  const totalLeads = leadsInfo.reduce((sum, lead) => sum + (lead["No. of Leads"]), 0);
+  const totalPrice = leadsInfo.reduce((sum, lead) => sum + (lead["Price"]) * (lead["No. of Leads"]), 0);
 
   const filteredLeads = leadsInfo.filter((lead) => {
     const searchLower = searchTerm.toLowerCase();
@@ -67,7 +67,6 @@ export const LeadPurchaseInfo = () => {
   const currentData = filteredLeads.slice(startIndex, endIndex);
 
   const handleViewLeads = async (lead: leadsInfoType) => {
-    console.log('lead id', lead.id);
     setSelectedLeadData(lead);
     
     try {
@@ -83,9 +82,6 @@ export const LeadPurchaseInfo = () => {
         return;
       }
 
-      console.log("Fetched assigned leads for request:", lead.id, assignedLeadsData);
-      
-      // Transform the data to match the expected format
       const transformedLeads = assignedLeadsData.map(lead => ({
         id: lead.id,
         firstName: lead["First Name"],
@@ -147,7 +143,7 @@ export const LeadPurchaseInfo = () => {
   };
 
   // Custom render function for lead details table
-  const renderLeadDetailsCell = (column: any, row: any, index: number) => {
+  const renderLeadDetailsCell = (column: any, row: any) => {
     switch (column.key) {
       case "name":
         return (
@@ -397,7 +393,6 @@ export const LeadPurchaseInfo = () => {
         endIndex={endIndex}
       />
 
-      {/* Lead Details Modal */}
       {/* Lead Details Table Popup */}
       <TablePopup
         isOpen={showModal}

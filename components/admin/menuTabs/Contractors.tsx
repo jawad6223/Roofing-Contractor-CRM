@@ -242,11 +242,12 @@ export const Contractors = () => {
         if (!lead) throw new Error(`Lead with ID ${leadId} not found`);
 
         return {
+          lead_id: lead.id,
           "First Name": lead["First Name"],
           "Last Name": lead["Last Name"],
           "Phone Number": lead["Phone Number"],
           "Email Address": lead["Email Address"],
-          "Zip Code": lead["Property Address"],
+          "Property Address": lead["Property Address"],
           "Insurance Company": lead["Insurance Company"],
           "Policy Number": lead["Policy Number"],
           contractor_id: contractorId,
@@ -736,7 +737,7 @@ export const Contractors = () => {
 
       {/* Assign Lead Modal */}
       {showAssignModal && selectedContractor && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 -top-8 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full mx-4 relative animate-in zoom-in-95 duration-300 max-h-[90vh] overflow-auto">
             {/* Close Button */}
             <button

@@ -425,6 +425,7 @@ export const LeadRequest = () => {
       // 3. Insert leads into Contractor_Leads table
       const contractorLeadsData = selectedLeadsData.map(lead => ({
         contractor_id: selectedContractorRequest.contractor_id,
+        lead_id: lead.id,
         "First Name": lead["First Name"],
         "Last Name": lead["Last Name"],
         "Phone Number": lead["Phone Number"],

@@ -17,7 +17,8 @@ export const fetchContractors = async () => {
       .from("Roofing_Auth")
       .select(
         `"Full Name", "Title", "Phone Number", "Email Address", "Business Address", "Service Radius", "Latitude", "Longitude", user_id`
-      );
+      )
+      .in("Is Verified", ["confirmed", "assigned"])
 
     if (error) throw error;
 

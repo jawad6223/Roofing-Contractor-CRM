@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { teamMemberSchema } from "@/validations/contractor/schema";
 import { FormField } from "@/types/Types";
 import * as yup from "yup";
+import { fetchTeamMembers } from "./Data";
 
 export const Team = () => {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -66,29 +67,21 @@ export const Team = () => {
     ]);
     if (error) throw error;
     toast.success("Team member added successfully!");
-    fetchTeamMembers();
+    fetchTeamMembersData();
     handleCloseModal();
   };
 
-  const fetchTeamMembers = async () => {
-    setIsLoading(true);
-    const { data: authData, error: authError } = await supabase.auth.getUser();
-    if (authError || !authData?.user) {
-      toast.error("User not logged in");
-      return;
-    }
-    const userId = authData.user.id;
-    const { data, error } = await supabase
-      .from("Team_Members")
-      .select("*")
-      .eq("user_id", userId);
-    if (error) throw error;
-    setTeamMembers(data);
-    setIsLoading(false);
-  };
+    const fetchTeamMembersData = async () => {
+      setIsLoading(true);
+      const teamMembersData = await fetchTeamMembers();
+      if (teamMembersData) {
+        setTeamMembers(teamMembersData);
+      }
+      setIsLoading(false);
+    };
 
   useEffect(() => {
-    fetchTeamMembers();
+    fetchTeamMembersData();
   }, []);
 
   const handleEditClick = (index: number, member: any) => {
@@ -99,13 +92,11 @@ export const Team = () => {
       Email_Address: member.Email_Address,
       Phone_Number: member.Phone_Number,
     });
-    // Clear any previous errors when starting to edit
     setFieldErrors({});
   };
 
   const handleSaveClick = async (index: number) => {
     try {
-      // Clear previous errors
       setFieldErrors({});
 
       // Validate edited member data with schema
@@ -160,7 +151,7 @@ export const Team = () => {
 
       toast.success("Team member updated successfully");
       setEditingMember(null);
-      fetchTeamMembers();
+      fetchTeamMembersData();
     } catch (error) {
       console.error("Error updating team member:", error);
       toast.error("Failed to update team member");
@@ -220,8 +211,7 @@ export const Team = () => {
 
       if (error) throw error;
 
-      // setTeamMembers(prev => prev.filter((_, i) => i !== index));
-      fetchTeamMembers();
+      fetchTeamMembersData();
       toast.success("Team member deleted successfully");
     } catch (error) {
       console.error("Error deleting team member:", error);

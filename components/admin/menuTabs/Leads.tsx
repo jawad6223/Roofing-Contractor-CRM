@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -121,16 +120,16 @@ export const Leads = () => {
     fetchLeadsData();
   }, []);
 
-  const fetchAssignedContractor = async (leadEmail: string) => {
+  const fetchAssignedContractor = async (leadId: number) => {
     setLoadingAssignedContractor(true);
     try {
-      console.log("Fetching contractor for lead email:", leadEmail);
+      console.log("Fetching contractor for lead email:", leadId);
 
       const { data: contractorLead, error: contractorLeadError } =
         await supabase
           .from("Contractor_Leads")
           .select("contractor_id")
-          .eq("Email Address", leadEmail)
+          .eq("lead_id", leadId)
           .single();
 
       if (contractorLeadError && contractorLeadError.code !== "PGRST116") {
@@ -166,9 +165,7 @@ export const Leads = () => {
   const handleViewLead = (lead: LeadType): void => {
     setSelectedLead(lead);
     setShowModal(true);
-    if (lead["Email Address"]) {
-      fetchAssignedContractor(lead["Email Address"]);
-    }
+    fetchAssignedContractor(lead.id);
   };
 
   const handleCloseModal = () => {
@@ -213,13 +210,17 @@ export const Leads = () => {
       const { error } = await supabase.from("Contractor_Leads").insert([
         {
           contractor_id: selectedContractor,
+          lead_id: leadToAssign.id,
           "First Name": leadToAssign["First Name"],
           "Last Name": leadToAssign["Last Name"],
           "Phone Number": leadToAssign["Phone Number"],
-          "Email Address": leadToAssign["Email Address"],
+          "Email Address": leadToAssign["Email Address"],  
           "Property Address": leadToAssign["Property Address"],
           "Insurance Company": leadToAssign["Insurance Company"],
           "Policy Number": leadToAssign["Policy Number"],
+          "Latitude": leadToAssign["Latitude"],
+          "Longitude": leadToAssign["Longitude"],
+          status: "open",
         },
       ]);
 
@@ -886,7 +887,7 @@ export const Leads = () => {
 
       {/* Assign Lead Modal */}
       {showAssignModal && leadToAssign && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 -top-8 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-4xl h-[80vh] md:h-auto w-full mx-4 relative animate-in zoom-in-95 duration-300 overflow-auto">
             {/* Close Button */}
             <button

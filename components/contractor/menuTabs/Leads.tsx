@@ -174,38 +174,6 @@ export const Leads = () => {
     // }
   ] : [];
 
-  // async function handleBuyNow(lead: premiumLeadType) {
-  //   setLoadingLeads((prev) => new Set(prev).add(lead.id));
-
-  //   try {
-  //     const response = await fetch("/api/create-single-checkout-session", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         // leadAmount: lead.price,
-  //         leadAmount: 50,
-  //         leadName: `${lead.firstName} ${lead.lastName}`,
-  //       }),
-  //     });
-
-  //     if (!response.ok) {
-  //       const errorData = await response.json();
-  //       console.error("Checkout error:", errorData.error);
-  //       return;
-  //     }
-
-  //     const { url } = await response.json();
-  //     window.location.href = url;
-  //   } catch (error) {
-  //     console.error("Stripe checkout error:", error);
-  //   } finally {
-  //     setLoadingLeads((prev) => {
-  //       const newSet = new Set(prev);
-  //       newSet.delete(lead.id);
-  //       return newSet;
-  //     });
-  //   }
-  // }
   async function handleBuyNow(lead: premiumLeadType) {
     setLoadingLeads((prev) => new Set(prev).add(lead.id));
     try {
@@ -303,7 +271,6 @@ export const Leads = () => {
             <option value="hot">Hot Lead</option>
             <option value="warm">Warm Lead</option>
             <option value="cold">Cold Lead</option>
-            <option value="close">Close</option>
           </select>
           <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 pointer-events-none" />
         </div>
@@ -334,7 +301,6 @@ export const Leads = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {/* Sample Leads - Blurred Preview */}
                 {premiumLeads.slice(0, 3).map((lead: premiumLeadType) => (
                   <tr key={lead.id} className={`border-l-4`}>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -372,7 +338,6 @@ export const Leads = () => {
                     <td></td>
                     <td className="px-6 py-4 whitespace-nowrap" colSpan={2}>
                       <div className="flex space-x-2">
-                        {/* <span className={`text-sm font-bold`}>${lead.price}</span> */}
                         <Button
                           disabled={loadingLeads.has(lead["id"])}
                           size="sm"

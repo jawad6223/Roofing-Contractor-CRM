@@ -11,9 +11,7 @@ const PurchaseLeads = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [pricePerLead, setPricePerLead] = useState<number>(0);
   const router = useRouter();
-  const [purchaseForm, setPurchaseForm] = useState<purchaseFormType>({
-    quantity: "1",
-  });
+  const [purchaseForm, setPurchaseForm] = useState<purchaseFormType>({ quantity: "1" });
 
   useEffect(() => {
     const fetchLeadPriceData = async () => {
@@ -43,12 +41,6 @@ const PurchaseLeads = () => {
         [name]: value,
       }));
     }
-  };
-
-  const handlePurchaseSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Purchase form data:", purchaseForm);
-    // TODO: Add purchase logic here
   };
 
   async function handlePurchaseSubmitStripe(e: React.FormEvent) {
@@ -81,7 +73,6 @@ const PurchaseLeads = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Purchase Premium Leads</h2>
@@ -89,7 +80,6 @@ const PurchaseLeads = () => {
         </div>
       </div>
 
-      {/* Purchase Form */}
       <Card className="border-0 shadow-lg max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
@@ -99,7 +89,7 @@ const PurchaseLeads = () => {
           <CardDescription>Specify your target area and quantity to get started</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handlePurchaseSubmit} className="space-y-6">
+          <form onSubmit={handlePurchaseSubmitStripe} className="space-y-6">
               <div className="space-y-2">
                 <label className="block text-sm font-semibold text-gray-700 mb-1">Quantity *</label>
                 <Input
@@ -118,7 +108,6 @@ const PurchaseLeads = () => {
                 />
             </div>
 
-            {/* Pricing Summary */}
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between items-center">
@@ -133,20 +122,18 @@ const PurchaseLeads = () => {
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-gray-900">Total:</span>
                     <span className="text-xl font-bold text-[#286BBD]">
-                      ${(parseInt(purchaseForm.quantity) * pricePerLead).toLocaleString()}
+                    ${(parseInt(purchaseForm.quantity) * pricePerLead) ? (parseInt(purchaseForm.quantity) * pricePerLead) : 0}
                     </span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-4">
               <Button
                 disabled={isLoading || purchaseForm.quantity === "0" || purchaseForm.quantity === ""}
                 type="submit"
                 className="px-6 py-2 text-sm bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
-                onClick={handlePurchaseSubmitStripe}
               >
                 {isLoading ? (
                   "Processing..."
