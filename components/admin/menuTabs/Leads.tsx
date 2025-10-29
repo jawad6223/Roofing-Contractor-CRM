@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { FormField } from "@/types/Types";
 import { Pagination } from "@/components/ui/pagination";
-import { Search, Target, Plus, Download, Eye, ChevronDown, X, UserPlus, Check, FileText, MoreHorizontal, MapPin, Phone, Mail, User, Building, Hash, } from "lucide-react";
+import { Search, Target, Plus, Download, Eye, ChevronDown, X, Check, FileText, MoreHorizontal, MapPin, Phone, Mail, User, Building, Hash, } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormPopup } from "@/components/ui/FormPopup";
@@ -312,19 +312,23 @@ export const Leads = () => {
       lead["Longitude"]
     );
     
-    if (distance <= radiusValue) {
-      const distancePercentage = (distance / radiusValue) * 100;
-      
-      if (distancePercentage <= 20) {
-        return { text: "Nearest", color: "bg-green-100 text-green-800" };
-      } else if (distancePercentage <= 60) {
-        return { text: "Near", color: "bg-yellow-100 text-yellow-800" };
-      } else {
-        return { text: "Within Range", color: "bg-blue-100 text-blue-800" };
-      }
-    } else {
-      return { text: "Out of Range", color: "bg-red-100 text-red-800" };
-    }
+    const diff = distance - radiusValue;
+    console.log('diff', diff);
+    console.log('distance', distance);
+    console.log('radiusValue', radiusValue);
+
+    let badge = { text: "Too Far", color: "bg-red-100 text-red-800" };
+
+    if (diff <= 5) badge = { text: "Nearest", color: "bg-green-100 text-green-800" };
+    else if (diff <= 10) badge = { text: "Near", color: "bg-yellow-100 text-yellow-800" };
+    else if (diff <= 20) badge = { text: "Far", color: "bg-blue-100 text-blue-800" };
+
+    return {
+      text: badge.text,
+      color: badge.color,
+      distance: distance.toFixed(1),
+      radius: radiusValue.toFixed(1),
+    };
   };
 
   
@@ -935,11 +939,12 @@ export const Leads = () => {
               <div className="max-h-64 overflow-y-auto">
                 <div className="space-y-3">
                   {filteredContractors.length > 0 ? (
-                    filteredContractors.map((contractor) => (
+                    filteredContractors.map((contractor) => {
+                      const badge = getDistanceBadge(contractor, leadToAssign);
+                      return (
                       <div
                         key={contractor.user_id}
-                        className="flex flex-col md:flex-row justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 hover:border-[#286BBD]/50"
-                      >
+                        className="flex flex-col md:flex-row justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-200 hover:border-[#286BBD]/50">
                         <div className="flex items-center space-x-4">
                           <Checkbox
                             checked={selectedContractor === contractor.user_id}
@@ -949,44 +954,37 @@ export const Leads = () => {
                             className="data-[state=checked]:bg-[#286BBD] data-[state=checked]:border-[#286BBD]"
                           />
                           <div className="flex items-center space-x-2">
-                            <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
-                              <UserPlus className="h-5 w-5 text-[#286BBD]" />
-                            </div>
-                            <div>
-                              <h3 className="font-semibold text-gray-900">
-                                {contractor.fullName}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                {contractor.phoneno}
-                              </p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDistanceBadge(contractor, leadToAssign).color}`}>
-                                  {getDistanceBadge(contractor, leadToAssign).text}
+
+                            <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full hidden md:flex items-center justify-center">
+                                <span className="text-sm font-semibold text-[#286BBD]">
+                                  {contractor.fullName.charAt(0).toUpperCase()}
+                                  {contractor.fullName.charAt(1).toUpperCase()}
                                 </span>
                               </div>
-                            </div>
+                              <div className="flex flex-col gap-2">
+                                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
+                                  {contractor.fullName}
+                                  {badge && (
+                                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${badge.color}`}>
+                                          {badge.text} • {badge.distance} mi (radius {badge.radius} mi)
+                                      </span>
+                                  )}
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  {contractor.businessAddress}
+                                </p>
+                              </div>
                           </div>
                         </div>
-                        <div className="">
-                          <div className="flex justify-between space-x-4 mt-4 md:mt-0">
-                            <div className="text-start md:text-end">
-                              <p className="text-sm font-medium text-[#286BBD]">
-                                {contractor.businessAddress}
-                              </p>
-                              <p className="text-xs text-gray-500">Location</p>
-                            </div>
-                            <div className="text-right">
+                          <div className="flex items-center mt-2 gap-2">
+                              <Phone className="h-4 w-4 text-gray-400" />
                               <p className="text-sm font-medium text-green-600">
-                                {contractor.serviceRadius}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                Service Radius
+                                {contractor.phoneno}
                               </p>
                             </div>
-                          </div>
-                        </div>
                       </div>
-                    ))
+                    );
+                    })
                   ) : (
                     <div className="text-center py-8">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">

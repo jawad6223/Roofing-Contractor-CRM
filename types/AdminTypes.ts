@@ -46,6 +46,22 @@ export interface ContractorType {
   longitude?: number;
 }
 
+export interface contractorDataType {
+  user_id: string;
+  fullName: string;
+  title?: string;
+  phoneno?: string;
+  email?: string;
+  businessAddress: string;
+  serviceRadius: string;
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
+  radius?: number;
+  text?: string;
+  color?: string;
+}
+
 export interface dashboardCardType {
   title: string;
   value: string;

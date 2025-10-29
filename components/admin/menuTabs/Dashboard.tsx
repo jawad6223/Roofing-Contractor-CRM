@@ -290,7 +290,7 @@ export const Dashboard = () => {
                       onClick={() => handleLeadClick(lead)}
                       className="flex flex-col lg:flex-row items-center justify-center md:justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-200"
                     >
-                      <div className="w-full md:w-auto">
+                      <div className="w-full md:w-1/2">
                       <div className="text-sm flex items-center font-semibold text-gray-900 transition-colors">
                         <User className="h-4 w-4 mr-1" />
                         <h4 className="font-semibold text-gray-900 text-base">
@@ -299,8 +299,8 @@ export const Dashboard = () => {
                       </div>
                       <div className="mt-1 flex items-center text-sm text-gray-600 transition-colors">
                         <div className="flex items-center space-x-1">
-                          <MapPin className="h-3 w-3" />
-                          <span>{lead["Property Address"]}</span>
+                          <MapPin className="h-4 w-4" />
+                          <span className="w-52 truncate">{lead["Property Address"]}</span>
                         </div>
                       </div>
                     </div>
@@ -363,7 +363,7 @@ export const Dashboard = () => {
                     onClick={() => handleRequestLeadClick(reqLead)}
                     className="flex flex-col lg:flex-row items-center justify-center md:justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-200"
                   >
-                    <div className="w-full md:w-auto">
+                    <div className="w-full md:w-1/2">
                       <div className="text-sm flex items-center font-semibold text-gray-900 transition-colors">
                         <User className="h-4 w-4 mr-1" />
                         <span className="font-medium">
@@ -372,7 +372,7 @@ export const Dashboard = () => {
                       </div>
                       <div className="text-sm mt-1 flex items-center font-semibold md:w-96 text-gray-900 transition-colors">
                         <MapPin className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{reqLead["Business Address"]}</span>
+                        <span className="font-medium w-52 truncate">{reqLead["Business Address"]}</span>
                       </div>
                     </div>
                     <div className="flex w-full md:w-auto flex-col mt-2 space-y-2">

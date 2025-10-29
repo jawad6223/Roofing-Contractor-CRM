@@ -36,7 +36,7 @@ export default function ThankYouPage() {
             </svg>
           </div>
         {/* Registration Success Message */}
-        <div className="p-8 text-center">
+        <div className="md:p-8 text-center">
         <div className="relative mb-2 flex justify-center">
               <Image 
                 src="/roofingF-logo.png" 
@@ -56,9 +56,7 @@ export default function ThankYouPage() {
                 <span className="font-semibold text-[#286BBD] block my-2">{userInfo?.emailAddress}</span>
               </p>
               <p className="text-gray-500 mt-5">
-                Please check your email and click the verification link
-                <br/>
-                to activate your account.
+                Please check your email and click the verification link to activate your account.
               </p>
             </div>
 
@@ -73,7 +71,7 @@ export default function ThankYouPage() {
               </button>
               <button
                 onClick={() => router.push('/')}
-                className="bg-white hover:bg-gray-50 text-[#122E5F] border-2 border-[#122E5F] px-6 py-3 font-semibold rounded-xl shadow-md text-lg w-full transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+                className="bg-white hover:bg-gray-50 text-[#122E5F] border-2 border-[#122E5F] px-6 py-3 font-semibold rounded-xl shadow-md text-lg w-full transition-all duration-200 hover:shadow-lg hover:scale-[1.02] whitespace-nowrap"
               >
                 Return to Homepage
               </button>

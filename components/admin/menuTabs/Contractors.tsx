@@ -28,8 +28,7 @@ import { fetchContractors, fetchLeads } from "./Data";
 import { calculateDistance } from "@/lib/distanceFormula";
 
 export const Contractors = () => {
-  const [selectedContractor, setSelectedContractor] =
-    useState<ContractorType>();
+  const [selectedContractor, setSelectedContractor] = useState<ContractorType>();
   const [showModal, setShowModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
   const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
@@ -47,8 +46,8 @@ export const Contractors = () => {
       contractor.fullName
         .toLowerCase()
         .includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.phoneno
-        .toLowerCase()
+      contractor?.phoneno
+        ?.toLowerCase()
         .includes(contractorSearchTerm.toLowerCase()) ||
       contractor.businessAddress
         .toLowerCase()
@@ -310,33 +309,42 @@ export const Contractors = () => {
       return { text: "Loading...", color: "bg-gray-100 text-gray-800" };
     }
 
-    if (!lead["Latitude"] || !lead["Longitude"] || !contractor.latitude || !contractor.longitude) {
+    if (
+      !lead["Latitude"] ||
+      !lead["Longitude"] ||
+      !contractor.latitude ||
+      !contractor.longitude
+    ) {
       return { text: "No Coordinates", color: "bg-gray-100 text-gray-800" };
     }
 
     const serviceRadius = contractor.serviceRadius;
-    const radiusValue = parseFloat(serviceRadius.replace(/\D/g, ''));
-    
+    const radiusValue = parseFloat(serviceRadius.replace(/\D/g, ""));
+
     const distance = calculateDistance(
       contractor.latitude,
       contractor.longitude,
       lead["Latitude"],
       lead["Longitude"]
     );
-    
-    if (distance <= radiusValue) {
-      const distancePercentage = (distance / radiusValue) * 100;
-      
-      if (distancePercentage <= 20) {
-        return { text: "Nearest", color: "bg-green-100 text-green-800" };
-      } else if (distancePercentage <= 60) {
-        return { text: "Near", color: "bg-yellow-100 text-yellow-800" };
-      } else {
-        return { text: "Within Range", color: "bg-blue-100 text-blue-800" };
-      }
-    } else {
-      return { text: "Out of Range", color: "bg-red-100 text-red-800" };
-    }
+
+    const diff = distance - radiusValue;
+    console.log('diff', diff);
+    console.log('distance', distance);
+    console.log('radiusValue', radiusValue);
+
+    let badge = { text: "Too Far", color: "bg-red-100 text-red-800" };
+
+    if (diff <= 5) badge = { text: "Nearest", color: "bg-green-100 text-green-800" };
+    else if (diff <= 10) badge = { text: "Near", color: "bg-yellow-100 text-yellow-800" };
+    else if (diff <= 20) badge = { text: "Far", color: "bg-blue-100 text-blue-800" };
+
+    return {
+      text: badge.text,
+      color: badge.color,
+      distance: distance.toFixed(1),
+      radius: radiusValue.toFixed(1),
+    };
   };
 
   const filteredLeads = leads.filter(
@@ -618,88 +626,90 @@ export const Contractors = () => {
                 </div>
 
                 <div className="space-y-3">
-                    <table className="w-full">
-                      <thead className="bg-gray-50">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Name
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Zip Code
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Phone no
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Email
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Company
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {loadingAssignedLeads ? (
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Zip Code
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Phone no
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Email
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Company
-                          </th>
+                          <td colSpan={5} className="px-6 py-8 text-center">
+                            <div className="flex flex-col items-center justify-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                              <p className="mt-2 text-sm text-gray-500">
+                                Loading assigned leads...
+                              </p>
+                            </div>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {loadingAssignedLeads ? (
-                          <tr>
-                            <td colSpan={5} className="px-6 py-8 text-center">
-                              <div className="flex flex-col items-center justify-center">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
-                                <p className="mt-2 text-sm text-gray-500">Loading assigned leads...</p>
-                              </div>
-                            </td>
-                          </tr>
-                        ) : currentAssignedLeadsData.length > 0 ? (
-                          currentAssignedLeadsData.map(
-                            (lead: any, index: number) => (
-                              <tr key={index} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div>
-                                    <div className="text-sm font-bold text-[#122E5F]">
-                                      {lead["First Name"]} {lead["Last Name"]}
-                                    </div>
+                      ) : currentAssignedLeadsData.length > 0 ? (
+                        currentAssignedLeadsData.map(
+                          (lead: any, index: number) => (
+                            <tr key={index} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div>
+                                  <div className="text-sm font-bold text-[#122E5F]">
+                                    {lead["First Name"]} {lead["Last Name"]}
                                   </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <div className="flex items-center">
-                                    <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                                    <span className="text-sm font-medium text-gray-900">
-                                      {lead["Zip Code"]}
-                                    </span>
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-black">
-                                  <div className="space-y-1 flex items-center">
-                                    <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                    {lead["Phone Number"]}
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-black">
-                                  <div className="space-y-1 flex items-center">
-                                    <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                                    {lead["Email Address"]}
-                                  </div>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className="text-sm font-medium text-gray-900 flex items-center">
-                                    <Building className="h-3 w-3 text-gray-400 mr-1" />
-                                    {lead["Insurance Company"]}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                                  <span className="text-sm font-medium text-gray-900">
+                                    {lead["Zip Code"]}
                                   </span>
-                                </td>
-                              </tr>
-                            )
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-black">
+                                <div className="space-y-1 flex items-center">
+                                  <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                  {lead["Phone Number"]}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-black">
+                                <div className="space-y-1 flex items-center">
+                                  <Mail className="h-3 w-3 text-gray-400 mr-1" />
+                                  {lead["Email Address"]}
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm font-medium text-gray-900 flex items-center">
+                                  <Building className="h-3 w-3 text-gray-400 mr-1" />
+                                  {lead["Insurance Company"]}
+                                </span>
+                              </td>
+                            </tr>
                           )
-                        ) : (
-                          <tr>
-                            <td
-                              colSpan={5}
-                              className="px-6 py-8 text-center text-gray-500"
-                            >
-                              No assigned leads found for this contractor
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
+                        )
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={5}
+                            className="px-6 py-8 text-center text-gray-500"
+                          >
+                            No assigned leads found for this contractor
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
                 </div>
 
                 {/* Assigned Leads Pagination */}
@@ -782,12 +792,14 @@ export const Contractors = () => {
                   {filteredLeads.length > 0 ? (
                     filteredLeads
                       .filter((lead: LeadType) => lead.Status === "open")
-                      .map((lead: LeadType) => (
+                      .map((lead: LeadType) => {
+                        const badge = getDistanceBadge(lead, selectedContractor);
+                        return (
                         <div
                           key={lead.id}
                           className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:bg-gray-100 transition-colors"
                         >
-                          <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
+                          <div className="flex flex-col md:flex-row items-start justify-between">
                             <div className="flex items-center space-x-4">
                               <Checkbox
                                 checked={selectedLeads.includes(
@@ -797,42 +809,36 @@ export const Contractors = () => {
                                   handleLeadCheckbox(lead.id.toString())
                                 }
                               />
-                              <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full flex items-center justify-center">
+                              <div className="w-10 h-10 bg-[#286BBD]/10 rounded-full hidden md:flex items-center justify-center">
                                 <span className="text-sm font-semibold text-[#286BBD]">
                                   {lead["First Name"].charAt(0).toUpperCase()}
                                   {lead["Last Name"].charAt(0).toUpperCase()}
                                 </span>
                               </div>
-                              <div>
-                                <h4 className="font-semibold text-gray-900">
+                              <div className="flex flex-col gap-2">
+                                <h4 className="font-semibold text-gray-900 flex items-center gap-2">
                                   {lead["First Name"]} {lead["Last Name"]}
+                                  {badge && (
+                                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${badge.color}`}>
+                                          {badge.text} • {badge.distance} mi (radius {badge.radius} mi)
+                                      </span>
+                                  )}
                                 </h4>
                                 <p className="text-sm text-gray-600">
-                                  {lead["Insurance Company"]} •{" "}
                                   {lead["Property Address"]}
                                 </p>
-                                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDistanceBadge(lead, selectedContractor).color}`}>
-                                    {getDistanceBadge(lead, selectedContractor).text}
-                                  </span>
                               </div>
                             </div>
-                            <div className="flex justify-between space-x-16 md:space-x-4 mt-4 md:mt-0">
-                              <div className="text-end">
-                                <p className="text-sm font-medium text-[#286BBD]">
-                                  {lead["Policy Number"]}
-                                </p>
-                                <p className="text-xs text-gray-500">Policy</p>
-                              </div>
-                              <div className="text-end">
-                                <p className="text-sm font-medium text-green-600">
-                                  {lead["Phone Number"]}
-                                </p>
-                                <p className="text-xs text-gray-500">Phone</p>
-                              </div>
+                            <div className="flex items-center justify-end gap-2 mt-2">
+                              <Phone className="h-4 w-4 text-gray-400" />
+                              <p className="text-sm font-medium text-green-600">
+                                {lead["Phone Number"]}
+                              </p>
                             </div>
                           </div>
                         </div>
-                      ))
+                      );
+                    })
                   ) : (
                     <div className="text-center py-8">
                       <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">

@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
 import { fetchLeads, fetchRequestLeads } from "./Data";
-import { requestLeadType, LeadType } from "@/types/AdminTypes";
+import { requestLeadType, LeadType, contractorDataType } from "@/types/AdminTypes";
 import { toast } from "react-toastify";
 import { TablePopup } from "@/components/ui/TablePopup";
 import { supabase } from "@/lib/supabase";
@@ -26,7 +26,7 @@ export const LeadRequest = () => {
   const [assignModalSearchTerm, setAssignModalSearchTerm] = useState("");
   const [selectedContractorRequest, setSelectedContractorRequest] = useState<any>(null);
   const [requestLeads, setRequestLeads] = useState<any[]>([]);
-  const [contractorData, setContractorData] = useState<any>(null);
+  const [contractorData, setContractorData] = useState<contractorDataType>();
   const [assignCurrentPage, setAssignCurrentPage] = useState(1);
   const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -272,38 +272,42 @@ export const LeadRequest = () => {
     setPendingModalSearchTerm("");
   };
 
-  const getDistanceBadge = (lead: any, contractor: any) => {
+  const getDistanceBadge = (lead: LeadType, contractor: contractorDataType) => {
     if (!contractor) {
       return { text: "Loading...", color: "bg-gray-100 text-gray-800" };
     }
 
-    if (!lead["Latitude"] || !lead["Longitude"] || !contractor["Latitude"] || !contractor["Longitude"]) {
+    if (!lead["Latitude"] || !lead["Longitude"] || !contractor.latitude || !contractor.longitude) {
       return { text: "No Coordinates", color: "bg-gray-100 text-gray-800" };
     }
 
-    const serviceRadius = contractor["Service Radius"];
+    const serviceRadius = contractor.serviceRadius;
     const radiusValue = parseFloat(serviceRadius.replace(/\D/g, '')) || 50;
     
     const distance = calculateDistance(
-      contractor["Latitude"],
-      contractor["Longitude"],
+      contractor.latitude,
+      contractor.longitude,
       lead["Latitude"],
       lead["Longitude"]
     );
     
-    if (distance <= radiusValue) {
-      const distancePercentage = (distance / radiusValue) * 100;
-      
-      if (distancePercentage <= 20) {
-        return { text: "Nearest", color: "bg-green-100 text-green-800" };
-      } else if (distancePercentage <= 60) {
-        return { text: "Near", color: "bg-yellow-100 text-yellow-800" };
-      } else {
-        return { text: "Within Range", color: "bg-blue-100 text-blue-800" };
-      }
-    } else {
-      return { text: "Out of Range", color: "bg-red-100 text-red-800" };
-    }
+    const diff = distance - radiusValue;
+    console.log('diff', diff);
+    console.log('distance', distance);
+    console.log('radiusValue', radiusValue);
+
+    let badge = { text: "Too Far", color: "bg-red-100 text-red-800" };
+
+    if (diff <= 5) badge = { text: "Nearest", color: "bg-green-100 text-green-800" };
+    else if (diff <= 10) badge = { text: "Near", color: "bg-yellow-100 text-yellow-800" };
+    else if (diff <= 20) badge = { text: "Far", color: "bg-blue-100 text-blue-800" };
+
+    return {
+      text: badge.text,
+      color: badge.color,
+      distance: distance.toFixed(1),
+      radius: radiusValue.toFixed(1),
+    };
   };
 
   const handleOpenAssignModal = async (contractorRequest: any) => {
@@ -311,7 +315,7 @@ export const LeadRequest = () => {
     console.log('contractorRequest', contractorRequest.contractor_id);
     
     try {
-      const { data: contractor, error } = await supabase
+      const { data: contractorData, error } = await supabase
         .from("Roofing_Auth")
         .select("user_id, \"Full Name\", \"Business Address\", \"Service Radius\", \"Latitude\", \"Longitude\"")
         .eq("user_id", contractorRequest.contractor_id)
@@ -321,7 +325,14 @@ export const LeadRequest = () => {
         console.error("Error fetching contractor:", error);
         toast.error("Failed to load contractor data");
       } else {
-        setContractorData(contractor);
+        setContractorData({
+          user_id: contractorData.user_id,
+          fullName: contractorData["Full Name"],
+          businessAddress: contractorData["Business Address"],
+          serviceRadius: contractorData["Service Radius"],
+          latitude: contractorData["Latitude"],
+          longitude: contractorData["Longitude"],
+        });
       }
     } catch (error) {
       console.error("Error in handleOpenAssignModal:", error);
@@ -334,7 +345,6 @@ export const LeadRequest = () => {
     setShowAssignModal(false);
     setSelectedAssignLeads(new Set());
     setSelectedContractorRequest(null);
-    setContractorData(null);
   };
 
   const handleSelectAssignLead = (leadId: number) => {
@@ -905,7 +915,9 @@ export const LeadRequest = () => {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {filteredAssignLeads?.map((lead: LeadType, index: number) => (
+                    {filteredAssignLeads?.map((lead: LeadType, index: number) => {
+                      const badge = contractorData ? getDistanceBadge(lead, contractorData) : null;
+                      return (
                       <tr key={index} className="hover:bg-gray-50">
                         <td className="px-4 py-3 whitespace-nowrap">
                           <input
@@ -926,9 +938,11 @@ export const LeadRequest = () => {
                             <span className="text-sm font-bold text-[#122E5F]">
                               {lead["Property Address"]}
                             </span>
-                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${getDistanceBadge(lead, contractorData).color}`}>
-                              {getDistanceBadge(lead, contractorData).text}
-                            </span>
+                            {badge && (
+                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${badge.color}`}>
+                                {badge.text} • {badge.distance} mi (radius {badge.radius} mi)
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
@@ -952,7 +966,8 @@ export const LeadRequest = () => {
                           </span>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
