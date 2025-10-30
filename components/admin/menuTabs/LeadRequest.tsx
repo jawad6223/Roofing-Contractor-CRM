@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { TablePopup } from "@/components/ui/TablePopup";
 import { supabase } from "@/lib/supabase";
 import { calculateDistance } from "@/lib/distanceFormula";
+ 
 
 export const LeadRequest = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -180,22 +181,17 @@ export const LeadRequest = () => {
         toast.error("Contractor ID not found");
         return;
       }
-      const { data: assignedLeads, error } = await supabase
-        .from("Assigned_Leads")
-        .select("*")
-        .eq("contractor_id", contractorId)
-        .eq("request_id", requestId)
-        .order("Assigned Date", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching assigned leads:", error);
-        toast.error("Failed to fetch assigned leads");
-        return;
+      const resA = await fetch(`/api/admin/assigned-leads?contractorId=${contractorId}&requestId=${Number(requestId)}`, { cache: 'no-store' })
+      const jsonA = await resA.json()
+      if (!resA.ok) {
+        console.error("Error fetching assigned leads:", jsonA.error)
+        toast.error("Failed to fetch assigned leads")
+        return
       }
-
+      const assignedLeads = jsonA.data || []
       console.log("Fetched assigned leads:", assignedLeads);
       
-      const transformedLeads = assignedLeads.map(lead => ({
+      const transformedLeads = assignedLeads.map((lead: any) => ({
         id: lead.id,
         firstName: lead["First Name"],
         lastName: lead["Last Name"],
@@ -220,27 +216,23 @@ export const LeadRequest = () => {
       const contractorId = lead.contractor_id;
       const requestId = lead.id;
       
+      console.log('contractorId', contractorId);
+      console.log('requestId', requestId);
       if (!contractorId) {
         toast.error("Contractor ID not found");
         return;
       }
-
-      const { data: assignedLeads, error } = await supabase
-        .from("Assigned_Leads")
-        .select("*")
-        .eq("contractor_id", contractorId)
-        .eq("request_id", requestId)
-        .order("Assigned Date", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching assigned leads:", error);
-        toast.error("Failed to fetch assigned leads");
-        return;
+      const resP = await fetch(`/api/admin/assigned-leads?contractorId=${contractorId}&requestId=${Number(requestId)}`, { cache: 'no-store' })
+      const jsonP = await resP.json()
+      if (!resP.ok) {
+        console.error("Error fetching assigned leads:", jsonP.error)
+        toast.error("Failed to fetch assigned leads")
+        return
       }
-
+      const assignedLeads = jsonP.data || []
       console.log("Fetched assigned leads for pending view:", assignedLeads);
       
-      const transformedLeads = assignedLeads.map(lead => ({
+      const transformedLeads = assignedLeads.map((lead: any) => ({
         id: lead.id,
         firstName: lead["First Name"],
         lastName: lead["Last Name"],

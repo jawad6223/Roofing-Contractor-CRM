@@ -155,6 +155,7 @@ export const DashBoard = () => {
         .single();
   
       if (userRecord?.["Is Verified"] === "confirmed") {
+        console.log("userRecord", userRecord["Is Verified"]);
         console.log("✅ User is verified, auto assigning leads...");
         await freeLeadsAssign(userId);
         fetchContractorLeadsData();
