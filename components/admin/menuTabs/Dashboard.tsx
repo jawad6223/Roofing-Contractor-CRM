@@ -11,8 +11,10 @@ import { LeadType, requestLeadType, ContractorType } from "@/types/AdminTypes";
 import { fetchContractors } from "./Data";
 import { supabase } from "@/lib/supabase";
 import LoadingDots from "@/lib/LoadingDots";
+import { useRouter } from "next/navigation";
 
 export const Dashboard = () => {
+  const router = useRouter();
   const [selectedLead, setSelectedLead] = useState<LeadType>();
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
   const [selectedRequestLead, setSelectedRequestLead] = useState<requestLeadType>();
@@ -198,7 +200,7 @@ export const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card onClick={()=>{router.push('/admin/leads')}} className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -214,7 +216,7 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card onClick={()=>{router.push('/admin/contractors')}} className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -230,7 +232,7 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card onClick={()=>{router.push('/admin/leads-request')}} className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>

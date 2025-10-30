@@ -362,7 +362,7 @@ export const Setting = () => {
                   </span>
                 </div>
               </div>
-              <div>
+              {/* <div>
                 {isEditing ? (
                   <AddressSuggestion
                     value={formData.businessAddress}
@@ -385,7 +385,7 @@ export const Setting = () => {
                     />
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
             {!isEditing ? (
               <Button
@@ -418,7 +418,7 @@ export const Setting = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg w-full md:w-1/2">
+        {/* <Card className="border-0 shadow-lg w-full md:w-1/2">
           <CardHeader className="bg-gradient-to-r from-green-50 to-blue-50">
             <CardTitle className="flex items-center text-[#286BBD] text-xl">
               <CreditCard className="h-5 w-5 mr-2" />
@@ -535,7 +535,7 @@ export const Setting = () => {
               </p>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Add Payment Method Modal */}

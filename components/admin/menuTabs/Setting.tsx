@@ -177,7 +177,7 @@ export const Setting = () => {
                   className={`text-gray-900 h-11 ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                 />
               </div>
-              <div>
+              {/* <div>
                 {isEditing ? (
                   <AddressSuggestion
                     value={formData.businessAddress}
@@ -203,7 +203,7 @@ export const Setting = () => {
                     />
                   </div>
                 )}
-              </div>
+              </div> */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
                   Price Per Lead

@@ -14,7 +14,7 @@ import { fetchContractorLeads, fetchMatchLeads } from "./Data";
 import { fetchLeadPrice } from "@/lib/leadPrice";
 import { freeLeadsAssign } from "@/lib/freeLeadsAssign";
 import LoadingDots from "@/lib/LoadingDots";
-
+import { useRouter } from "next/navigation";
 export const DashBoard = () => {
   const { getCurrentUserFullName } = useAuth();
   const currentUserFullName = getCurrentUserFullName();
@@ -26,6 +26,7 @@ export const DashBoard = () => {
   const [premiumLeads, setPremiumLeads] = useState<any[]>([]);
   const [pricePerLead, setPricePerLead] = useState<number>(0);
   const hasRun = useRef(false);
+  const router = useRouter();
     const handleCloseModal = () => {
     setIsLeadModalOpen(false);
     setSelectedLead(null);
@@ -196,7 +197,7 @@ export const DashBoard = () => {
 
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-white">
+        <Card onClick={()=>{router.push('/contractor/leads')}} className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-blue-50 to-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-semibold text-[#286BBD]">
               Total Leads
@@ -214,7 +215,7 @@ export const DashBoard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-green-50 to-white">
+        <Card onClick={()=>{router.push('/contractor/leads')}} className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-green-50 to-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-semibold text-[#286BBD]">
               Active Leads
@@ -233,7 +234,7 @@ export const DashBoard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-red-50 to-white">
+        <Card onClick={()=>{router.push('/contractor/crm')}} className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-gradient-to-br from-red-50 to-white">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
             <CardTitle className="text-sm font-semibold text-[#286BBD]">
               Closed Leads
