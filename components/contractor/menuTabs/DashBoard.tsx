@@ -314,10 +314,6 @@ export const DashBoard = () => {
                         <Phone className="h-4 w-4 mr-1" />
                         <span className="font-medium">{lead["Phone Number"]}</span>
                       </div>
-                      <div className="text-sm text-gray-600 flex items-center hover:text-gray-800 transition-colors">
-                        <Mail className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{lead["Email Address"]}</span>
-                      </div>
                     </div>
                     </div>
                   ))
