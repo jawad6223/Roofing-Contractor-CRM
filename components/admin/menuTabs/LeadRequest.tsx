@@ -161,15 +161,73 @@ export const LeadRequest = () => {
     policy: lead.policy
   }));
 
-  const filteredAssignLeads = leads?.filter((lead: LeadType) => lead["Status"] === "open")?.filter((lead: LeadType) =>
-    lead["First Name"]?.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
-    lead["Last Name"]?.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
-    lead["Property Address"]?.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
-    lead["Phone Number"]?.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
-    lead["Email Address"]?.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
-    lead["Insurance Company"]?.toLowerCase().includes(assignModalSearchTerm.toLowerCase()) ||
-    lead["Policy Number"]?.toLowerCase().includes(assignModalSearchTerm)
-  );
+  const getDistanceBadge = (lead: LeadType, contractor: contractorDataType) => {
+    if (!contractor) {
+      return { text: "Loading...", color: "bg-gray-100 text-gray-800" };
+    }
+
+    if (!lead["Latitude"] || !lead["Longitude"] || !contractor.latitude || !contractor.longitude) {
+      return { text: "No Coordinates", color: "bg-gray-100 text-gray-800" };
+    }
+
+    const serviceRadius = contractor.serviceRadius;
+    const radiusValue = parseFloat(serviceRadius.replace(/\D/g, '')) || 50;
+    
+    const distance = calculateDistance(
+      contractor.latitude,
+      contractor.longitude,
+      lead["Latitude"],
+      lead["Longitude"]
+    );
+    
+    const diff = distance - radiusValue;
+    console.log('diff', diff);
+    console.log('distance', distance);
+    console.log('radiusValue', radiusValue);
+
+    let badge = { text: "Too Far", color: "bg-red-100 text-red-800" };
+
+    if (diff <= 5) badge = { text: "Nearest", color: "bg-green-100 text-green-800" };
+    else if (diff <= 10) badge = { text: "Near", color: "bg-yellow-100 text-yellow-800" };
+    else if (diff <= 20) badge = { text: "Far", color: "bg-blue-100 text-blue-800" };
+
+    return {
+      text: badge.text,
+      color: badge.color,
+      distance: distance.toFixed(1),
+      radius: radiusValue.toFixed(1),
+    };
+  };
+
+  const filteredAssignLeads = leads?.filter((lead: LeadType) => lead["Status"] === "open")?.filter((lead: LeadType) => {
+    const searchLower = assignModalSearchTerm.toLowerCase();
+    const matchesBasic =
+      lead["First Name"]?.toLowerCase().includes(searchLower) ||
+      lead["Last Name"]?.toLowerCase().includes(searchLower) ||
+      lead["Property Address"]?.toLowerCase().includes(searchLower) ||
+      lead["Phone Number"]?.toLowerCase().includes(searchLower) ||
+      lead["Email Address"]?.toLowerCase().includes(searchLower) ||
+      lead["Insurance Company"]?.toLowerCase().includes(searchLower) ||
+      lead["Policy Number"]?.toLowerCase().includes(assignModalSearchTerm);
+
+    if (matchesBasic) return true;
+
+    if (contractorData) {
+      const badge = getDistanceBadge(lead, contractorData);
+      if (badge) {
+        const badgeText = badge.text?.toLowerCase() || "";
+        const badgeDistance = badge.distance?.toString() || "";
+        const badgeRadius = badge.radius?.toString() || "";
+        const badgeSearchable = `${badgeText} ${badgeDistance} ${badgeRadius}`.toLowerCase();
+        
+        if (badgeSearchable.includes(searchLower)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  });
 
   const handleViewAssignedLead = async (lead: requestLeadType) => {
     try {
@@ -262,44 +320,6 @@ export const LeadRequest = () => {
     setShowPendingModal(false);
     setSelectedPendingLead(null);
     setPendingModalSearchTerm("");
-  };
-
-  const getDistanceBadge = (lead: LeadType, contractor: contractorDataType) => {
-    if (!contractor) {
-      return { text: "Loading...", color: "bg-gray-100 text-gray-800" };
-    }
-
-    if (!lead["Latitude"] || !lead["Longitude"] || !contractor.latitude || !contractor.longitude) {
-      return { text: "No Coordinates", color: "bg-gray-100 text-gray-800" };
-    }
-
-    const serviceRadius = contractor.serviceRadius;
-    const radiusValue = parseFloat(serviceRadius.replace(/\D/g, '')) || 50;
-    
-    const distance = calculateDistance(
-      contractor.latitude,
-      contractor.longitude,
-      lead["Latitude"],
-      lead["Longitude"]
-    );
-    
-    const diff = distance - radiusValue;
-    console.log('diff', diff);
-    console.log('distance', distance);
-    console.log('radiusValue', radiusValue);
-
-    let badge = { text: "Too Far", color: "bg-red-100 text-red-800" };
-
-    if (diff <= 5) badge = { text: "Nearest", color: "bg-green-100 text-green-800" };
-    else if (diff <= 10) badge = { text: "Near", color: "bg-yellow-100 text-yellow-800" };
-    else if (diff <= 20) badge = { text: "Far", color: "bg-blue-100 text-blue-800" };
-
-    return {
-      text: badge.text,
-      color: badge.color,
-      distance: distance.toFixed(1),
-      radius: radiusValue.toFixed(1),
-    };
   };
 
   const handleOpenAssignModal = async (contractorRequest: any) => {

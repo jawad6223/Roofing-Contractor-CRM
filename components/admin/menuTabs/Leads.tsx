@@ -280,19 +280,6 @@ export const Leads = () => {
     setContractorSearchTerm(e.target.value);
   };
 
-  const filteredContractors = contractors.filter(
-    (contractor) =>
-      contractor.fullName
-        .toLowerCase()
-        .includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.phoneno
-        .toLowerCase()
-        .includes(contractorSearchTerm.toLowerCase()) ||
-      contractor.businessAddress
-        .toLowerCase()
-        .includes(contractorSearchTerm.toLowerCase())
-  );
-
   const getDistanceBadge = (contractor: ContractorType, lead: LeadType) => {
     if (!contractor || !lead) {
       return { text: "Loading...", color: "bg-gray-100 text-gray-800" };
@@ -330,6 +317,40 @@ export const Leads = () => {
       radius: radiusValue.toFixed(1),
     };
   };
+
+  const filteredContractors = contractors.filter(
+    (contractor) => {
+      const searchLower = contractorSearchTerm.toLowerCase();
+      const matchesBasic = 
+        contractor.fullName
+          .toLowerCase()
+          .includes(searchLower) ||
+        contractor.phoneno
+          .toLowerCase()
+          .includes(searchLower) ||
+        contractor.businessAddress
+          .toLowerCase()
+          .includes(searchLower);
+
+      if (matchesBasic) return true;
+
+      if (leadToAssign) {
+        const badge = getDistanceBadge(contractor, leadToAssign);
+        if (badge) {
+          const badgeText = badge.text?.toLowerCase() || "";
+          const badgeDistance = badge.distance?.toString() || "";
+          const badgeRadius = badge.radius?.toString() || "";
+          const badgeSearchable = `${badgeText} ${badgeDistance} ${badgeRadius}`.toLowerCase();
+          
+          if (badgeSearchable.includes(searchLower)) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+  );
 
   
 

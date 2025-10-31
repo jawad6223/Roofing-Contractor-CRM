@@ -348,22 +348,44 @@ export const Contractors = () => {
   };
 
   const filteredLeads = leads.filter(
-    (lead) =>
-      (lead["First Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
-        lead["Last Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (lead) => {
+      const searchLower = searchTerm.toLowerCase();
+      const matchesBasic =
+        lead["First Name"].toLowerCase().includes(searchLower) ||
+        lead["Last Name"].toLowerCase().includes(searchLower) ||
         lead["Property Address"]
           .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
+          .includes(searchLower) ||
         lead["Insurance Company"]
           .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
+          .includes(searchLower) ||
         lead["Policy Number"]
           .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
+          .includes(searchLower) ||
         lead["Phone Number"]
           .toLowerCase()
-          .includes(searchTerm.toLowerCase())) &&
-      !existingAssignments.includes(lead["Email Address"])
+          .includes(searchLower);
+
+      if (matchesBasic) {
+        return !existingAssignments.includes(lead["Email Address"]);
+      }
+
+      if (selectedContractor) {
+        const badge = getDistanceBadge(lead, selectedContractor);
+        if (badge) {
+          const badgeText = badge.text?.toLowerCase() || "";
+          const badgeDistance = badge.distance?.toString() || "";
+          const badgeRadius = badge.radius?.toString() || "";
+          const badgeSearchable = `${badgeText} ${badgeDistance} ${badgeRadius}`.toLowerCase();
+          
+          if (badgeSearchable.includes(searchLower)) {
+            return !existingAssignments.includes(lead["Email Address"]);
+          }
+        }
+      }
+
+      return false;
+    }
   );
 
   return (

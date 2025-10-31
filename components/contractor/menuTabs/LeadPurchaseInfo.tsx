@@ -16,11 +16,13 @@ export const LeadPurchaseInfo = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalSearchTerm, setModalSearchTerm] = useState("");
   const [leadsInfo, setLeadsInfo] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [assignedLeads, setAssignedLeads] = useState<any[]>([]);
   const itemsPerPage = 10;
 
   useEffect(()=>{
     const fetchRequestLeads= async() => {
+      setLoading(true);
       try {
         const { data: authData, error: authError } = await supabase.auth.getUser();
         if (authError || !authData?.user) {
@@ -41,6 +43,8 @@ export const LeadPurchaseInfo = () => {
       } catch (error) {
         console.error("Error fetching contractor leads:", error);
         toast.error("Failed to fetch leads");
+      } finally {
+        setLoading(false);
       }
     };
     fetchRequestLeads();
@@ -303,7 +307,16 @@ export const LeadPurchaseInfo = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {currentData.length > 0 ? (
+                  {loading ? (
+                    <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                        <p className="mt-2 text-sm text-gray-500">Loading leads...</p>
+                      </div>
+                    </td>
+                  </tr>
+                  ) : currentData.length > 0 ? (
                     currentData.map((lead: leadsInfoType) => (
                       <tr key={lead.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">

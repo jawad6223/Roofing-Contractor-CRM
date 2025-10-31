@@ -69,6 +69,7 @@ export interface settingType {
   businessAddress: string;
   latitude?: number;
   longitude?: number;
+  phoneNumber: string;
 }
 
 export interface  paymentMethodType {

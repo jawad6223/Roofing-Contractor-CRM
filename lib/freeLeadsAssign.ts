@@ -42,7 +42,7 @@ export async function freeLeadsAssign(userId: string) {
 
     if (leadsError) throw leadsError;
     if (!leads || leads.length === 0) return;
-    console.log('freeLeadsAssign:openLeads', leads.length);
+    console.log('freeLeadsAssign:openLeads', leads);
 
     // 3️⃣ Filter leads within radius
     const matchingLeads = leads.filter((lead) => {

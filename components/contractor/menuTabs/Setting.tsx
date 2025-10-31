@@ -29,6 +29,7 @@ export const Setting = () => {
     businessAddress: "",
     latitude: 0,
     longitude: 0,
+    phoneNumber: "",
   });
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export const Setting = () => {
         const { data, error } = await supabase
           .from("Roofing_Auth")
           .select(
-            `"Full Name", "Service Radius", "Business Address", "Email Address"`
+            `"Full Name", "Service Radius", "Business Address", "Email Address", "Phone Number"`
           )
           .eq("user_id", userId)
           .maybeSingle();
@@ -61,6 +62,7 @@ export const Setting = () => {
           email: data["Email Address"] || "",
           serviceRadius: data["Service Radius"] || "",
           businessAddress: data["Business Address"] || "",
+          phoneNumber: data["Phone Number"] || "",
         });
       } catch (err: any) {
         console.error("Error fetching user data:", err);
@@ -90,7 +92,7 @@ export const Setting = () => {
       const { data, error } = await supabase
         .from("Roofing_Auth")
         .select(
-          `"Full Name", "Service Radius", "Business Address"`
+          `"Full Name", "Service Radius", "Business Address", "Phone Number"`
         )
         .eq("user_id", userId)
         .maybeSingle();
@@ -100,6 +102,7 @@ export const Setting = () => {
           fullName: data["Full Name"] || "",
           serviceRadius: data["Service Radius"] || "",
           businessAddress: data["Business Address"] || "",
+          phoneNumber: data["Phone Number"],
         });
       }
     } catch (err) {
@@ -124,6 +127,7 @@ export const Setting = () => {
           "Business Address": formData.businessAddress,
           "Latitude": formData.latitude,
           "Longitude": formData.longitude,
+          "Phone Number": formData.phoneNumber,
         })
         .eq("user_id", userId);
 
@@ -335,6 +339,21 @@ export const Setting = () => {
                   value={isProfileLoading ? "Loading..." : formData.fullName}
                   onChange={(e) =>
                     handleInputChange("fullName", e.target.value)
+                  }
+                  readOnly={!isEditing}
+                  className={`text-gray-900 h-11 ${
+                    !isEditing ? "bg-gray-50 cursor-not-allowed" : ""
+                  }`}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <Input
+                  value={isProfileLoading ? "Loading..." : formData.phoneNumber}
+                  onChange={(e) =>
+                    handleInputChange("phoneNumber", e.target.value)
                   }
                   readOnly={!isEditing}
                   className={`text-gray-900 h-11 ${
