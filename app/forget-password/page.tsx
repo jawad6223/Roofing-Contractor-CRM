@@ -115,7 +115,7 @@ export default function ForgetPasswordPage() {
             </div>
 
             {/* Buttons */}
-            <div className="flex space-x-3">
+            <div className="flex flex-col md:flex-row gap-3 md:gap-0 md:space-x-3">
               <button
                 type="button"
                 onClick={() => router.push("/login")}

@@ -103,7 +103,7 @@ useEffect(() => {
 
           {/* Action Button */}
           <button
-            onClick={() => router.push("/contractor/leads")}
+            onClick={() => router.push("/contractor")}
             className="w-full bg-[#122E5F] hover:bg-[#0f2347] text-white py-4 px-8 rounded-2xl font-bold text-lg shadow-2xl hover:shadow-3xl transform transition-all duration-300 hover:scale-105 active:scale-95 relative overflow-hidden group"
           >
             <span className="relative z-10 flex items-center justify-center">
