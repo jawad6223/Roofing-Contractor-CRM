@@ -64,6 +64,7 @@ export default function LoginModal() {
       if (recordError) {
         console.warn("No Roofing_Auth data found for this user:", recordError);
       } else {
+        if (userRecord["Is Verified"] === "not_confirmed") {
         const { error: updateError } = await supabase
           .from("Roofing_Auth")
           .update({ "Is Verified": "confirmed" })
@@ -71,8 +72,10 @@ export default function LoginModal() {
 
         if (updateError) {
           console.error("Error updating verification status:", updateError);
+        } else {
+          console.log("✅ User status updated from not_confirmed → confirmed");
         }
-
+      }
         localStorage.setItem("userInfo", JSON.stringify(userRecord));
         localStorage.setItem("loggedInUser", authData.user?.email || "");
       }
