@@ -50,7 +50,7 @@ useEffect(() => {
       ]);
 
       // Close the lead in Leads_Data
-      await supabase.from("Leads_Data").update({ Status: "closed" }).eq("id", lead_id);
+      await supabase.from("Leads_Data").update({ Status: "close" }).eq("id", lead_id);
     }
   };
 
