@@ -648,90 +648,96 @@ export const Contractors = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Name
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Zip Code
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Phone no
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Email
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Company
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {loadingAssignedLeads ? (
-                        <tr>
-                          <td colSpan={5} className="px-6 py-8 text-center">
-                            <div className="flex flex-col items-center justify-center">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
-                              <p className="mt-2 text-sm text-gray-500">
-                                Loading assigned leads...
-                              </p>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : currentAssignedLeadsData.length > 0 ? (
-                        currentAssignedLeadsData.map(
-                          (lead: any, index: number) => (
-                            <tr key={index} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div>
-                                  <div className="text-sm font-bold text-[#122E5F]">
-                                    {lead["First Name"]} {lead["Last Name"]}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center">
-                                  <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                                  <span className="text-sm font-medium text-gray-900">
-                                    {lead["Zip Code"]}
-                                  </span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-black">
-                                <div className="space-y-1 flex items-center">
-                                  <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead["Phone Number"]}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-black">
-                                <div className="space-y-1 flex items-center">
-                                  <Mail className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead["Email Address"]}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className="text-sm font-medium text-gray-900 flex items-center">
-                                  <Building className="h-3 w-3 text-gray-400 mr-1" />
-                                  {lead["Insurance Company"]}
-                                </span>
-                              </td>
+                  <div className="overflow-x-auto -mx-4 sm:mx-0">
+                    <div className="inline-block min-w-full align-middle">
+                      <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                        <table className="min-w-full divide-y divide-gray-300">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                Name
+                              </th>
+                              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                Zip Code
+                              </th>
+                              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                Phone no
+                              </th>
+                              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                Email
+                              </th>
+                              <th className="px-4 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                                Company
+                              </th>
                             </tr>
-                          )
-                        )
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan={5}
-                            className="px-6 py-8 text-center text-gray-500"
-                          >
-                            No assigned leads found for this contractor
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {loadingAssignedLeads ? (
+                              <tr>
+                                <td colSpan={5} className="px-4 sm:px-6 py-8 text-center">
+                                  <div className="flex flex-col items-center justify-center">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                                    <p className="mt-2 text-sm text-gray-500">
+                                      Loading assigned leads...
+                                    </p>
+                                  </div>
+                                </td>
+                              </tr>
+                            ) : currentAssignedLeadsData.length > 0 ? (
+                              currentAssignedLeadsData.map(
+                                (lead: any, index: number) => (
+                                  <tr key={index} className="hover:bg-gray-50">
+                                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                                      <div>
+                                        <div className="text-sm font-bold text-[#122E5F]">
+                                          {lead["First Name"]} {lead["Last Name"]}
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                                      <div className="flex items-center">
+                                        <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                                        <span className="text-sm font-medium text-gray-900">
+                                          {lead["Zip Code"]}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-black">
+                                      <div className="space-y-1 flex items-center">
+                                        <Phone className="h-3 w-3 text-gray-400 mr-1" />
+                                        {lead["Phone Number"]}
+                                      </div>
+                                    </td>
+                                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-black">
+                                      <div className="space-y-1 flex items-center">
+                                        <Mail className="h-3 w-3 text-gray-400 mr-1" />
+                                        {lead["Email Address"]}
+                                      </div>
+                                    </td>
+                                    <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                                      <span className="text-sm font-medium text-gray-900 flex items-center">
+                                        <Building className="h-3 w-3 text-gray-400 mr-1" />
+                                        {lead["Insurance Company"]}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                )
+                              )
+                            ) : (
+                              <tr>
+                                <td
+                                  colSpan={5}
+                                  className="px-4 sm:px-6 py-8 text-center text-gray-500"
+                                >
+                                  No assigned leads found for this contractor
+                                </td>
+                              </tr>
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Assigned Leads Pagination */}
