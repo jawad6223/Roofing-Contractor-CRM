@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
         lead_id,
         user_id,
       },
-      success_url: `${request.headers.get("origin")}/premiumSuccess?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${request.headers.get("origin")}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get("origin")}/cancel`,
     });
 
