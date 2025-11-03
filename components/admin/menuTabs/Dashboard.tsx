@@ -72,32 +72,34 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchTotalSales = async () => {
       const currentDate = new Date();
-      const currentMonth = currentDate.getMonth() + 1;
       const currentYear = currentDate.getFullYear();
+      const currentMonth = currentDate.getMonth();
       
-      const startOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
-      const endOfMonth = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-31`;
+      const monthForString = currentMonth + 1;
+      const startOfMonthStr = `${currentYear}-${monthForString.toString().padStart(2, '0')}-01`;
+      
+      const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
+      const endOfMonthStr = `${currentYear}-${monthForString.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
       
       const { data, error } = await supabase
         .from("Leads_Request")
         .select("Price, \"No. of Leads\"")
-        .gte("Purchase Date", startOfMonth)
-        .lte("Purchase Date", endOfMonth);
+        .gte("Purchase Date", startOfMonthStr)
+        .lte("Purchase Date", endOfMonthStr);
       
       if (error) {
         console.error("Error fetching sales data:", error);
+        setTotalSales(0);
         return;
       }
       
-      if (data) {
-        const totalSalesAmount = data.reduce((sum, item) => {
-          const price = item.Price || 0;
-          const numberOfLeads = item["No. of Leads"] || 0;
-          return sum + (price * numberOfLeads);
-        }, 0);
-        
-        setTotalSales(totalSalesAmount);
-      }
+      const totalSalesAmount = (data || []).reduce((sum, item) => {
+        const price = item.Price || 0;
+        const numberOfLeads = item["No. of Leads"] || 0;
+        return sum + (price * numberOfLeads);
+      }, 0);
+      
+      setTotalSales(totalSalesAmount);
     };
     
     fetchTotalSales();
@@ -238,7 +240,8 @@ export const Dashboard = () => {
               <div>
                 <span className="text-xs font-medium underline text-gray-500">This Month</span>
                 <p className="text-sm font-medium text-gray-600">Total Sales</p>
-                <div className="text-2xl font-bold text-gray-900">{totalSales ? `$${totalSales}` : <LoadingDots />}</div>
+                <div className="text-2xl font-bold text-gray-900">${totalSales.toLocaleString()}</div>
+                {/* <div className="text-2xl font-bold text-gray-900">{totalSales ? `$${totalSales.toLocaleString()}` : <LoadingDots />}</div> */}
               </div>
               <div
                 className={`w-12 h-12 bg-[#122E5F] rounded-xl flex items-center justify-center`}
