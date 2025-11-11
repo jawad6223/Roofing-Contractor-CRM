@@ -327,9 +327,9 @@ export const Leads = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="text-sm font-medium text-gray-400 select-none">{`${lead["Property Address"]?.slice(
+                      <div className="flex items-center w-52">
+                        <MapPin className="h-9 w-9 text-gray-400 mr-2" />
+                        <span className="text-sm truncate font-medium text-gray-400 select-none">{`${lead["Property Address"]?.slice(
                           0,
                           2
                         ) || ""}${"*".repeat(Math.max((lead["Property Address"]?.length || 0) - 2, 0))}`}</span>
@@ -387,10 +387,10 @@ export const Leads = () => {
                           {lead["Email Address"]}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center text-sm font-medium text-gray-600">
-                          <MapPin className="h-3 w-3 mr-1 text-gray-400" />
-                          {lead["Property Address"]}
+                      <td className="px-6 py-4 whitespace-nowra">
+                        <div className="flex items-center text-sm w-52 font-medium text-gray-600">
+                          <MapPin className="h-6 w-6 mr-1 text-gray-400" />
+                          <span className="truncate">{lead["Property Address"]}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

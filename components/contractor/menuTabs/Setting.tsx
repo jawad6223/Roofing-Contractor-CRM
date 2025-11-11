@@ -62,7 +62,7 @@ export const Setting = () => {
           email: data["Email Address"] || "",
           serviceRadius: data["Service Radius"] || "",
           businessAddress: data["Business Address"] || "",
-          phoneNumber: data["Phone Number"] || "",
+          phoneNumber: data["Phone Number"] || ""
         });
       } catch (err: any) {
         console.error("Error fetching user data:", err);
@@ -329,6 +329,7 @@ export const Setting = () => {
                 {formData.fullName}
               </h3>
               <p className="text-sm text-gray-600">{formData.email}</p>
+              <p className="text-sm text-gray-500 w-96 text-center mx-auto">{formData.businessAddress}</p>
             </div>
             <div className="space-y-4">
               <div>
