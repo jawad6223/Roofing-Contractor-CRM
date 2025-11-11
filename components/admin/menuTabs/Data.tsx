@@ -19,6 +19,7 @@ export const fetchContractors = async () => {
         `"Full Name", "Title", "Phone Number", "Email Address", "Business Address", "Service Radius", "Latitude", "Longitude", user_id`
       )
       .in("Is Verified", ["confirmed", "assigned"])
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
 
