@@ -198,8 +198,14 @@ export const Appointments = () => {
                 mode="single"
                 selected={date}
                 onSelect={setDate}
-                className="rounded-md w-full border shadow-sm"
+                className="rounded-md w-full border shadow-sm calendar-appointments"
                 captionLayout="dropdown"
+                fromYear={new Date().getFullYear() - 5}
+                toYear={new Date().getFullYear() + 10}
+                formatters={{
+                  formatYearDropdown: (date) => date.getFullYear().toString(),
+                  formatMonthDropdown: (date) => date.toLocaleString("default", { month: "short" })
+                }}
                 modifiers={{
                   hasAppointment: appointmentDates
                 }}
@@ -224,8 +230,27 @@ export const Appointments = () => {
                     background-color: #3b82f6;
                     z-index: 1;
                   }
+                  .calendar-appointments button[aria-label*="Next"],
+                  .calendar-appointments .rdp-button_next {
+                    pointer-events: auto !important;
+                    opacity: 1 !important;
+                    cursor: pointer !important;
+                  }
+                  .calendar-appointments button[aria-label*="Next"][aria-disabled="true"],
+                  .calendar-appointments .rdp-button_next[aria-disabled="true"] {
+                    opacity: 1 !important;
+                    pointer-events: auto !important;
+                    cursor: pointer !important;
+                    background-color: transparent !important;
+                  }
+                  .calendar-appointments button[aria-label*="Next"][aria-disabled="true"]:hover,
+                  .calendar-appointments .rdp-button_next[aria-disabled="true"]:hover {
+                    opacity: 1 !important;
+                    background-color: rgba(0, 0, 0, 0.05) !important;
+                  }
                 `
-              }} />
+              }}
+               />
             </CardContent>
           </Card>
         </div>
@@ -324,7 +349,7 @@ export const Appointments = () => {
                       <SelectTrigger>
                         <SelectValue placeholder="Choose a lead" />
                       </SelectTrigger>
-                      <SelectContent className="max-h-[200px] overflow-y-auto max-w-[300px]">
+                      <SelectContent className="max-h-[350px] overflow-y-auto max-w-[300px]">
                         {leads.map((lead) => (
                           <SelectItem key={lead.id} value={lead.id}>
                             {lead['First Name']} {lead['Last Name']} - {lead['Property Address']}
@@ -344,6 +369,9 @@ export const Appointments = () => {
                     selected={appointmentDate}
                     onSelect={setAppointmentDate}
                     className="rounded-md border"
+                    captionLayout="dropdown"
+                fromYear={new Date().getFullYear() - 5}
+                toYear={new Date().getFullYear() + 10}
                   />
                 </div>
                 <div>
