@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Home, Settings, BarChart3, Menu, X, User, LogOut, UserPlus, ShoppingCart, FileText } from "lucide-react";
+import { Home, Settings, BarChart3, Menu, X, User, LogOut, UserPlus, ShoppingCart, FileText, Calendar } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -31,6 +31,8 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
         return "CRM";
       case "leads":
         return "Leads";
+      case "appointments":
+        return "Appointments";
       case "purchase-leads":
         return "Purchase Leads";
       case "lead-purchase-info":
@@ -50,6 +52,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
     { icon: Home, label: "Dashboard", path: "/contractor/dashboard" },
     { icon: BarChart3, label: "CRM", path: "/contractor/crm" },
     { icon: FileText, label: "Leads", path: "/contractor/leads" },
+    { icon: Calendar, label: "Appointments", path: "/contractor/appointments" },
     { icon: ShoppingCart, label: "Purchase Leads", path: "/contractor/purchase-leads" },
     { icon: FileText, label: "Lead Purchase Info", path: "/contractor/lead-purchase-info" },
     { icon: Settings, label: "Settings", path: "/contractor/settings" },

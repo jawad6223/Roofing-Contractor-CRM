@@ -9,8 +9,8 @@ import 'react-toastify/dist/ReactToastify.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'RoofClaim Pro - Professional Roofing Claims Services',
-  description: 'Expert roofing damage assessment and insurance claim assistance. Get the coverage you deserve with our professional roofing claim services.',
+  title: 'Free Roof Quotes | Fast & Trusted Roofing Claims Experts',
+  description: 'Discover your best roofing options with a free quote. Fast, reliable roof inspections and professional insurance claim help. Secure your home with trusted local experts—request your free estimate today!',
 };
 
 export default function RootLayout({

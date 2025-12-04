@@ -80,3 +80,14 @@ export interface  paymentMethodType {
   card_holder_name: string;
   card_brand: string;
 }
+
+export interface appointmentType {
+  id: string
+  date: Date
+  time: string
+  clientName: string
+  propertyAddress: string
+  phone: string
+  email: string
+  notes?: string
+}
