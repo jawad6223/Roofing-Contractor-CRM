@@ -37,6 +37,8 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
         return "Purchase Leads";
       case "lead-purchase-info":
         return "Lead Purchase Info";
+      case "appointment-info":
+        return "Appointment Info";
       case "settings":
         return "Settings";
       case "teams":
@@ -55,6 +57,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
     { icon: Calendar, label: "Appointments", path: "/contractor/appointments" },
     { icon: ShoppingCart, label: "Purchase Leads", path: "/contractor/purchase-leads" },
     { icon: FileText, label: "Lead Purchase Info", path: "/contractor/lead-purchase-info" },
+    { icon: Calendar, label: "Appointment Info", path: "/contractor/appointment-info" },
     { icon: Settings, label: "Settings", path: "/contractor/settings" },
     { icon: UserPlus, label: "Teams", path: "/contractor/teams" },
   ];

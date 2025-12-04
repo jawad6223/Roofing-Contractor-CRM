@@ -1,4 +1,4 @@
-import { FileText, Users, DollarSign, Settings, BarChart3 } from "lucide-react";
+import { FileText, Users, DollarSign, Settings, BarChart3, Calendar } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
 import { ContractorType } from "@/types/AdminTypes";
@@ -8,6 +8,7 @@ export const sidebarItems = [
   { id: "leads", label: "Leads", icon: FileText, path: "/admin/leads" },
   { id: "contractors", label: "Contractors", icon: Users, path: "/admin/contractors", },
   { id: "leads-request", label: "Lead Request", icon: FileText, path: "/admin/leads-request", },
+  { id: "appointments", label: "Appointments Request", icon: Calendar, path: "/admin/appointments-request", },
   { id: "settings", label: "Settings", icon: Settings, path: "/admin/settings", },
 ];
 
@@ -74,7 +75,75 @@ export const fetchRequestLeads = async () => {
   }
 };
 
+// export const fetchRequestAppointments = async () => {
+
+//   try {
+//     const { data, error } = await supabase
+//       .from("Appointments_Request")
+//       .select("*")
+//       .order("created_at", { ascending: false });
+
+//     if (error) {
+//       throw error;
+//     } else {
+//       return data || [];
+//     }
+//   } catch (error) {
+//     toast.error("Failed to fetch appointment requests");
+//   }
+// };
+
 // Leads Data
+
+export const appointmentRequests = [
+  {
+    id: 1,
+    name: "John Doe",
+    phone: "(555) 123-5787",
+    email: "john.doe@example.com",
+    address: "Main St, Houston, TX",
+    date: "2024-01-15",
+    time: "10:00 AM",
+    status: "Pending",
+    price: 350,
+  },
+  {
+    id: 2,
+    name: "Jane Smith",
+    phone: "(555) 987-5787",
+    email: "jane.doe@example.com",
+    address: "Main St, Dallas, TX",
+    date: "2024-01-14",
+    time: "11:00 AM",
+    status: "Pending",
+    price: 350,
+  },
+  {
+    id: 3,
+    name: "Jim Beam",
+    phone: "(555) 789-5787",
+    email: "jim.beam@example.com",
+    address: "Main St, Austin, TX",
+    date: "2024-01-13",
+    time: "12:00 PM",
+    status: "Confirmed",
+    price: 350,
+  },
+]
+
+export const staticAppointmentData = [
+  {
+    id: 1,
+    name: "John Smith",
+    price: 350,
+    propertyAddress: "123 Main St, Houston, TX 77001",
+    phone: "(555) 123-4567",
+    email: "john.smith@email.com",
+    date: "2024-12-15",
+    time: "10:00 AM"
+  }
+];
+
 export const allLeads = [
   {
     id: 1,

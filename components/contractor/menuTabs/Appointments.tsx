@@ -78,6 +78,7 @@ export const Appointments = () => {
   const [selectedLead, setSelectedLead] = useState<string>('')
   const [appointmentDate, setAppointmentDate] = useState<Date | undefined>(new Date())
   const [appointmentTime, setAppointmentTime] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [newLead, setNewLead] = useState({
     firstName: '',
     lastName: '',
@@ -159,8 +160,24 @@ export const Appointments = () => {
     // }
   }
 
-  const handleBuyAppointments = () => {
-    setShowPurchasedModal(false)
+  async function handleBuyAppointments() {
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/create-appointment-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          appointmentAmount: 350,
+        }),
+      });
+  
+      const { url } = await response.json();
+      router.push(url);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -191,7 +208,7 @@ export const Appointments = () => {
         <div className="w-full lg:flex-1">
           <Card>
             <CardHeader>
-              <CardTitle>Calendar</CardTitle>
+              <CardTitle className="text-black">Calendar</CardTitle>
             </CardHeader>
             <CardContent>
               <Calendar
@@ -257,7 +274,7 @@ export const Appointments = () => {
         <div className="w-full lg:flex-1">
           <Card>
             <CardHeader>
-              <CardTitle>
+              <CardTitle className="text-black">
                 {date 
                   ? `Appointments for ${format(date, 'MMMM d, yyyy')}`
                   : 'Select a date to view appointments'
@@ -336,17 +353,17 @@ export const Appointments = () => {
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Schedule Appointment</DialogTitle>
+            <DialogTitle className="text-black">Schedule Appointment</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Select Lead</Label>
+                  <Label className="text-sm font-medium mb-2 block text-black">Select Lead</Label>
                   <div className="space-y-3">
                     <Select value={selectedLead} onValueChange={setSelectedLead}>
-                      <SelectTrigger>
+                      <SelectTrigger className="text-black">
                         <SelectValue placeholder="Choose a lead" />
                       </SelectTrigger>
                       <SelectContent className="max-h-[350px] overflow-y-auto max-w-[300px]">
@@ -363,7 +380,7 @@ export const Appointments = () => {
 
               <div className="space-y-4">
                 <div>
-                  <Label className="text-sm font-medium mb-2 block">Select Date</Label>
+                  <Label className="text-sm font-medium mb-2 block text-black">Select Date</Label>
                   <Calendar
                     mode="single"
                     selected={appointmentDate}
@@ -375,13 +392,13 @@ export const Appointments = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="time" className="text-sm font-medium mb-2 block">Select Time</Label>
+                  <Label htmlFor="time" className="text-sm font-medium mb-2 block text-black">Select Time</Label>
                   <Input
                     id="time"
                     type="time"
                     value={appointmentTime}
                     onChange={(e) => setAppointmentTime(e.target.value)}
-                    className="w-full"
+                    className="w-full text-black"
                   />
                 </div>
               </div>
@@ -408,7 +425,7 @@ export const Appointments = () => {
             </Button>
             <Button
               onClick={handleAddAppointment}
-              className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+              className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
             >
               Mark as Appointment Set
             </Button>
@@ -439,9 +456,10 @@ export const Appointments = () => {
             </Button>
             <Button
               onClick={() => {handleBuyAppointments()}}
-              className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+              className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
+              disabled={isLoading}
             >
-              Buy Now
+              {isLoading ? 'Processing...' : 'Buy Now'}
             </Button>
           </DialogFooter>
         </DialogContent>

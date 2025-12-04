@@ -1,12 +1,12 @@
 "use client";
 
 import { ProtectedRoute } from "@/components/Auth/ProtectedRoute";
-import { Dashboard, Leads, Contractors, Setting, LeadRequest } from "@/components/admin/menuTabs/Index";
+import { Dashboard, Leads, Contractors, Setting, LeadRequest, AppointmentsRequest } from "@/components/admin/menuTabs/Index";
 import { notFound } from "next/navigation";
 import { AdminSectionPageProps } from "@/types/AdminTypes";
 import { useEffect, useState } from "react";
 
-const validSections = ["dashboard", "leads", "contractors", "leads-request", "settings"];
+const validSections = ["dashboard", "leads", "contractors", "leads-request", "appointments-request", "settings"];
 
 export default function AdminSectionPage({ params }: { params: Promise<{ section: string }> }) {
   const [section, setSection] = useState<string>("");
@@ -41,6 +41,8 @@ export default function AdminSectionPage({ params }: { params: Promise<{ section
         return <Contractors />;
       case "leads-request":
         return <LeadRequest />;
+      case "appointments-request":
+        return <AppointmentsRequest />;
       case "settings":
         return <Setting />;
       default:
