@@ -122,7 +122,7 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate capitalize">{currentUserFullName}</p>
-                <p className="text-xs text-gray-500 truncate">{loading ? "Loading..." : user}</p>
+                {/* <p className="text-xs text-gray-500 truncate">{loading ? "Loading..." : user}</p> */}
               </div>
             </div>
             <AlertDialog>
