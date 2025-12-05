@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2025-08-27.basil",
@@ -7,10 +8,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const { appointmentAmount } = await request.json();
+    const { appointmentAmount, contractorId } = await request.json();
 
     if (!appointmentAmount) {
-      return NextResponse.json({ error: "Missing lead amount" }, { status: 400 });
+      return NextResponse.json({ error: "Missing appointment amount" }, { status: 400 });
+    }
+
+    if (!contractorId) {
+      return NextResponse.json({ error: "Missing contractor ID" }, { status: 400 });
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -30,6 +35,10 @@ export async function POST(request: NextRequest) {
       mode: "payment",
       success_url: `${request.headers.get("origin")}/appointment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get("origin")}/cancel`,
+      metadata: {
+        contractor_id: contractorId,
+        appointment_amount: appointmentAmount.toString(),
+      },
     });
 
     return NextResponse.json({ url: session.url });

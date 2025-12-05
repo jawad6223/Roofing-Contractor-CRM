@@ -14,67 +14,13 @@ import { fetchContractorLeads } from './Data'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'react-toastify'
 
-
-
-const mockAppointments: appointmentType[] = [
-  {
-    id: '1',
-    date: new Date(2025, 11, 15),
-    time: '10:00 AM',
-    clientName: 'John Smith',
-    propertyAddress: '123 Main St, City, State 12345',
-    phone: '(555) 123-4567',
-    email: 'john.smith@email.com',
-    notes: 'Initial roof inspection needed'
-  },
-  {
-    id: '2',
-    date: new Date(2025, 11, 18),
-    time: '2:30 PM',
-    clientName: 'Sarah Johnson',
-    propertyAddress: '456 Oak Ave, City, State 12345',
-    phone: '(555) 234-5678',
-    email: 'sarah.j@email.com',
-    notes: 'Follow-up appointment for quote'
-  },
-  {
-    id: '3',
-    date: new Date(2025, 11, 20),
-    time: '9:00 AM',
-    clientName: 'Michael Brown',
-    propertyAddress: '789 Pine Rd, City, State 12345',
-    phone: '(555) 345-6789',
-    email: 'm.brown@email.com',
-    notes: 'Roof repair work scheduled'
-  },
-  {
-    id: '4',
-    date: new Date(2025, 11, 22),
-    time: '1:00 PM',
-    clientName: 'Emily Davis',
-    propertyAddress: '321 Elm St, City, State 12345',
-    phone: '(555) 456-7890',
-    email: 'emily.d@email.com',
-    notes: 'New installation consultation'
-  },
-  {
-    id: '5',
-    date: new Date(2025, 11, 25),
-    time: '11:00 AM',
-    clientName: 'Robert Wilson',
-    propertyAddress: '654 Maple Dr, City, State 12345',
-    phone: '(555) 567-8901',
-    email: 'r.wilson@email.com',
-    notes: 'Emergency roof repair'
-  }
-]
-
 export const Appointments = () => {
   const router = useRouter()
   const [date, setDate] = useState<Date | undefined>(new Date())
   const [showAddModal, setShowAddModal] = useState(false)
   const [showPurchasedModal, setShowPurchasedModal] = useState(false)
   const [leads, setLeads] = useState<purchasedLeadType[]>([])
+  const [appointments, setAppointments] = useState<appointmentType[]>([])
   const [selectedLead, setSelectedLead] = useState<string>('')
   const [appointmentDate, setAppointmentDate] = useState<Date | undefined>(new Date())
   const [appointmentTime, setAppointmentTime] = useState('')
@@ -87,21 +33,73 @@ export const Appointments = () => {
     address: ''
   })
 
+  const fetchAppointments = async () => {
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError || !authData?.user) {
+        return
+      }
+      const userId = authData.user.id
+
+      const { data, error } = await supabase
+        .from('Contractor_Leads')
+        .select('*')
+        .eq('contractor_id', userId)
+        .eq('Appointment_Status', 'Yes')
+        .not('Appointment_Date', 'is', null)
+        .not('Appointment_Time', 'is', null)
+        .order('Appointment_Date', { ascending: true })
+        .order('Appointment_Time', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching appointments:', error)
+        return
+      }
+
+      if (data) {
+        const transformedAppointments: appointmentType[] = data.map((lead: any) => {
+          const appointmentDate = lead.Appointment_Date ? new Date(lead.Appointment_Date) : new Date()
+          const timeStr = lead.Appointment_Time || ''
+          const timeParts = timeStr.split(':')
+          const formattedTime = timeParts.length >= 2 
+            ? `${parseInt(timeParts[0]) % 12 || 12}:${timeParts[1]} ${parseInt(timeParts[0]) >= 12 ? 'PM' : 'AM'}`
+            : ''
+
+          return {
+            id: lead.id.toString(),
+            date: appointmentDate,
+            time: formattedTime,
+            clientName: `${lead['First Name'] || ''} ${lead['Last Name'] || ''}`.trim(),
+            propertyAddress: lead['Property Address'] || '',
+            phone: lead['Phone Number'] || '',
+            email: lead['Email Address'] || '',
+            notes: ''
+          }
+        })
+
+        setAppointments(transformedAppointments)
+      }
+    } catch (error) {
+      console.error('Error in fetchAppointments:', error)
+    }
+  }
+
   useEffect(() => {
     const fetchLeads = async () => {
       const leadsData = await fetchContractorLeads()
       if (leadsData) {
-        setLeads(leadsData.filter((lead: any) => lead.status !== 'close'))
+        setLeads(leadsData.filter((lead: any) => lead.status !== 'close' && lead.Appointment_Status !== 'Yes'))
       }
     }
     fetchLeads()
+    fetchAppointments()
   }, [])
 
-  const appointmentDates = mockAppointments.map(apt => apt.date)
+  const appointmentDates = appointments.map(apt => apt.date)
 
   const getAppointmentsForDate = (selectedDate: Date | undefined) => {
     if (!selectedDate) return []
-    return mockAppointments.filter(apt => 
+    return appointments.filter(apt => 
       format(apt.date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
     )
   }
@@ -110,64 +108,99 @@ export const Appointments = () => {
 
   const handleAddAppointment = async () => {
     if (!selectedLead) {
-        toast.error('Please select a lead')
-        return
-      }
+      toast.error('Please select a lead')
+      return
+    }
+    if (!appointmentDate) {
+      toast.error('Please select a date')
+      return
+    }
     if (!appointmentTime) {
       toast.error('Please select time')
       return
     }
 
-    // try {
-    //     const { data: authData } = await supabase.auth.getUser()
-    //     const userId = authData?.user?.id
+    try {
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError || !authData?.user) {
+        toast.error('User not logged in')
+        return
+      }
+      const userId = authData.user.id
 
-    //     if (!userId) {
-    //       toast.error('User not logged in')
-    //       return
-    //     }
+      const formattedDate = format(appointmentDate, 'yyyy-MM-dd')
+      const timeParts = appointmentTime.split(':')
+      const formattedTime = `${timeParts[0]}:${timeParts[1]}:00`
 
-    //     const { error: leadError } = await supabase
-    //       .from('Contractor_Leads')
-    //       .insert({
-    //         contractor_id: userId,
-    //         'First Name': newLead.firstName,
-    //         'Last Name': newLead.lastName,
-    //         'Phone Number': newLead.phone,
-    //         'Email Address': newLead.email,
-    //         'Property Address': newLead.address,
-    //         status: 'appointment_set'
-    //       })
+      const { data: existingAppointments, error: checkError } = await supabase
+        .from('Contractor_Leads')
+        .select('id')
+        .eq('contractor_id', userId)
+        .eq('Appointment_Date', formattedDate)
+        .eq('Appointment_Time', formattedTime)
+        .neq('id', selectedLead)
 
-    //     if (leadError) throw leadError
-      
+      if (checkError) {
+        console.error('Error checking existing appointments:', checkError)
+        toast.error('Failed to check appointment availability')
+        return
+      }
 
-    //   toast.success('Appointment scheduled successfully')
-    //   setShowAddModal(false)
-    //   setSelectedLead('')
-    //   setAppointmentDate(new Date())
-    //   setAppointmentTime('')
-    //   setNewLead({
-    //     firstName: '',
-    //     lastName: '',
-    //     phone: '',
-    //     email: '',
-    //     address: ''
-    //   })
-    // } catch (error) {
-    //   console.error('Error scheduling appointment:', error)
-    //   toast.error('Failed to schedule appointment')
-    // }
+      if (existingAppointments && existingAppointments.length > 0) {
+        toast.error('An appointment already exists at this date and time. Please choose a different time.')
+        return
+      }
+
+      const { error: updateError } = await supabase
+        .from('Contractor_Leads')
+        .update({
+          Appointment_Date: formattedDate,
+          Appointment_Time: formattedTime,
+          Appointment_Status: 'Yes'
+        })
+        .eq('id', selectedLead)
+        .eq('contractor_id', userId)
+
+      if (updateError) {
+        console.error('Error updating appointment:', updateError)
+        toast.error('Failed to set appointment')
+        return
+      }
+
+      toast.success('Appointment set successfully')
+      setShowAddModal(false)
+      setSelectedLead('')
+      setAppointmentDate(new Date())
+      setAppointmentTime('')
+
+      const leadsData = await fetchContractorLeads()
+      if (leadsData) {
+        setLeads(leadsData.filter((lead: any) => lead.status !== 'close' && lead.Appointment_Status !== 'Yes'))
+      }
+      await fetchAppointments()
+    } catch (error) {
+      console.error('Error in handleAddAppointment:', error)
+      toast.error('An error occurred while setting the appointment')
+    }
   }
 
   async function handleBuyAppointments() {
     setIsLoading(true)
     try {
+      const { data: authData, error: authError } = await supabase.auth.getUser()
+      if (authError || !authData?.user) {
+        toast.error('User not logged in')
+        setIsLoading(false)
+        return
+      }
+      const contractorId = authData.user.id
+
       const response = await fetch("/api/create-appointment-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           appointmentAmount: 350,
+          contractorId: contractorId,
         }),
       });
   
@@ -175,6 +208,7 @@ export const Appointments = () => {
       router.push(url);
     } catch (error) {
       console.error(error);
+      toast.error('Failed to create checkout session')
     } finally {
       setIsLoading(false)
     }
@@ -387,8 +421,9 @@ export const Appointments = () => {
                     onSelect={setAppointmentDate}
                     className="rounded-md border"
                     captionLayout="dropdown"
-                fromYear={new Date().getFullYear() - 5}
-                toYear={new Date().getFullYear() + 10}
+                    fromYear={new Date().getFullYear() - 5}
+                    toYear={new Date().getFullYear() + 10}
+                    disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
                   />
                 </div>
                 <div>
