@@ -7,30 +7,79 @@ import { Pagination } from "@/components/ui/pagination";
 import { TablePopup } from "@/components/ui/TablePopup";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
-
-const appointmentsInfo = [
-  {
-    id: 1,
-    "Business Address": "123 Main St, Anytown, USA",
-    "Date": "2025-12-01",
-    "Time": "10:00 AM",
-    "Price": 350,
-    status: "Pending"
-  },
-  {
-    id: 2,
-    "Business Address": "456 Oak Ave, Anytown, USA",
-    "Date": "2025-12-02",
-    "Time": "09:00 AM",
-    "Price": 350,
-    status: "Confirmed"
-  },
-];
+import { format } from "date-fns";
 
 export const AppointmentsInfo = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [appointmentsInfo, setAppointmentsInfo] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 10;
+
+  useEffect(() => {
+    const fetchAppointmentsInfo = async () => {
+      try {
+        setLoading(true);
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError || !authData?.user) {
+          toast.error("User not logged in");
+          setLoading(false);
+          return;
+        }
+        const userId = authData.user.id;
+
+        const { data: contractorData, error: contractorError } = await supabase
+          .from("Roofing_Auth")
+          .select('"Business Address"')
+          .eq("user_id", userId)
+          .single();
+
+        if (contractorError) {
+          console.error("Error fetching contractor data:", contractorError);
+        }
+
+        const businessAddress = contractorData?.["Business Address"] || "";
+
+        const { data: appointments, error: appointmentsError } = await supabase
+          .from("Appointments_Request")
+          .select("*")
+          .eq("Contractor_Id", userId)
+          .order("created_at", { ascending: false });
+
+        if (appointmentsError) {
+          console.error("Error fetching appointments:", appointmentsError);
+          toast.error("Failed to fetch appointments");
+          setAppointmentsInfo([]);
+          return;
+        }
+
+        if (appointments) {
+          const transformedAppointments = appointments.map((apt: any) => {
+            const appointmentDate = apt.created_at ? new Date(apt.created_at) : new Date();
+            return {
+              id: apt.id,
+              "Business Address": businessAddress,
+              "Date": format(appointmentDate, "yyyy-MM-dd"),
+              // "Time": format(appointmentDate, "hh:mm a"),
+              "Price": apt.Price || 0,
+              status: apt.Status || "Pending",
+            };
+          });
+          setAppointmentsInfo(transformedAppointments);
+        } else {
+          setAppointmentsInfo([]);
+        }
+      } catch (error) {
+        console.error("Error fetching appointments info:", error);
+        toast.error("Failed to load appointments");
+        setAppointmentsInfo([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointmentsInfo();
+  }, []);
 
   const filteredAppointments = appointmentsInfo.filter((appointment) => {
     const searchLower = searchTerm.toLowerCase();
@@ -141,9 +190,9 @@ export const AppointmentsInfo = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Date
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Time
-                    </th>
+                    </th> */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Price
                     </th>
@@ -153,7 +202,16 @@ export const AppointmentsInfo = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {currentData.length > 0 ? (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={5} className="px-6 py-8 text-center">
+                        <div className="flex flex-col items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                          <p className="mt-2 text-sm text-gray-500">Loading appointments...</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : currentData.length > 0 ? (
                     currentData.map((appointment) => (
                       <tr key={appointment.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -170,19 +228,19 @@ export const AppointmentsInfo = () => {
                             {appointment["Date"]}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-black">
+                        {/* <td className="px-6 py-4 whitespace-nowrap text-black">
                           <div className="flex items-center">
-                            <Calendar className="h-3 w-3 text-gray-400 mr-1" />
+                            <Clock className="h-3 w-3 text-gray-400 mr-1" />
                             {appointment["Time"]}
                           </div>
-                        </td>
+                        </td> */}
                         <td className="px-6 py-4 whitespace-nowrap text-center">
                           <span className="text-sm font-bold text-gray-900">
                             ${appointment["Price"]}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <span className={`text-sm font-bold ${appointment.status === "Confirmed" ? "text-green-500" : "text-red-500"}`}>
+                          <span className={`text-sm font-bold ${appointment.status === "Confirmed" ? "text-green-500" : appointment.status === "Pending" ? "text-yellow-500" : "text-gray-500"}`}>
                             {appointment.status}
                           </span>
                         </td>
@@ -190,7 +248,7 @@ export const AppointmentsInfo = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={7} className="px-6 py-8 text-center">
+                      <td colSpan={5} className="px-6 py-8 text-center">
                         <div className="flex flex-col items-center justify-center space-y-3">
                           <Search className="h-12 w-12 text-gray-300" />
                           <div>

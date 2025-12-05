@@ -13,6 +13,7 @@ import { appointmentType, purchasedLeadType } from '@/types/DashboardTypes'
 import { fetchContractorLeads } from './Data'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'react-toastify'
+import { fetchAppointmentPrice } from '@/lib/AppointmentPrice'
 
 export const Appointments = () => {
   const router = useRouter()
@@ -25,6 +26,7 @@ export const Appointments = () => {
   const [appointmentDate, setAppointmentDate] = useState<Date | undefined>(new Date())
   const [appointmentTime, setAppointmentTime] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [appointmentPrice, setAppointmentPrice] = useState<number>(0);
   const [newLead, setNewLead] = useState({
     firstName: '',
     lastName: '',
@@ -32,6 +34,16 @@ export const Appointments = () => {
     email: '',
     address: ''
   })
+
+  useEffect(() => {
+    const fetchAppointmentPriceData = async () => {
+      const appointmentPriceData = await fetchAppointmentPrice();
+      if (appointmentPriceData) {
+        setAppointmentPrice((appointmentPriceData)['Price Per Appointment']);
+      }
+    };
+    fetchAppointmentPriceData();
+  }, []);
 
   const fetchAppointments = async () => {
     try {
@@ -214,7 +226,7 @@ export const Appointments = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          appointmentAmount: 350,
+          appointmentAmount: appointmentPrice,
           contractorId: contractorId,
         }),
       });
@@ -514,7 +526,7 @@ export const Appointments = () => {
       <Dialog open={showPurchasedModal} onOpenChange={setShowPurchasedModal}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Buy Lead Appointment – $350</DialogTitle>
+            <DialogTitle>Buy Lead Appointment – ${appointmentPrice}</DialogTitle>
           </DialogHeader>
           
           <div className="py-4">

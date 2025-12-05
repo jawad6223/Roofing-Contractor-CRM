@@ -76,6 +76,7 @@ export interface settingType {
   leads: string;
   latitude?: number;
   longitude?: number;
+  appointmentPrice: string;
 }
 
 export interface requestLeadType {

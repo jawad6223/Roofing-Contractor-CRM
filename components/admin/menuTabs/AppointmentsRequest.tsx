@@ -51,18 +51,19 @@ export const AppointmentsRequest = () => {
     fetchOpenLeads();
   }, []);
 
-  useEffect(() => {
-    const fetchAppointmentRequestsData = async () => {
-      try {
-        const data = await fetchRequestAppointments();
-        if (data) {
-          setAppointmentRequestsData(data);
-        }
-      } catch (error) {
-        console.error("Error fetching appointment requests:", error);
-        toast.error("Failed to fetch appointment requests");
+  const fetchAppointmentRequestsData = async () => {
+    try {
+      const data = await fetchRequestAppointments();
+      if (data) {
+        setAppointmentRequestsData(data);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching appointment requests:", error);
+      toast.error("Failed to fetch appointment requests");
+    }
+  };
+
+  useEffect(() => {
     fetchAppointmentRequestsData();
   }, []);
 
@@ -117,28 +118,77 @@ export const AppointmentsRequest = () => {
     setPendingCurrentPage(1);
   }, [searchTerm]);
 
+  const [assignedLeadsData, setAssignedLeadsData] = useState<any[]>([]);
+  const [loadingAssignedLeads, setLoadingAssignedLeads] = useState(false);
+
   const assignedAppointmentsColumns = [
     { key: "name", label: "Name" },
     { key: "propertyAddress", label: "Property Address" },
-    { key: "price", label: "Price" },
     { key: "phone", label: "Phone No" },
     { key: "email", label: "Email" },
     { key: "date", label: "Date" },
     { key: "time", label: "Time" },
   ];
 
-  const assignedAppointmentsTableData = appointmentRequestsData?.map((appointment: any) => ({
-    ...appointment,
-    date: appointment.date || new Date().toISOString().split('T')[0]
-  }));
-
-  const handleViewAssignedAppointment = () => {
+  const handleViewAssignedAppointment = async (request: any) => {
     setShowAssignedModal(true);
+    setLoadingAssignedLeads(true);
+    
+    if (!request.id) {
+      setAssignedLeadsData([]);
+      setLoadingAssignedLeads(false);
+      return;
+    }
+
+    try {
+      const { data: lead, error } = await supabase
+        .from("Contractor_Leads")
+        .select("*")
+        .eq("appointment_request_id", request.id)
+        .eq("Appointment_Status", "Yes")
+        .not("Appointment_Date", "is", null)
+        .not("Appointment_Time", "is", null)
+        .maybeSingle();
+
+      if (error) {
+        console.error("Error fetching assigned lead:", error);
+        setAssignedLeadsData([]);
+        return;
+      }
+
+      if (lead) {
+        const appointmentDate = lead.Appointment_Date ? new Date(lead.Appointment_Date) : new Date();
+        const timeStr = lead.Appointment_Time || '';
+        const timeParts = timeStr.split(':');
+        const formattedTime = timeParts.length >= 2 
+          ? `${parseInt(timeParts[0]) % 12 || 12}:${timeParts[1]} ${parseInt(timeParts[0]) >= 12 ? 'PM' : 'AM'}`
+          : '';
+
+        const transformedLead = {
+          name: `${lead['First Name'] || ''} ${lead['Last Name'] || ''}`.trim(),
+          propertyAddress: lead['Property Address'] || '',
+          phone: lead['Phone Number'] || '',
+          email: lead['Email Address'] || '',
+          date: format(appointmentDate, 'yyyy-MM-dd'),
+          time: formattedTime,
+        };
+        setAssignedLeadsData([transformedLead]);
+      } else {
+        setAssignedLeadsData([]);
+      }
+    } catch (error) {
+      console.error("Error fetching assigned lead:", error);
+      toast.error("Failed to load assigned lead");
+      setAssignedLeadsData([]);
+    } finally {
+      setLoadingAssignedLeads(false);
+    }
   };
 
   const handleCloseAssignedModal = () => {
     setShowAssignedModal(false);
     setAssignedModalSearchTerm("");
+    setAssignedLeadsData([]);
   };
 
   const handleSendAppointments = async (request: any) => {
@@ -323,6 +373,48 @@ export const AppointmentsRequest = () => {
         return;
       }
 
+      const selectedHour = parseInt(timeParts[0]);
+      const selectedMinute = parseInt(timeParts[1]);
+      const selectedTimeInMinutes = selectedHour * 60 + selectedMinute;
+
+      let query = supabase
+        .from("Contractor_Leads")
+        .select("id, Appointment_Time")
+        .eq("contractor_id", contractorId)
+        .eq("Appointment_Date", formattedDate)
+        .not("Appointment_Time", "is", null)
+        .neq("lead_id", selectedLeadData.id);
+
+      if (existingLead) {
+        query = query.neq("id", existingLead.id);
+      }
+
+      const { data: existingAppointments, error: checkTimeError } = await query;
+
+      if (checkTimeError) {
+        console.error("Error checking existing appointments:", checkTimeError);
+        toast.error("Failed to check appointment availability");
+        return;
+      }
+
+      if (existingAppointments && existingAppointments.length > 0) {
+        for (const appointment of existingAppointments) {
+          if (!appointment.Appointment_Time) continue;
+          
+          const existingTimeParts = appointment.Appointment_Time.split(':');
+          const existingHour = parseInt(existingTimeParts[0]);
+          const existingMinute = parseInt(existingTimeParts[1]);
+          const existingTimeInMinutes = existingHour * 60 + existingMinute;
+
+          const timeDifference = Math.abs(selectedTimeInMinutes - existingTimeInMinutes);
+          
+          if (timeDifference < 60) {
+            toast.error("Appointment time must be at least 1 hour apart from existing appointments.");
+            return;
+          }
+        }
+      }
+
       if (existingLead) {
         const { error: updateError } = await supabase
           .from("Contractor_Leads")
@@ -330,6 +422,7 @@ export const AppointmentsRequest = () => {
             Appointment_Date: formattedDate,
             Appointment_Time: formattedTime,
             Appointment_Status: "Yes",
+            appointment_request_id: selectedAppointmentRequest.id,
           })
           .eq("id", existingLead.id);
 
@@ -357,6 +450,7 @@ export const AppointmentsRequest = () => {
               Appointment_Date: formattedDate,
               Appointment_Time: formattedTime,
               Appointment_Status: "Yes",
+              appointment_request_id: selectedAppointmentRequest.id,
               status: "open",
             },
           ]);
@@ -519,7 +613,7 @@ export const AppointmentsRequest = () => {
                               size="sm"
                               variant="outline"
                               className="border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
-                              onClick={handleViewAssignedAppointment}
+                              onClick={() => handleViewAssignedAppointment(request)}
                             >
                               <Eye className="h-4 w-4 mr-1" />
                               View
@@ -689,18 +783,32 @@ export const AppointmentsRequest = () => {
       <TablePopup
         isOpen={showAssignedModal}
         onClose={handleCloseAssignedModal}
-        title="Assigned Appointment Details"
-        subtitle="Complete information about assigned appointments"
+        title="Assigned Lead Details"
+        subtitle="Lead assigned to this appointment request"
         titleIcon={FileText}
         columns={assignedAppointmentsColumns}
-        data={assignedAppointmentsTableData}
+        data={assignedLeadsData}
         searchTerm={assignedModalSearchTerm}
         onSearchChange={setAssignedModalSearchTerm}
-        searchPlaceholder="Search appointments..."
+        searchPlaceholder="Search lead..."
         itemsPerPage={10}
         showPagination={true}
         closeButtonText="Close"
         closeButtonClassName="px-3 py-1.5 text-sm"
+        renderCell={(column, row, index) => {
+          if (loadingAssignedLeads) {
+            return (
+              <div className="flex items-center justify-center py-4">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#122E5F]"></div>
+              </div>
+            );
+          }
+          return (
+            <span className="text-sm text-gray-900">
+              {row[column.key] || '-'}
+            </span>
+          );
+        }}
       />
 
       <Dialog open={showSendModal} onOpenChange={setShowSendModal}>

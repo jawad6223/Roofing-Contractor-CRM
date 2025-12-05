@@ -22,6 +22,7 @@ export const Setting = () => {
     leads: "",
     latitude: 0,
     longitude: 0,
+    appointmentPrice: "",
   });
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export const Setting = () => {
 
         const { data, error } = await supabase
           .from("Admin_Data")
-          .select(`"Full Name", "Business Address", "Price Per Lead", "Email Address"`)
+          .select(`"Full Name", "Business Address", "Price Per Lead", "Email Address", "Price Per Appointment"`)
           .maybeSingle();
 
         if (error) throw error;
@@ -41,6 +42,7 @@ export const Setting = () => {
             email: data["Email Address"] || "",
             businessAddress: data["Business Address"] || "",
             leads: data["Price Per Lead"]?.toString() || "",
+            appointmentPrice: data["Price Per Appointment"]?.toString() || "",
           });
         } else {
           toast.warning("No admin data found in table.");
@@ -64,7 +66,7 @@ export const Setting = () => {
     try {
       const { data, error } = await supabase
         .from("Admin_Data")
-        .select(`"Full Name", "Business Address", "Price Per Lead"`)
+        .select(`"Full Name", "Business Address", "Price Per Lead", "Price Per Appointment"`)
         .maybeSingle();
 
       if (error) throw error;
@@ -74,6 +76,7 @@ export const Setting = () => {
           fullName: data["Full Name"] || "",
           businessAddress: data["Business Address"] || "",
           leads: data["Price Per Lead"]?.toString() || "",
+          appointmentPrice: data["Price Per Appointment"]?.toString() || "",
         });
       }
     } catch (err) {
@@ -119,6 +122,7 @@ export const Setting = () => {
           "Price Per Lead": parseFloat(formData.leads) || null,
           "Latitude": formData.latitude,
           "Longitude": formData.longitude,
+          "Price Per Appointment": parseFloat(formData.appointmentPrice) || null,
         })
         .eq("Email Address", formData.email);
 
@@ -212,6 +216,22 @@ export const Setting = () => {
                   <Input
                     value={formData.leads}
                     onChange={(e) => handleInputChange('leads', e.target.value)}
+                    readOnly={!isEditing}
+                    className={`text-gray-900 h-11 pr-16 ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
+                  />
+                  <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    $
+                  </span>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Price Per Appointment
+                </label>
+                <div className="relative">
+                  <Input
+                    value={formData.appointmentPrice}
+                    onChange={(e) => handleInputChange('appointmentPrice', e.target.value)}
                     readOnly={!isEditing}
                     className={`text-gray-900 h-11 pr-16 ${!isEditing ? 'bg-gray-50 cursor-not-allowed' : ''}`}
                   />
