@@ -32,6 +32,7 @@ export async function GET(req: NextRequest) {
               Contractor_Id: contractorId,
               Price: appointmentAmount,
               Status: "Pending",
+              date: new Date().toISOString(),
             },
           ])
           .select();

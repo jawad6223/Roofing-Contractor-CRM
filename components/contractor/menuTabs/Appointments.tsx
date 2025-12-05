@@ -130,14 +130,16 @@ export const Appointments = () => {
 
       const formattedDate = format(appointmentDate, 'yyyy-MM-dd')
       const timeParts = appointmentTime.split(':')
-      const formattedTime = `${timeParts[0]}:${timeParts[1]}:00`
+      const selectedHour = parseInt(timeParts[0])
+      const selectedMinute = parseInt(timeParts[1])
+      const selectedTimeInMinutes = selectedHour * 60 + selectedMinute
 
       const { data: existingAppointments, error: checkError } = await supabase
         .from('Contractor_Leads')
-        .select('id')
+        .select('Appointment_Time')
         .eq('contractor_id', userId)
         .eq('Appointment_Date', formattedDate)
-        .eq('Appointment_Time', formattedTime)
+        .not('Appointment_Time', 'is', null)
         .neq('id', selectedLead)
 
       if (checkError) {
@@ -147,15 +149,28 @@ export const Appointments = () => {
       }
 
       if (existingAppointments && existingAppointments.length > 0) {
-        toast.error('An appointment already exists at this date and time. Please choose a different time.')
-        return
+        for (const appointment of existingAppointments) {
+          if (!appointment.Appointment_Time) continue
+          
+          const existingTimeParts = appointment.Appointment_Time.split(':')
+          const existingHour = parseInt(existingTimeParts[0])
+          const existingMinute = parseInt(existingTimeParts[1])
+          const existingTimeInMinutes = existingHour * 60 + existingMinute
+
+          const timeDifference = Math.abs(selectedTimeInMinutes - existingTimeInMinutes)
+          
+          if (timeDifference < 60) {
+            toast.error(`Appointment time must be at least 1 hour apart from existing appointments.`)
+            return
+          }
+        }
       }
 
       const { error: updateError } = await supabase
         .from('Contractor_Leads')
         .update({
           Appointment_Date: formattedDate,
-          Appointment_Time: formattedTime,
+          Appointment_Time: appointmentTime,
           Appointment_Status: 'Yes'
         })
         .eq('id', selectedLead)
@@ -222,12 +237,19 @@ export const Appointments = () => {
           <p className="text-gray-600">Manage and track your appointments</p>
         </div>
         <div className="flex flex-col w-full lg:w-auto md:flex-row gap-3">
+        <Button
+          onClick={() => setShowAddModal(true)}
+          className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
+        >
+          <CalendarIcon className="h-4 w-4 mr-2" />
+          Add Appointment
+        </Button>
           <Button
             onClick={() => router.push("/contractor/purchase-leads")}
             className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            <span>Add Purchase Leads</span>
+            <span>Purchase Leads</span>
           </Button>
           <Button
             onClick={() => setShowPurchasedModal(true)}
@@ -374,15 +396,6 @@ export const Appointments = () => {
           </Card>
         </div>
       </div>
-      <div className="flex justify-end">
-        <Button
-          onClick={() => setShowAddModal(true)}
-          className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
-        >
-          <CalendarIcon className="h-4 w-4 mr-2" />
-          Add Appointment
-        </Button>
-      </div>
 
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -397,13 +410,43 @@ export const Appointments = () => {
                   <Label className="text-sm font-medium mb-2 block text-black">Select Lead</Label>
                   <div className="space-y-3">
                     <Select value={selectedLead} onValueChange={setSelectedLead}>
-                      <SelectTrigger className="text-black">
-                        <SelectValue placeholder="Choose a lead" />
+                      <SelectTrigger className="text-black h-auto py-3 px-4">
+                        {selectedLead ? (() => {
+                          const selectedLeadData = leads.find((lead) => lead.id.toString() === selectedLead);
+                          if (!selectedLeadData) return <SelectValue placeholder="Choose a lead" />;
+                          return (
+                            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                              <div className="flex gap-1.5 text-xs font-semibold text-gray-600">
+                                <User className="h-3 w-3 text-gray-400" />
+                                <span className="truncate">{selectedLeadData['First Name']} {selectedLeadData['Last Name']}</span>
+                              </div>
+                              <div className="flex gap-1.5 text-xs text-gray-600">
+                                <MapPin className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                <span className="truncate">{selectedLeadData['Property Address']}</span>
+                              </div>
+                            </div>
+                          );
+                        })() : <SelectValue placeholder="Choose a lead" />}
                       </SelectTrigger>
-                      <SelectContent className="max-h-[350px] overflow-y-auto max-w-[300px]">
+                      <SelectContent className="max-h-[300px] overflow-y-auto max-w-[450px]">
                         {leads.map((lead) => (
-                          <SelectItem key={lead.id} value={lead.id}>
-                            {lead['First Name']} {lead['Last Name']} - {lead['Property Address']}
+                          <SelectItem 
+                            key={lead.id} 
+                            value={lead.id.toString()} 
+                            className="py-3 px-4 cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
+                          >
+                            <div className="flex items-start justify-between gap-4 w-full ml-3">
+                              <div className="flex flex-col gap-1 flex-1 min-w-0">
+                                <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
+                                  <User className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
+                                  <span className="truncate">{lead['First Name']} {lead['Last Name']}</span>
+                                </div>
+                                <div className="flex items-start gap-1.5 text-xs text-gray-600">
+                                  <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                  <span className="break-words leading-relaxed min-w-0">{lead['Property Address']}</span>
+                                </div>
+                              </div>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>

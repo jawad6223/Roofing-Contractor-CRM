@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Search, MapPin, Phone, Eye, Calendar as CalendarIcon, User, DollarSign, Send, FileText } from "lucide-react";
+import { Search, MapPin, Phone, Eye, Calendar as CalendarIcon, User, DollarSign, Send, FileText, Clock, Mail } from "lucide-react";
+import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-// import { fetchRequestAppointments } from "./Data";
+import { fetchRequestAppointments } from "./Data";
 import { toast } from "react-toastify";
 import { TablePopup } from "@/components/ui/TablePopup";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -14,22 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/lib/supabase";
 import { fetchLeads } from "./Data";
-import { appointmentRequests, staticAppointmentData } from "./Data";
-
-
-interface AppointmentRequestType {
-  id: string;
-  contractor_id: string;
-  "Name": string;
-  "Phone Number": string;
-  "No. of Appointments": number;
-  "Price": number;
-  "Purchase Date": string;
-  "Send Appointments": number | string;
-  "Pending Appointments": number | string;
-  "Business Address": string;
-  "Status": string;
-}
+import { calculateDistance } from "@/lib/distanceFormula";
 
 export const AppointmentsRequest = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,9 +26,13 @@ export const AppointmentsRequest = () => {
   const [appointmentDate, setAppointmentDate] = useState<Date | undefined>(new Date());
   const [appointmentTime, setAppointmentTime] = useState('');
   const [leads, setLeads] = useState<any[]>([]);
-  // const [appointmentRequests, setAppointmentRequests] = useState<AppointmentRequestType[]>([]);
+  const [appointmentRequestsData, setAppointmentRequestsData] = useState<any[]>([]);
   const [assignCurrentPage, setAssignCurrentPage] = useState(1);
   const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
+  const [selectedAppointmentRequest, setSelectedAppointmentRequest] = useState<any>(null);
+  const [contractorData, setContractorData] = useState<any>(null);
+  const [contractorAppointmentDates, setContractorAppointmentDates] = useState<Date[]>([]);
+  const [contractorAppointments, setContractorAppointments] = useState<any[]>([]);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -61,27 +51,32 @@ export const AppointmentsRequest = () => {
     fetchOpenLeads();
   }, []);
 
-//   useEffect(() => {
-//     const fetchAppointmentRequestsData = async () => {
-//       const appointmentRequestsData = await fetchRequestAppointments();
-//       if (appointmentRequestsData) {
-//         setAppointmentRequests(appointmentRequestsData);
-//       }
-//     };
-//     fetchAppointmentRequestsData();
-//   }, []);
+  useEffect(() => {
+    const fetchAppointmentRequestsData = async () => {
+      try {
+        const data = await fetchRequestAppointments();
+        if (data) {
+          setAppointmentRequestsData(data);
+        }
+      } catch (error) {
+        console.error("Error fetching appointment requests:", error);
+        toast.error("Failed to fetch appointment requests");
+      }
+    };
+    fetchAppointmentRequestsData();
+  }, []);
 
-  const filteredAppointmentRequests = appointmentRequests.filter(
+  const filteredAppointmentRequests = appointmentRequestsData.filter(
     (request) =>
-      request.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      request.phone.toString().includes(searchTerm) ||
-      request.date.includes(searchTerm) ||
-      request.time.toString().includes(searchTerm) ||
-      request.status.includes(searchTerm)
+      request["Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request["Business Address"].toLowerCase().includes(searchTerm.toLowerCase()) ||
+      request["Phone Number"].toString().includes(searchTerm) ||
+      request["Date"].includes(searchTerm) ||
+      request["Time"].toString().includes(searchTerm) ||
+      request["Status"].includes(searchTerm)
   );
 
-  const assignedAppointments = filteredAppointmentRequests.filter((request) => request.status === "Confirmed");
+  const assignedAppointments = filteredAppointmentRequests.filter((request) => request["Status"] === "Confirmed");
   const assignTotalPages = Math.ceil(assignedAppointments.length / itemsPerPage);
   const assignStartIndex = (assignCurrentPage - 1) * itemsPerPage;
   const assignEndIndex = assignStartIndex + itemsPerPage;
@@ -132,7 +127,7 @@ export const AppointmentsRequest = () => {
     { key: "time", label: "Time" },
   ];
 
-  const assignedAppointmentsTableData = staticAppointmentData?.map((appointment: any) => ({
+  const assignedAppointmentsTableData = appointmentRequestsData?.map((appointment: any) => ({
     ...appointment,
     date: appointment.date || new Date().toISOString().split('T')[0]
   }));
@@ -146,8 +141,79 @@ export const AppointmentsRequest = () => {
     setAssignedModalSearchTerm("");
   };
 
-  const handleSendAppointments = () => {
+  const handleSendAppointments = async (request: any) => {
+    setSelectedAppointmentRequest(request);
     setShowSendModal(true);
+    
+    if (request.Contractor_Id) {
+      try {
+        const { data: contractorInfo, error: contractorError } = await supabase
+          .from("Roofing_Auth")
+          .select('"Latitude", "Longitude", "Service Radius"')
+          .eq("user_id", request.Contractor_Id)
+          .single();
+
+        if (contractorError) {
+          console.error("Error fetching contractor data:", contractorError);
+        } else if (contractorInfo) {
+          setContractorData({
+            latitude: contractorInfo["Latitude"],
+            longitude: contractorInfo["Longitude"],
+            serviceRadius: contractorInfo["Service Radius"],
+          });
+        }
+
+        const { data: appointments, error: appointmentsError } = await supabase
+          .from("Contractor_Leads")
+          .select("*")
+          .eq("contractor_id", request.Contractor_Id)
+          .eq("Appointment_Status", "Yes")
+          .not("Appointment_Date", "is", null)
+          .not("Appointment_Time", "is", null)
+          .order("Appointment_Date", { ascending: true })
+          .order("Appointment_Time", { ascending: true });
+
+        if (appointmentsError) {
+          console.error("Error fetching contractor appointments:", appointmentsError);
+          setContractorAppointmentDates([]);
+          setContractorAppointments([]);
+        } else if (appointments) {
+          const dates = appointments
+            .map((apt: any) => {
+              if (apt.Appointment_Date) {
+                const date = new Date(apt.Appointment_Date);
+                date.setHours(0, 0, 0, 0);
+                return date;
+              }
+              return null;
+            })
+            .filter((date: Date | null) => date !== null) as Date[];
+          setContractorAppointmentDates(dates);
+          
+          const transformedAppointments = appointments.map((apt: any) => {
+            const appointmentDate = apt.Appointment_Date ? new Date(apt.Appointment_Date) : new Date();
+            const timeStr = apt.Appointment_Time || '';
+            const timeParts = timeStr.split(':');
+            const formattedTime = timeParts.length >= 2 
+              ? `${parseInt(timeParts[0]) % 12 || 12}:${timeParts[1]} ${parseInt(timeParts[0]) >= 12 ? 'PM' : 'AM'}`
+              : '';
+
+            return {
+              id: apt.id.toString(),
+              date: appointmentDate,
+              time: formattedTime,
+              clientName: `${apt['First Name'] || ''} ${apt['Last Name'] || ''}`.trim(),
+              propertyAddress: apt['Property Address'] || '',
+              phone: apt['Phone Number'] || '',
+              email: apt['Email Address'] || '',
+            };
+          });
+          setContractorAppointments(transformedAppointments);
+        }
+      } catch (error) {
+        console.error("Error fetching contractor data:", error);
+      }
+    }
   };
 
   const handleCloseSendModal = () => {
@@ -155,6 +221,193 @@ export const AppointmentsRequest = () => {
     setSelectedLead('');
     setAppointmentDate(new Date());
     setAppointmentTime('');
+    setSelectedAppointmentRequest(null);
+    setContractorData(null);
+    setContractorAppointmentDates([]);
+    setContractorAppointments([]);
+  };
+
+  const getAppointmentsForDate = (selectedDate: Date | undefined) => {
+    if (!selectedDate) return [];
+    return contractorAppointments.filter(apt => 
+      format(apt.date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+    );
+  };
+
+  const selectedDateAppointments = getAppointmentsForDate(appointmentDate);
+
+  const getDistanceBadge = (lead: any) => {
+    if (!contractorData || !lead) {
+      return null;
+    }
+
+    if (
+      !lead["Latitude"] ||
+      !lead["Longitude"] ||
+      !contractorData.latitude ||
+      !contractorData.longitude
+    ) {
+      return { text: "No Coordinates", color: "bg-gray-100 text-gray-800" };
+    }
+
+    const serviceRadius = contractorData.serviceRadius;
+    const radiusValue = parseFloat(serviceRadius.replace(/\D/g, ""));
+
+    const distance = calculateDistance(
+      contractorData.latitude,
+      contractorData.longitude,
+      lead["Latitude"],
+      lead["Longitude"]
+    );
+
+    const diff = distance - radiusValue;
+
+    let badge = { text: "Too Far", color: "bg-red-100 text-red-800" };
+
+    if (diff <= 5) badge = { text: "Nearest", color: "bg-green-100 text-green-800" };
+    else if (diff <= 10) badge = { text: "Near", color: "bg-yellow-100 text-yellow-800" };
+    else if (diff <= 20) badge = { text: "Far", color: "bg-blue-100 text-blue-800" };
+
+    return {
+      text: badge.text,
+      color: badge.color,
+      distance: distance.toFixed(1),
+      radius: radiusValue.toFixed(1),
+    };
+  };
+
+  const sendAppointments = async (selectedLead: string, appointmentTime: string) => {
+    if (!selectedLead) {
+      toast.error('Please select a lead');
+      return;
+    }
+    
+    if (!appointmentDate) {
+      toast.error('Please select a date');
+      return;
+    }
+    
+    if (!appointmentTime) {
+      toast.error('Please select a time');
+      return;
+    }
+
+    if (!selectedAppointmentRequest) {
+      toast.error('Appointment request not found');
+      return;
+    }
+
+    const selectedLeadData = leads.find((lead) => lead.id.toString() === selectedLead);
+    
+    if (!selectedLeadData) {
+      toast.error('Lead data not found');
+      return;
+    }
+
+    const formattedDate = format(appointmentDate, 'yyyy-MM-dd');
+    const timeParts = appointmentTime.split(':');
+    const formattedTime = `${timeParts[0]}:${timeParts[1]}:00`;
+    const contractorId = selectedAppointmentRequest.Contractor_Id;
+
+    try {
+      const { data: existingLead, error: checkError } = await supabase
+        .from("Contractor_Leads")
+        .select("id")
+        .eq("contractor_id", contractorId)
+        .eq("lead_id", selectedLeadData.id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error("Error checking existing lead:", checkError);
+        toast.error("Failed to check lead assignment");
+        return;
+      }
+
+      if (existingLead) {
+        const { error: updateError } = await supabase
+          .from("Contractor_Leads")
+          .update({
+            Appointment_Date: formattedDate,
+            Appointment_Time: formattedTime,
+            Appointment_Status: "Yes",
+          })
+          .eq("id", existingLead.id);
+
+        if (updateError) {
+          console.error("Error updating appointment:", updateError);
+          toast.error("Failed to update appointment");
+          return;
+        }
+      } else {
+        const { error: insertError } = await supabase
+          .from("Contractor_Leads")
+          .insert([
+            {
+              contractor_id: contractorId,
+              lead_id: selectedLeadData.id,
+              "First Name": selectedLeadData["First Name"],
+              "Last Name": selectedLeadData["Last Name"],
+              "Phone Number": selectedLeadData["Phone Number"],
+              "Email Address": selectedLeadData["Email Address"],
+              "Property Address": selectedLeadData["Property Address"],
+              "Insurance Company": selectedLeadData["Insurance Company"],
+              "Policy Number": selectedLeadData["Policy Number"],
+              "Latitude": selectedLeadData["Latitude"],
+              "Longitude": selectedLeadData["Longitude"],
+              Appointment_Date: formattedDate,
+              Appointment_Time: formattedTime,
+              Appointment_Status: "Yes",
+              status: "open",
+            },
+          ]);
+
+        if (insertError) {
+          console.error("Error inserting lead:", insertError);
+          toast.error("Failed to assign lead to contractor");
+          return;
+        }
+      }
+
+      const { error: updateLeadError } = await supabase
+        .from("Leads_Data")
+        .update({ Status: "close" })
+        .eq("id", selectedLeadData.id);
+
+      if (updateLeadError) {
+        console.error("Error updating lead status:", updateLeadError);
+        toast.error("Failed to update lead status");
+        return;
+      }
+
+      const { error: updateRequestError } = await supabase
+        .from("Appointments_Request")
+        .update({ Status: "Confirmed" })
+        .eq("id", selectedAppointmentRequest.id);
+
+      if (updateRequestError) {
+        console.error("Error updating appointment request status:", updateRequestError);
+        toast.error("Failed to update appointment request status");
+        return;
+      }
+
+      toast.success("Appointment assigned successfully");
+      
+      const leadsData = await fetchLeads();
+      if (leadsData) {
+        const openLeads = leadsData.filter((lead: any) => lead["Status"] === "open");
+        setLeads(openLeads);
+      }
+
+      const appointmentRequestsData = await fetchRequestAppointments();
+      if (appointmentRequestsData) {
+        setAppointmentRequestsData(appointmentRequestsData);
+      }
+
+      handleCloseSendModal();
+    } catch (error) {
+      console.error("Error in sendAppointments:", error);
+      toast.error("An error occurred while assigning the appointment");
+    }
   };
 
   return (
@@ -210,6 +463,9 @@ export const AppointmentsRequest = () => {
                         Price
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -247,6 +503,11 @@ export const AppointmentsRequest = () => {
                                 ${request.price}
                               </span>
                             </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="text-sm font-medium text-gray-900">
+                              {request.date}
+                            </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm font-bold text-green-500">
@@ -321,6 +582,9 @@ export const AppointmentsRequest = () => {
                         Price
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Status
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -360,6 +624,11 @@ export const AppointmentsRequest = () => {
                               </span>
                             </div>
                           </td>
+                          <td className="px-2 py-2 whitespace-nowrap">
+                            <span className="text-sm font-medium text-gray-900">
+                              {request.date}
+                            </span>
+                          </td>
                           <td className="py-2 whitespace-nowrap">
                             <span className="text-sm font-bold text-yellow-500">
                               {request.status}
@@ -370,7 +639,7 @@ export const AppointmentsRequest = () => {
                               size="sm"
                               variant="outline"
                               className="border-[#122E5F] w-full text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
-                              onClick={handleSendAppointments}
+                              onClick={() => handleSendAppointments(request)}
                             >
                               <Send className="h-4 w-4 mr-1" />
                               Send
@@ -437,7 +706,7 @@ export const AppointmentsRequest = () => {
       <Dialog open={showSendModal} onOpenChange={setShowSendModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Send Leads</DialogTitle>
+            <DialogTitle className="text-black">Send Leads</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6 py-4">
@@ -446,18 +715,97 @@ export const AppointmentsRequest = () => {
                 <div>
                   <Label className="text-sm font-medium mb-2 block text-black">Select Lead</Label>
                   <Select value={selectedLead} onValueChange={setSelectedLead}>
-                    <SelectTrigger className="text-black">
-                      <SelectValue placeholder="Choose a lead" />
+                    <SelectTrigger className="text-black h-auto py-3 px-4">
+                      {selectedLead ? (() => {
+                        const selectedLeadData = leads.find((lead) => lead.id.toString() === selectedLead);
+                        if (!selectedLeadData) return <SelectValue placeholder="Choose a lead" />;
+                        return (
+                            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                              <div className="flex gap-1.5 text-xs font-semibold text-gray-600">
+                                <User className="h-3 w-3 text-gray-400" />
+                                <span className="truncate">{selectedLeadData["First Name"]} {selectedLeadData["Last Name"]}</span>
+                              </div>
+                              <div className="flex gap-1.5 text-xs text-gray-600">
+                                <MapPin className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                <span className="truncate">{selectedLeadData["Property Address"]}</span>
+                              </div>
+                          </div>
+                        );
+                      })() : <SelectValue placeholder="Choose a lead" />}
                     </SelectTrigger>
-                    <SelectContent className="max-h-[350px] overflow-y-auto max-w-[300px]">
-                      {leads.map((lead) => (
-                        <SelectItem key={lead.id} value={lead.id.toString()}>
-                          {lead["First Name"]} {lead["Last Name"]} - {lead["Property Address"]}
-                        </SelectItem>
-                      ))}
+                    <SelectContent className="max-h-[300px] overflow-y-auto max-w-[450px]">
+                      {leads.map((lead) => {
+                        const badge = getDistanceBadge(lead);
+                        return (
+                          <SelectItem 
+                            key={lead.id} 
+                            value={lead.id.toString()} 
+                            className="py-3 px-4 cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
+                          >
+                            <div className="flex items-start justify-between gap-4 w-full ml-3">
+                                <div className="flex flex-col gap-1 flex-1">
+                                  <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
+                                    <User className="h-3 w-3 text-gray-400 mr-1" />
+                                    <span className="truncate">{lead["First Name"]} {lead["Last Name"]}</span>
+                                  </div>
+                                  <div className="flex items-start gap-1.5 text-xs text-gray-600">
+                                    <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                    <span className="break-words leading-relaxed">{lead["Property Address"]}</span>
+                                  </div>
+                                </div>
+                              {badge && (
+                                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0 shadow-sm ${badge.color}`}>
+                                  {badge.text} • {badge.distance}mi
+                                </span>
+                              )}
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
+                
+                {appointmentDate && selectedDateAppointments.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    <div className="text-sm font-semibold text-gray-700 mb-2">
+                      Appointments on {format(appointmentDate, 'MMMM d, yyyy')}
+                    </div>
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {selectedDateAppointments.map((appointment) => (
+                        <div
+                          key={appointment.id}
+                          className="border rounded-lg p-4 space-y-2 hover:shadow-md transition-shadow bg-gray-50"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full bg-blue-500" />
+                              <span className="font-semibold text-base text-gray-900">{appointment.clientName}</span>
+                            </div>
+                          </div>
+                          <div className="space-y-1.5 text-sm text-gray-600">
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-3.5 w-3.5 text-gray-400" />
+                              <span>{appointment.time}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-3.5 w-3.5 text-gray-400" />
+                              <span className="break-words">{appointment.propertyAddress}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-3.5 w-3.5 text-gray-400" />
+                              <span>{appointment.phone}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Mail className="h-3.5 w-3.5 text-gray-400" />
+                              <span>{appointment.email}</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -471,7 +819,33 @@ export const AppointmentsRequest = () => {
                     captionLayout="dropdown"
                     fromYear={new Date().getFullYear() - 5}
                     toYear={new Date().getFullYear() + 10}
+                    modifiers={{
+                      hasAppointment: contractorAppointmentDates
+                    }}
+                    modifiersClassNames={{
+                      hasAppointment: 'has-appointment'
+                    }}
+                    disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
                   />
+                  <style dangerouslySetInnerHTML={{
+                    __html: `
+                      .has-appointment {
+                        position: relative;
+                      }
+                      .has-appointment::after {
+                        content: '';
+                        position: absolute;
+                        bottom: 4px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 6px;
+                        height: 6px;
+                        border-radius: 50%;
+                        background-color: #3b82f6;
+                        z-index: 1;
+                      }
+                    `
+                  }} />
                 </div>
                 <div>
                   <Label htmlFor="time" className="text-sm font-medium mb-2 block text-black">Select Time</Label>
@@ -495,10 +869,7 @@ export const AppointmentsRequest = () => {
               Cancel
             </Button>
             <Button
-              onClick={() => {
-                toast.success('Leads sent successfully');
-                handleCloseSendModal();
-              }}
+              onClick={() => sendAppointments(selectedLead, appointmentTime)}
               className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
             >
               Send

@@ -235,7 +235,7 @@ export const Leads = () => {
             className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            <span>Add Purchase Leads</span>
+            <span>Purchase Leads</span>
           </Button>
           <Button
             onClick={() => router.push("/contractor/lead-purchase-info")}

@@ -75,74 +75,86 @@ export const fetchRequestLeads = async () => {
   }
 };
 
-// export const fetchRequestAppointments = async () => {
+export const fetchRequestAppointments = async () => {
+  try {
+    const { data: appointments, error: appointmentsError } = await supabase
+      .from("Appointments_Request")
+      .select("*")
+      .order("created_at", { ascending: false });
 
-//   try {
-//     const { data, error } = await supabase
-//       .from("Appointments_Request")
-//       .select("*")
-//       .order("created_at", { ascending: false });
+    if (appointmentsError) {
+      console.error("Error fetching appointment requests:", appointmentsError);
+      toast.error("Failed to fetch appointment requests");
+      return [];
+    }
 
-//     if (error) {
-//       throw error;
-//     } else {
-//       return data || [];
-//     }
-//   } catch (error) {
-//     toast.error("Failed to fetch appointment requests");
-//   }
-// };
+    if (!appointments || appointments.length === 0) {
+      return [];
+    }
 
-// Leads Data
+    const allContractorIds = appointments
+      .map((apt: any) => apt.Contractor_Id)
+      .filter(Boolean);
+    const contractorIds = allContractorIds.filter(
+      (id: any, index: number) => allContractorIds.indexOf(id) === index
+    );
 
-export const appointmentRequests = [
-  {
-    id: 1,
-    name: "John Doe",
-    phone: "(555) 123-5787",
-    email: "john.doe@example.com",
-    address: "Main St, Houston, TX",
-    date: "2024-01-15",
-    time: "10:00 AM",
-    status: "Pending",
-    price: 350,
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    phone: "(555) 987-5787",
-    email: "jane.doe@example.com",
-    address: "Main St, Dallas, TX",
-    date: "2024-01-14",
-    time: "11:00 AM",
-    status: "Pending",
-    price: 350,
-  },
-  {
-    id: 3,
-    name: "Jim Beam",
-    phone: "(555) 789-5787",
-    email: "jim.beam@example.com",
-    address: "Main St, Austin, TX",
-    date: "2024-01-13",
-    time: "12:00 PM",
-    status: "Confirmed",
-    price: 350,
-  },
-]
+    if (contractorIds.length === 0) {
+      return appointments.map((appointment: any) => ({
+        ...appointment,
+        Name: "",
+        "Phone Number": "",
+        "Business Address": "",
+        "Email Address": "",
+        Date: appointment.Date || "",
+        Time: appointment.Time || "",
+        name: "",
+        phone: "",
+        address: "",
+        price: appointment.Price || 0,
+        status: appointment.Status || "Pending",
+      }));
+    }
 
-export const staticAppointmentData = [
-  {
-    id: 1,
-    name: "John Smith",
-    price: 350,
-    propertyAddress: "123 Main St, Houston, TX 77001",
-    phone: "(555) 123-4567",
-    email: "john.smith@email.com",
-    date: "2024-12-15",
-    time: "10:00 AM"
+    const { data: contractors, error: contractorsError } = await supabase
+      .from("Roofing_Auth")
+      .select('user_id, "Full Name", "Phone Number", "Business Address", "Email Address"')
+      .in("user_id", contractorIds);
+
+    if (contractorsError) {
+      console.error("Error fetching contractors:", contractorsError);
+    }
+
+    const contractorMap = new Map(
+      (contractors || []).map((contractor: any) => [contractor.user_id, contractor])
+    );
+
+    const mappedData = appointments.map((appointment: any) => {
+      const contractor = contractorMap.get(appointment.Contractor_Id);
+      return {
+        ...appointment,
+        Name: contractor?.["Full Name"] || "",
+        "Phone Number": contractor?.["Phone Number"] || "",
+        "Business Address": contractor?.["Business Address"] || "",
+        "Email Address": contractor?.["Email Address"] || "",
+        Date: appointment.Date || "",
+        Time: appointment.Time || "",
+        name: contractor?.["Full Name"] || "",
+        phone: contractor?.["Phone Number"] || "",
+        address: contractor?.["Business Address"] || "",
+        price: appointment.Price || 0,
+        status: appointment.Status || "Pending",
+      };
+    });
+
+    return mappedData;
+  } catch (error) {
+    console.error("Error fetching appointment requests:", error);
+    toast.error("Failed to fetch appointment requests");
+    return [];
   }
-];
+};
+// Leads Data
 
 export const allLeads = [
   {
