@@ -126,8 +126,8 @@ export const AppointmentsRequest = () => {
     { key: "propertyAddress", label: "Property Address" },
     { key: "phone", label: "Phone No" },
     { key: "email", label: "Email" },
-    { key: "date", label: "Date" },
-    { key: "time", label: "Time" },
+    { key: "date", label: "Appointment Date" },
+    { key: "time", label: "Appointment Time" },
   ];
 
   const handleViewAssignedAppointment = async (request: any) => {
