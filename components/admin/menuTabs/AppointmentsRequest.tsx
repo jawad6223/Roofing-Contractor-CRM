@@ -812,7 +812,7 @@ export const AppointmentsRequest = () => {
       />
 
       <Dialog open={showSendModal} onOpenChange={setShowSendModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-black">Send Leads</DialogTitle>
           </DialogHeader>
@@ -841,7 +841,7 @@ export const AppointmentsRequest = () => {
                         );
                       })() : <SelectValue placeholder="Choose a lead" />}
                     </SelectTrigger>
-                    <SelectContent className="max-h-[300px] overflow-y-auto max-w-[450px]">
+                    <SelectContent className="max-h-[300px] overflow-y-auto">
                       {leads.map((lead) => {
                         const badge = getDistanceBadge(lead);
                         return (
@@ -923,7 +923,7 @@ export const AppointmentsRequest = () => {
                     mode="single"
                     selected={appointmentDate}
                     onSelect={setAppointmentDate}
-                    className="rounded-md border"
+                    className="rounded-md border w-full"
                     captionLayout="dropdown"
                     fromYear={new Date().getFullYear() - 5}
                     toYear={new Date().getFullYear() + 10}
