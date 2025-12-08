@@ -208,8 +208,10 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-[#286BBD] font-bold mb-1">
-              {contractorLeads.length ? contractorLeads.length : (
-                  <LoadingDots />
+              {isLoading ? (
+                <LoadingDots />
+              ) : (
+                contractorLeads.length
               )}
             </div>
           </CardContent>
@@ -226,9 +228,10 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-green-600 font-bold mb-1">
-              {contractorLeads.length ? 
-              contractorLeads.filter((lead) => lead.status !== "close").length : (
+              {isLoading ? (
                 <LoadingDots />
+              ) : (
+                contractorLeads.filter((lead) => lead.status !== "close").length
               )}
             </div>
           </CardContent>
@@ -245,8 +248,10 @@ export const DashBoard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-3xl text-red-600 font-bold mb-1">
-              {contractorLeads.length ?  contractorLeads.filter((lead) => lead.status === "close").length : (
+              {isLoading ? (
                 <LoadingDots />
+              ) : (
+                contractorLeads.filter((lead) => lead.status === "close").length
               )}
             </div>
           </CardContent>
