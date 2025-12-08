@@ -41,11 +41,11 @@ export async function freeLeadsAssign(userId: string) {
       .eq("Status", "open");
 
     if (leadsError) throw leadsError;
-    if (!leads || leads.length === 0) return;
-    console.log('freeLeadsAssign:openLeads', leads);
+    const openLeads = leads || [];
+    console.log('freeLeadsAssign:openLeads', openLeads.length);
 
     // 3️⃣ Filter leads within radius
-    const matchingLeads = leads.filter((lead) => {
+    const matchingLeads = openLeads.filter((lead) => {
       if (!lead["Latitude"] || !lead["Longitude"]) return false;
       const distance = calculateDistance(
         contractorLat,
@@ -55,8 +55,6 @@ export async function freeLeadsAssign(userId: string) {
       );
       return distance <= contractorRadius;
     });
-
-    if (matchingLeads.length === 0) return;
 
     // 4️⃣ Limit to 3 leads max
     const requestedQty = 3;
@@ -174,15 +172,21 @@ export async function freeLeadsAssign(userId: string) {
       console.log('freeLeadsAssign:insertAssignedLeads:ok');
     }
 
-    // 9️⃣ Mark contractor as assigned so free assignment runs once
-    const { error: updateContractorError } = await supabase
-      .from("Roofing_Auth")
-      .update({ "Is Verified": "assigned" })
-      .eq("user_id", userId);
+    // 9️⃣ Mark contractor as assigned so free assignment runs once (only if leads were actually assigned)
+    // If no leads were assigned, keep status as "confirmed" so system can check again when new leads are available
+    if (leadsToAssign.length > 0) {
+      const { error: updateContractorError } = await supabase
+        .from("Roofing_Auth")
+        .update({ "Is Verified": "assigned" })
+        .eq("user_id", userId);
 
-    if (updateContractorError) {
-      console.error('freeLeadsAssign:updateContractor:error', updateContractorError);
-      throw updateContractorError;
+      if (updateContractorError) {
+        console.error('freeLeadsAssign:updateContractor:error', updateContractorError);
+        throw updateContractorError;
+      }
+      console.log('freeLeadsAssign:updateContractor:ok - marked as assigned');
+    } else {
+      console.log('freeLeadsAssign:noLeadsAssigned - keeping status as confirmed for future assignment');
     }
     console.log('freeLeadsAssign:done');
 
