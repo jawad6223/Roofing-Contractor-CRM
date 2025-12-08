@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, MapPin, Phone, Eye, Calendar as CalendarIcon, User, DollarSign, Send, FileText, Clock, Mail } from "lucide-react";
+import { Search, MapPin, Phone, Eye, Calendar as CalendarIcon, User, Send, FileText, Clock, Mail } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,6 +23,7 @@ export const AppointmentsRequest = () => {
   const [assignedModalSearchTerm, setAssignedModalSearchTerm] = useState("");
   const [showSendModal, setShowSendModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<string>('');
+  const [leadSearchTerm, setLeadSearchTerm] = useState('');
   const [appointmentDate, setAppointmentDate] = useState<Date | undefined>(new Date());
   const [appointmentTime, setAppointmentTime] = useState('');
   const [leads, setLeads] = useState<any[]>([]);
@@ -560,9 +561,6 @@ export const AppointmentsRequest = () => {
                         Date
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Action
                       </th>
                     </tr>
@@ -570,8 +568,11 @@ export const AppointmentsRequest = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {assignCurrentData.length > 0 ? (
                       assignCurrentData.map((request: any) => (
-                        <tr key={request.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
+                        <tr
+                          key={request.id}
+                          className={`hover:bg-gray-50 ${assignCurrentData.indexOf(request) % 2 === 1 ? "bg-gray-50" : ""}`}
+                        >
+                          <td className="px-2 py-2 whitespace-nowrap">
                             <div className="flex flex-col items-center">
                               <div className="text-sm font-bold text-[#122E5F]">
                                 {request.name}
@@ -582,7 +583,7 @@ export const AppointmentsRequest = () => {
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-2 py-2 whitespace-nowrap">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                               <span className="text-sm font-medium text-gray-900">
@@ -590,25 +591,20 @@ export const AppointmentsRequest = () => {
                               </span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-center">
-                            <div className="flex items-center">
-                              <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
-                              <span className="text-sm font-medium text-gray-900">
-                                ${request.price}
-                              </span>
-                            </div>
+                          <td className="px-2 py-2 whitespace-nowrap text-center">
+                            <span className="text-sm font-medium text-gray-900">
+                              ${request.price}
+                            </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-2 py-2 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <CalendarIcon className="h-3 w-3 text-gray-400 mr-1" />
                             <span className="text-sm font-medium text-gray-900">
                               {request.date}
                             </span>
+                            </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className="text-sm font-bold text-green-500">
-                              {request.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-2 py-2 whitespace-nowrap">
                             <Button
                               size="sm"
                               variant="outline"
@@ -676,10 +672,7 @@ export const AppointmentsRequest = () => {
                         Price
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
+                        Purchase Date
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Send
@@ -689,7 +682,10 @@ export const AppointmentsRequest = () => {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {pendingCurrentData.length > 0 ? (
                       pendingCurrentData.map((request: any) => (
-                        <tr key={request.id} className="hover:bg-gray-50">
+                        <tr
+                          key={request.id}
+                          className={`hover:bg-gray-50 ${pendingCurrentData.indexOf(request) % 2 === 1 ? "bg-gray-50" : ""}`}
+                        >
                           <td className="px-4 py-2 whitespace-nowrap">
                             <div className="flex flex-col items-start">
                               <div className="flex items-center text-sm text-start font-bold text-[#122E5F]">
@@ -710,23 +706,18 @@ export const AppointmentsRequest = () => {
                               </span>
                             </div>
                           </td>
-                          <td className="px-2 py-2 whitespace-nowrap text-center">
-                            <div className="flex items-center">
-                              <DollarSign className="h-3 w-3 text-gray-400 mr-1" />
+                          <td className="px-6 py-4 whitespace-nowrap text-center">
                               <span className="text-sm font-medium text-gray-900">
                                 ${request.price}
                               </span>
-                            </div>
                           </td>
-                          <td className="px-2 py-2 whitespace-nowrap">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <CalendarIcon className="h-3 w-3 text-gray-400 mr-1" />
                             <span className="text-sm font-medium text-gray-900">
                               {request.date}
                             </span>
-                          </td>
-                          <td className="py-2 whitespace-nowrap">
-                            <span className="text-sm font-bold text-yellow-500">
-                              {request.status}
-                            </span>
+                            </div>
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap">
                             <Button
@@ -818,11 +809,11 @@ export const AppointmentsRequest = () => {
           </DialogHeader>
           
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-4 md:col-span-2">
                 <div>
                   <Label className="text-sm font-medium mb-2 block text-black">Select Lead</Label>
-                  <Select value={selectedLead} onValueChange={setSelectedLead}>
+                  <Select value={selectedLead} onValueChange={(value) => { setSelectedLead(value); setLeadSearchTerm(''); }}>
                     <SelectTrigger className="text-black h-auto py-3 px-4">
                       {selectedLead ? (() => {
                         const selectedLeadData = leads.find((lead) => lead.id.toString() === selectedLead);
@@ -841,35 +832,77 @@ export const AppointmentsRequest = () => {
                         );
                       })() : <SelectValue placeholder="Choose a lead" />}
                     </SelectTrigger>
-                    <SelectContent className="max-h-[300px] overflow-y-auto">
-                      {leads.map((lead) => {
-                        const badge = getDistanceBadge(lead);
-                        return (
-                          <SelectItem 
-                            key={lead.id} 
-                            value={lead.id.toString()} 
-                            className="py-3 px-4 cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
-                          >
-                            <div className="flex items-start justify-between gap-4 w-full ml-3">
-                                <div className="flex flex-col gap-1 flex-1">
-                                  <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
-                                    <User className="h-3 w-3 text-gray-400 mr-1" />
-                                    <span className="truncate">{lead["First Name"]} {lead["Last Name"]}</span>
-                                  </div>
-                                  <div className="flex items-start gap-1.5 text-xs text-gray-600">
-                                    <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
-                                    <span className="break-words leading-relaxed">{lead["Property Address"]}</span>
-                                  </div>
+                    <SelectContent position="popper" className="max-h-[400px] overflow-hidden w-[var(--radix-select-trigger-width)]">
+                      <div className="sticky top-0 z-10 bg-white border-b px-3 py-2">
+                        <div className="relative">
+                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Input
+                            placeholder="Search leads..."
+                            value={leadSearchTerm}
+                            onChange={(e) => setLeadSearchTerm(e.target.value)}
+                            className="pl-8 h-9 text-sm"
+                            onClick={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => e.stopPropagation()}
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-[300px] overflow-y-auto">
+                        {leads
+                          .filter((lead) => {
+                            if (!leadSearchTerm) return true;
+                            const searchLower = leadSearchTerm.toLowerCase();
+                            return (
+                              lead["First Name"]?.toLowerCase().includes(searchLower) ||
+                              lead["Last Name"]?.toLowerCase().includes(searchLower) ||
+                              lead["Property Address"]?.toLowerCase().includes(searchLower) ||
+                              lead["Phone Number"]?.includes(leadSearchTerm) ||
+                              lead["Email Address"]?.toLowerCase().includes(searchLower)
+                            );
+                          })
+                          .map((lead) => {
+                            const badge = getDistanceBadge(lead);
+                            return (
+                              <SelectItem 
+                                key={lead.id} 
+                                value={lead.id.toString()} 
+                                className="py-3 px-4 cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
+                              >
+                                <div className="flex items-start justify-between gap-4 w-full ml-3 min-w-0">
+                                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                                      <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
+                                        <User className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
+                                        <span className="truncate">{lead["First Name"]} {lead["Last Name"]}</span>
+                                      </div>
+                                      <div className="flex items-start gap-1.5 text-xs text-gray-600">
+                                        <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                        <span className="break-words leading-relaxed min-w-0">{lead["Property Address"]}</span>
+                                      </div>
+                                    </div>
+                                  {badge && (
+                                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0 shadow-sm ${badge.color}`}>
+                                      {badge.text} • {badge.distance}mi
+                                    </span>
+                                  )}
                                 </div>
-                              {badge && (
-                                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full whitespace-nowrap flex-shrink-0 shadow-sm ${badge.color}`}>
-                                  {badge.text} • {badge.distance}mi
-                                </span>
-                              )}
-                            </div>
-                          </SelectItem>
-                        );
-                      })}
+                              </SelectItem>
+                            );
+                          })}
+                        {leads.filter((lead) => {
+                          if (!leadSearchTerm) return false;
+                          const searchLower = leadSearchTerm.toLowerCase();
+                          return (
+                            lead["First Name"]?.toLowerCase().includes(searchLower) ||
+                            lead["Last Name"]?.toLowerCase().includes(searchLower) ||
+                            lead["Property Address"]?.toLowerCase().includes(searchLower) ||
+                            lead["Phone Number"]?.includes(leadSearchTerm) ||
+                            lead["Email Address"]?.toLowerCase().includes(searchLower)
+                          );
+                        }).length === 0 && leadSearchTerm && (
+                          <div className="py-6 text-center text-sm text-gray-500">
+                            No leads found matching "{leadSearchTerm}"
+                          </div>
+                        )}
+                      </div>
                     </SelectContent>
                   </Select>
                 </div>
@@ -960,7 +993,7 @@ export const AppointmentsRequest = () => {
                   <Input
                     id="time"
                     type="time"
-                    value={appointmentTime}
+                    value={appointmentTime || "00:00"}
                     onChange={(e) => setAppointmentTime(e.target.value)}
                     className="w-full text-black"
                   />

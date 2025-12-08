@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Plus, ShoppingCart, Clock, MapPin, Phone, Mail, User, Calendar as CalendarIcon } from 'lucide-react'
+import { Plus, ShoppingCart, Clock, MapPin, Phone, Mail, User, Calendar as CalendarIcon, Search } from 'lucide-react'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar } from "@/components/ui/calendar"
@@ -26,6 +26,7 @@ export const Appointments = () => {
   const [appointmentDate, setAppointmentDate] = useState<Date | undefined>(new Date())
   const [appointmentTime, setAppointmentTime] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [leadSearchTerm, setLeadSearchTerm] = useState('')
   const [appointmentPrice, setAppointmentPrice] = useState<number>(0);
   const [newLead, setNewLead] = useState({
     firstName: '',
@@ -410,18 +411,18 @@ export const Appointments = () => {
       </div>
 
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-black">Schedule Appointment</DialogTitle>
           </DialogHeader>
           
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-4 md:col-span-2">
                 <div>
                   <Label className="text-sm font-medium mb-2 block text-black">Select Lead</Label>
                   <div className="space-y-3">
-                    <Select value={selectedLead} onValueChange={setSelectedLead}>
+                    <Select value={selectedLead} onValueChange={(value) => { setSelectedLead(value); setLeadSearchTerm(''); }}>
                       <SelectTrigger className="text-black h-auto py-3 px-4">
                         {selectedLead ? (() => {
                           const selectedLeadData = leads.find((lead) => lead.id.toString() === selectedLead);
@@ -440,27 +441,69 @@ export const Appointments = () => {
                           );
                         })() : <SelectValue placeholder="Choose a lead" />}
                       </SelectTrigger>
-                      <SelectContent className="max-h-[300px] overflow-y-auto max-w-[450px]">
-                        {leads.map((lead) => (
-                          <SelectItem 
-                            key={lead.id} 
-                            value={lead.id.toString()} 
-                            className="py-3 px-4 cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
-                          >
-                            <div className="flex items-start justify-between gap-4 w-full ml-3">
-                              <div className="flex flex-col gap-1 flex-1 min-w-0">
-                                <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
-                                  <User className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
-                                  <span className="truncate">{lead['First Name']} {lead['Last Name']}</span>
+                      <SelectContent position="popper" className="max-h-[400px] overflow-hidden w-[var(--radix-select-trigger-width)]">
+                        <div className="sticky top-0 z-10 bg-white border-b px-3 py-2">
+                          <div className="relative">
+                            <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <Input
+                              placeholder="Search leads..."
+                              value={leadSearchTerm}
+                              onChange={(e) => setLeadSearchTerm(e.target.value)}
+                              className="pl-8 h-9 text-sm"
+                              onClick={(e) => e.stopPropagation()}
+                              onKeyDown={(e) => e.stopPropagation()}
+                            />
+                          </div>
+                        </div>
+                        <div className="max-h-[300px] overflow-y-auto">
+                          {leads
+                            .filter((lead) => {
+                              if (!leadSearchTerm) return true;
+                              const searchLower = leadSearchTerm.toLowerCase();
+                              return (
+                                lead['First Name']?.toLowerCase().includes(searchLower) ||
+                                lead['Last Name']?.toLowerCase().includes(searchLower) ||
+                                lead['Property Address']?.toLowerCase().includes(searchLower) ||
+                                lead['Phone Number']?.includes(leadSearchTerm) ||
+                                lead['Email Address']?.toLowerCase().includes(searchLower)
+                              );
+                            })
+                            .map((lead) => (
+                              <SelectItem 
+                                key={lead.id} 
+                                value={lead.id.toString()} 
+                                className="py-3 px-4 cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
+                              >
+                                <div className="flex items-start justify-between gap-4 w-full ml-3 min-w-0">
+                                  <div className="flex flex-col gap-1 flex-1 min-w-0">
+                                    <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
+                                      <User className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
+                                      <span className="truncate">{lead['First Name']} {lead['Last Name']}</span>
+                                    </div>
+                                    <div className="flex items-start gap-1.5 text-xs text-gray-600">
+                                      <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                      <span className="break-words leading-relaxed min-w-0">{lead['Property Address']}</span>
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="flex items-start gap-1.5 text-xs text-gray-600">
-                                  <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
-                                  <span className="break-words leading-relaxed min-w-0">{lead['Property Address']}</span>
-                                </div>
-                              </div>
+                              </SelectItem>
+                            ))}
+                          {leads.filter((lead) => {
+                            if (!leadSearchTerm) return false;
+                            const searchLower = leadSearchTerm.toLowerCase();
+                            return (
+                              lead['First Name']?.toLowerCase().includes(searchLower) ||
+                              lead['Last Name']?.toLowerCase().includes(searchLower) ||
+                              lead['Property Address']?.toLowerCase().includes(searchLower) ||
+                              lead['Phone Number']?.includes(leadSearchTerm) ||
+                              lead['Email Address']?.toLowerCase().includes(searchLower)
+                            );
+                          }).length === 0 && leadSearchTerm && (
+                            <div className="py-6 text-center text-sm text-gray-500">
+                              No leads found matching "{leadSearchTerm}"
                             </div>
-                          </SelectItem>
-                        ))}
+                          )}
+                        </div>
                       </SelectContent>
                     </Select>
                   </div>
@@ -474,7 +517,7 @@ export const Appointments = () => {
                     mode="single"
                     selected={appointmentDate}
                     onSelect={setAppointmentDate}
-                    className="rounded-md border"
+                    className="rounded-md border w-full"
                     captionLayout="dropdown"
                     fromYear={new Date().getFullYear() - 5}
                     toYear={new Date().getFullYear() + 10}
@@ -486,7 +529,7 @@ export const Appointments = () => {
                   <Input
                     id="time"
                     type="time"
-                    value={appointmentTime}
+                    value={appointmentTime || "00:00"}
                     onChange={(e) => setAppointmentTime(e.target.value)}
                     className="w-full text-black"
                   />

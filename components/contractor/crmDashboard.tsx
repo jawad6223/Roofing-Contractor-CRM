@@ -1,10 +1,32 @@
 "use client";
 
 import React, { useState } from "react";
-import { Home, Settings, BarChart3, Menu, X, User, LogOut, UserPlus, ShoppingCart, FileText, Calendar } from "lucide-react";
+import {
+  Home,
+  Settings,
+  BarChart3,
+  Menu,
+  X,
+  User,
+  LogOut,
+  UserPlus,
+  ShoppingCart,
+  FileText,
+  Calendar,
+} from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { CrmDashboardProps } from "@/types/DashboardTypes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -55,9 +77,21 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
     { icon: BarChart3, label: "CRM", path: "/contractor/crm" },
     { icon: FileText, label: "Leads", path: "/contractor/leads" },
     { icon: Calendar, label: "Appointments", path: "/contractor/appointments" },
-    { icon: ShoppingCart, label: "Purchase Leads", path: "/contractor/purchase-leads" },
-    { icon: FileText, label: "Lead Purchase Info", path: "/contractor/lead-purchase-info" },
-    { icon: Calendar, label: "Appointment Info", path: "/contractor/appointment-info" },
+    {
+      icon: ShoppingCart,
+      label: "Purchase Leads",
+      path: "/contractor/purchase-leads",
+    },
+    {
+      icon: FileText,
+      label: "Lead Purchase Info",
+      path: "/contractor/lead-purchase-info",
+    },
+    {
+      icon: Calendar,
+      label: "Appointment Info",
+      path: "/contractor/appointment-info",
+    },
     { icon: Settings, label: "Settings", path: "/contractor/settings" },
     { icon: UserPlus, label: "Teams", path: "/contractor/teams" },
   ];
@@ -70,7 +104,10 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
     <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
       {/* Sidebar */}
@@ -116,32 +153,37 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
           </nav>
 
           <div className="p-4 border-t bg-white flex-shrink-0">
-            <div className="flex items-center space-x-3 p-3 rounded-lg bg-gray-50 mb-2">
-              <div className="w-8 h-8 bg-[#122E5F] rounded-full flex items-center justify-center">
-                <User className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate capitalize">{currentUserFullName}</p>
-                {/* <p className="text-xs text-gray-500 truncate">{loading ? "Loading..." : user}</p> */}
-              </div>
-            </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="w-full border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full border-[#122E5F] text-[#122E5F] hover:bg-[#122E5F] hover:text-white"
+                >
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-[#286BBD]">Confirm Logout</AlertDialogTitle>
+                  <AlertDialogTitle className="text-[#286BBD]">
+                    Confirm Logout
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to logout? You will need to sign in again to access your account.
+                    Are you sure you want to logout? You will need to sign in
+                    again to access your account.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="text-[#286BBD]">Cancel</AlertDialogCancel>
-                  <AlertDialogAction className="bg-[#122E5F] hover:bg-[#0f2347]/80" onClick={handleLogout}>Yes, Logout</AlertDialogAction>
+                  <AlertDialogCancel className="text-[#286BBD]">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-[#122E5F] hover:bg-[#0f2347]/80"
+                    onClick={handleLogout}
+                  >
+                    Yes, Logout
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -152,16 +194,29 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
       <div className="flex-1 lg:ml-0 flex flex-col h-full overflow-hidden">
         {/* Top header */}
         <div className="bg-white shadow-sm border-b px-4 sm:px-6 flex-shrink-0">
-            <div className="flex justify-start items-center gap-4 h-16">
-                <button
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-                  aria-label="Open sidebar"
-                >
-                  <Menu className="h-5 w-5" />
-                </button>
-                <h1 className="text-2xl font-bold text-gray-900">Contractor Dashboard</h1>
+          <div className="flex justify-between items-center gap-4 h-16">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                aria-label="Open sidebar"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
+              <h1 className="text-xl whitespace-nowrap md:text-2xl font-bold text-gray-900">Contractor Dashboard</h1>
             </div>
+            <div className="flex items-center space-x-3 p-3">
+              <div className="w-8 h-8 bg-[#122E5F] rounded-full flex items-center justify-center">
+                <User className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate capitalize">
+                  {currentUserFullName}
+                </p>
+                {/* <p className="text-xs text-gray-500 truncate">{loading ? "Loading..." : user}</p> */}
+              </div>
+            </div>
+          </div>
         </div>
         {/* Main content area */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</main>
