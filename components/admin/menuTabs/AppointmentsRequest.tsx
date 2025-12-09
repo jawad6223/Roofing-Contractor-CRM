@@ -338,10 +338,10 @@ export const AppointmentsRequest = () => {
       return;
     }
     
-    if (!appointmentTime) {
-      toast.error('Please select a time');
-      return;
-    }
+    // if (!appointmentTime) {
+    //   toast.error('Please select a time');
+    //   return;
+    // }
 
     if (!selectedAppointmentRequest) {
       toast.error('Appointment request not found');
