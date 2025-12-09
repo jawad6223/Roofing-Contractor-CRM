@@ -505,7 +505,9 @@ export const AppointmentsRequest = () => {
       console.error("Error in sendAppointments:", error);
       toast.error("An error occurred while assigning the appointment");
     }
-    setSendAppointmentLoading(false);
+    finally {
+      setSendAppointmentLoading(false);
+    }
   };
 
   return (
