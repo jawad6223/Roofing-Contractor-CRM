@@ -529,7 +529,7 @@ export const Appointments = () => {
                   <Input
                     id="time"
                     type="time"
-                    value={appointmentTime || "00:00"}
+                    value={appointmentTime}
                     onChange={(e) => setAppointmentTime(e.target.value)}
                     className="w-full text-black"
                   />

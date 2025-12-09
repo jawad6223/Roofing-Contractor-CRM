@@ -338,10 +338,10 @@ export const AppointmentsRequest = () => {
       return;
     }
     
-    // if (!appointmentTime) {
-    //   toast.error('Please select a time');
-    //   return;
-    // }
+    if (!appointmentTime) {
+      toast.error('Please select a time');
+      return;
+    }
 
     if (!selectedAppointmentRequest) {
       toast.error('Appointment request not found');
@@ -993,7 +993,7 @@ export const AppointmentsRequest = () => {
                   <Input
                     id="time"
                     type="time"
-                    value={appointmentTime || "00:00"}
+                    value={appointmentTime}
                     onChange={(e) => setAppointmentTime(e.target.value)}
                     className="w-full text-black"
                   />
