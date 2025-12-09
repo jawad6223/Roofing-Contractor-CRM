@@ -172,22 +172,20 @@ export async function freeLeadsAssign(userId: string) {
       console.log('freeLeadsAssign:insertAssignedLeads:ok');
     }
 
-    // 9️⃣ Mark contractor as assigned so free assignment runs once (only if leads were actually assigned)
-    // If no leads were assigned, keep status as "confirmed" so system can check again when new leads are available
-    if (leadsToAssign.length > 0) {
-      const { error: updateContractorError } = await supabase
-        .from("Roofing_Auth")
-        .update({ "Is Verified": "assigned" })
-        .eq("user_id", userId);
+    // 9️⃣ Mark contractor as assigned so free assignment runs once
+    // This prevents duplicate Leads_Request records on subsequent logins
+    // The Leads_Request record is already created (with pending leads if none were found)
+    // The checkAndAssignPendingFreeLeads function will handle assigning leads when they become available
+    const { error: updateContractorError } = await supabase
+      .from("Roofing_Auth")
+      .update({ "Is Verified": "assigned" })
+      .eq("user_id", userId);
 
-      if (updateContractorError) {
-        console.error('freeLeadsAssign:updateContractor:error', updateContractorError);
-        throw updateContractorError;
-      }
-      console.log('freeLeadsAssign:updateContractor:ok - marked as assigned');
-    } else {
-      console.log('freeLeadsAssign:noLeadsAssigned - keeping status as confirmed for future assignment');
+    if (updateContractorError) {
+      console.error('freeLeadsAssign:updateContractor:error', updateContractorError);
+      throw updateContractorError;
     }
+    console.log('freeLeadsAssign:updateContractor:ok - marked as assigned');
     console.log('freeLeadsAssign:done');
 
   } catch (error) {
