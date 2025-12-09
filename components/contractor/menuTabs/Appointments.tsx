@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button'
-import { Plus, ShoppingCart, Clock, MapPin, Phone, Mail, User, Calendar as CalendarIcon, Search } from 'lucide-react'
+import { Plus, ShoppingCart, Clock, MapPin, Phone, Mail, User, Calendar as CalendarIcon, Search, Loader2 } from 'lucide-react'
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar } from "@/components/ui/calendar"
@@ -28,6 +28,7 @@ export const Appointments = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [leadSearchTerm, setLeadSearchTerm] = useState('')
   const [appointmentPrice, setAppointmentPrice] = useState<number>(0);
+  const [sendAppointmentLoading, setSendAppointmentLoading] = useState(false);
   const [newLead, setNewLead] = useState({
     firstName: '',
     lastName: '',
@@ -120,6 +121,7 @@ export const Appointments = () => {
   const selectedAppointments = getAppointmentsForDate(date)
 
   const handleAddAppointment = async () => {
+    setSendAppointmentLoading(true);
     if (!selectedLead) {
       toast.error('Please select a lead')
       return
@@ -209,6 +211,8 @@ export const Appointments = () => {
     } catch (error) {
       console.error('Error in handleAddAppointment:', error)
       toast.error('An error occurred while setting the appointment')
+    } finally {
+      setSendAppointmentLoading(false);
     }
   }
 
@@ -559,8 +563,9 @@ export const Appointments = () => {
             <Button
               onClick={handleAddAppointment}
               className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
+              disabled={sendAppointmentLoading}
             >
-              Mark as Appointment Set
+              {sendAppointmentLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Mark as Appointment Set"}
             </Button>
           </DialogFooter>
         </DialogContent>

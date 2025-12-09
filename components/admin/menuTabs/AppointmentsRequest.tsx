@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, MapPin, Phone, Eye, Calendar as CalendarIcon, User, Send, FileText, Clock, Mail } from "lucide-react";
+import { Search, MapPin, Phone, Eye, Calendar as CalendarIcon, User, Send, FileText, Clock, Mail, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,6 +34,7 @@ export const AppointmentsRequest = () => {
   const [contractorData, setContractorData] = useState<any>(null);
   const [contractorAppointmentDates, setContractorAppointmentDates] = useState<Date[]>([]);
   const [contractorAppointments, setContractorAppointments] = useState<any[]>([]);
+  const [sendAppointmentLoading, setSendAppointmentLoading] = useState(false);
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -328,6 +329,7 @@ export const AppointmentsRequest = () => {
   };
 
   const sendAppointments = async (selectedLead: string, appointmentTime: string) => {
+    setSendAppointmentLoading(true);
     if (!selectedLead) {
       toast.error('Please select a lead');
       return;
@@ -503,6 +505,7 @@ export const AppointmentsRequest = () => {
       console.error("Error in sendAppointments:", error);
       toast.error("An error occurred while assigning the appointment");
     }
+    setSendAppointmentLoading(false);
   };
 
   return (
@@ -1012,8 +1015,9 @@ export const AppointmentsRequest = () => {
             <Button
               onClick={() => sendAppointments(selectedLead, appointmentTime)}
               className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
+              disabled={sendAppointmentLoading}
             >
-              Send
+              {sendAppointmentLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send"}
             </Button>
           </DialogFooter>
         </DialogContent>
