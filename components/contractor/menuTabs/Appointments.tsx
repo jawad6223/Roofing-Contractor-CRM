@@ -357,7 +357,7 @@ export const Appointments = () => {
             <CardContent>
               {date ? (
                 selectedAppointments.length > 0 ? (
-                  <div className="space-y-4">
+                  <div className="space-y-4 max-h-[500px] overflow-y-auto">
                     {selectedAppointments.map((appointment) => (
                       <div
                         key={appointment.id}
