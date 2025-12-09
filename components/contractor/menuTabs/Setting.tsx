@@ -329,7 +329,9 @@ export const Setting = () => {
                 {formData.fullName}
               </h3>
               <p className="text-sm text-gray-600">{formData.email}</p>
-              <p className="text-sm text-gray-500 w-96 text-center mx-auto">{formData.businessAddress}</p>
+              <p className="text-xs mt-1 text-gray-500 w-60 text-center mx-auto break-words whitespace-pre-line">
+                {formData.businessAddress}
+              </p>
             </div>
             <div className="space-y-4">
               <div>

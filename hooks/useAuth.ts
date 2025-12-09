@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
 
 export const useAuth = () => {
   const [user, setUser] = useState<string | null>(null);
   const [admin, setAdmin] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [userFullName, setUserFullName] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -26,6 +28,40 @@ export const useAuth = () => {
       }
     }
     setLoading(false);
+  }, []);
+
+  // Fetch user full name from Supabase
+  useEffect(() => {
+    const fetchUserFullName = async () => {
+      try {
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+        if (authError || !authData?.user) {
+          setUserFullName(null);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from("Roofing_Auth")
+          .select('"Full Name"')
+          .eq("user_id", authData.user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching user full name:", error);
+          setUserFullName(null);
+          return;
+        }
+
+        if (data) {
+          setUserFullName(data["Full Name"] || null);
+        }
+      } catch (error) {
+        console.error("Error in fetchUserFullName:", error);
+        setUserFullName(null);
+      }
+    };
+
+    fetchUserFullName();
   }, []);
 
   const login = (emailAddress: string) => {
@@ -90,18 +126,13 @@ export const useAuth = () => {
     }
   };
 
-  // Get the full name of the current user
+  // Get the full name of the current user from Supabase
   const getCurrentUserFullName = () => {
     if (typeof window === 'undefined' || loading) {
       return 'Loading...';
     }
     
-      try {
-        const userInfo = JSON.parse(localStorage.getItem("userInfo") || "{}");
-        return userInfo["Full Name"] || user || 'User';
-      } catch (error) {
-        return user || 'User';
-      }
+    return userFullName || user || 'User';
   };
 
   // Get the admin name

@@ -203,14 +203,14 @@ const CrmDashboard = ({ children }: CrmDashboardProps) => {
               >
                 <Menu className="h-5 w-5" />
               </button>
-              <h1 className="text-xl whitespace-nowrap md:text-2xl font-bold text-gray-900">Contractor Dashboard</h1>
+              <h1 className="text-base whitespace-nowrap md:text-2xl font-bold text-gray-900">Contractor Dashboard</h1>
             </div>
-            <div className="flex items-center space-x-3 p-3">
-              <div className="w-8 h-8 bg-[#122E5F] rounded-full flex items-center justify-center">
+            <div className="flex flex-col md:flex-row items-center space-x-0 md:space-x-3 space-y-1 md:space-y-0">
+              <div className="w-8 h-8 bg-[#122E5F] rounded-full flex items-center justify-center flex-shrink-0">
                 <User className="h-4 w-4 text-white" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate capitalize">
+              <div className="min-w-0 text-center md:text-left">
+                <p className="text-sm font-medium text-gray-900 capitalize break-words">
                   {currentUserFullName}
                 </p>
                 {/* <p className="text-xs text-gray-500 truncate">{loading ? "Loading..." : user}</p> */}
