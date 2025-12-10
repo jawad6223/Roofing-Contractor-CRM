@@ -168,7 +168,7 @@ export const useAuth = () => {
       return 'Loading...';
     }
     
-    return userFullName || '';
+    return userFullName;
   };
 
   // Get the admin name

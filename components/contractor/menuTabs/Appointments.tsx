@@ -30,6 +30,7 @@ export const Appointments = () => {
   const [leadSearchTerm, setLeadSearchTerm] = useState('')
   const [appointmentPrice, setAppointmentPrice] = useState<number>(0);
   const [sendAppointmentLoading, setSendAppointmentLoading] = useState(false);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(true);
   const [newLead, setNewLead] = useState({
     firstName: '',
     lastName: '',
@@ -52,9 +53,11 @@ export const Appointments = () => {
   }, []);
 
   const fetchAppointments = async () => {
+    setAppointmentsLoading(true)
     try {
       const { data: authData, error: authError } = await supabase.auth.getUser()
       if (authError || !authData?.user) {
+        setAppointmentsLoading(false)
         return
       }
       const userId = authData.user.id
@@ -71,6 +74,7 @@ export const Appointments = () => {
 
       if (error) {
         console.error('Error fetching appointments:', error)
+        setAppointmentsLoading(false)
         return
       }
 
@@ -97,8 +101,10 @@ export const Appointments = () => {
 
         setAppointments(transformedAppointments)
       }
+      setAppointmentsLoading(false)
     } catch (error) {
       console.error('Error in fetchAppointments:', error)
+      setAppointmentsLoading(false)
     }
   }
 
@@ -238,6 +244,33 @@ export const Appointments = () => {
       toast.error('Please select time')
       setSendAppointmentLoading(false)
       return
+    }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayDate = format(today, 'yyyy-MM-dd')
+    const selectedDateStr = format(appointmentDate, 'yyyy-MM-dd')
+    const selectedDateOnly = new Date(appointmentDate)
+    selectedDateOnly.setHours(0, 0, 0, 0)
+    
+    if (selectedDateOnly < today) {
+      toast.error('Cannot schedule appointment in the past. Please select today or a future date.')
+      setSendAppointmentLoading(false)
+      return
+    }
+    
+    if (todayDate === selectedDateStr) {
+      const timeParts = appointmentTime.split(':')
+      const selectedHour = parseInt(timeParts[0])
+      const selectedMinute = parseInt(timeParts[1])
+      const selectedDateTime = new Date(appointmentDate)
+      selectedDateTime.setHours(selectedHour, selectedMinute, 0, 0)
+      
+      if (selectedDateTime < new Date()) {
+        toast.error('Cannot schedule appointment in the past. Please select a future time.')
+        setSendAppointmentLoading(false)
+        return
+      }
     }
 
     try {
@@ -475,7 +508,14 @@ export const Appointments = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {date ? (
+              {appointmentsLoading ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#122E5F]"></div>
+                    <p className="mt-2 text-sm text-gray-500">
+                      Loading appointments...
+                    </p>
+                </div>
+              ) : date ? (
                 selectedAppointments.length > 0 ? (
                   <div className="space-y-4 max-h-[500px] overflow-y-auto">
                     {selectedAppointments.map((appointment) => (
@@ -541,8 +581,7 @@ export const Appointments = () => {
           </DialogHeader>
           
           <div className="space-y-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-4 md:col-span-2">
+          <div className="space-y-4">
                 <div>
                   <Label className="text-sm font-medium mb-2 block text-black">Select Lead</Label>
                   <div className="space-y-3">
@@ -633,9 +672,8 @@ export const Appointments = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="space-y-4">
-                <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
                   <Label className="text-sm font-medium mb-2 block text-black">Select Date</Label>
                   <Calendar
                     mode="single"
@@ -648,7 +686,7 @@ export const Appointments = () => {
                     disabled={{ before: new Date(new Date().setHours(0, 0, 0, 0)) }}
                   />
                 </div>
-                <div>
+                <div className="space-y-4">
                   <Label className="text-sm font-medium mb-2 block text-black">Select Time</Label>
                   <div className="border rounded-md p-4 max-h-[200px] overflow-y-auto">
                     <div className="grid grid-cols-2 gap-2">
@@ -700,7 +738,6 @@ export const Appointments = () => {
                     />
                   </div>
                 </div>
-              </div>
             </div>
           </div>
 
