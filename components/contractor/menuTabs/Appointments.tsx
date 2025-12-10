@@ -1,8 +1,9 @@
 import { Button } from '@/components/ui/button'
 import { Plus, ShoppingCart, Clock, MapPin, Phone, Mail, User, Calendar as CalendarIcon, Search, Loader2 } from 'lucide-react'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar } from "@/components/ui/calendar"
+import { Calendar, CalendarDayButton } from "@/components/ui/calendar"
+import { DayButton } from "react-day-picker"
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -36,6 +37,9 @@ export const Appointments = () => {
     email: '',
     address: ''
   })
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const lastClickRef = useRef<{ date: Date; time: number } | null>(null)
+  const dayButtonClicksRef = useRef<Map<string, { time: number; count: number }>>(new Map())
 
   useEffect(() => {
     const fetchAppointmentPriceData = async () => {
@@ -120,18 +124,119 @@ export const Appointments = () => {
 
   const selectedAppointments = getAppointmentsForDate(date)
 
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    if (!selectedDate) {
+      setDate(selectedDate)
+      return
+    }
+
+    const now = Date.now()
+    const dateKey = format(selectedDate, 'yyyy-MM-dd')
+
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current)
+      clickTimeoutRef.current = null
+    }
+
+    if (lastClickRef.current) {
+      const lastDateKey = format(lastClickRef.current.date, 'yyyy-MM-dd')
+      const timeDiff = now - lastClickRef.current.time
+
+      if (dateKey === lastDateKey && timeDiff < 500) {
+        setDate(selectedDate)
+        setAppointmentDate(selectedDate)
+        setShowAddModal(true)
+        lastClickRef.current = null
+        if (clickTimeoutRef.current) {
+          clearTimeout(clickTimeoutRef.current)
+          clickTimeoutRef.current = null
+        }
+        return
+      }
+    }
+
+    setDate(selectedDate)
+    lastClickRef.current = { date: selectedDate, time: now }
+
+    clickTimeoutRef.current = setTimeout(() => {
+      lastClickRef.current = null
+      clickTimeoutRef.current = null
+    }, 500)
+  }
+
+  const selectTimeoutRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
+
+  const CustomDayButton = (props: React.ComponentProps<typeof DayButton>) => {
+    const { day, onClick, ...restProps } = props
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!day) {
+        onClick?.(e)
+        return
+      }
+
+      const dateKey = format(day.date, 'yyyy-MM-dd')
+      const now = Date.now()
+      const clickData = dayButtonClicksRef.current.get(dateKey)
+      
+      const existingTimeout = selectTimeoutRef.current.get(dateKey)
+      if (existingTimeout) {
+        clearTimeout(existingTimeout)
+        selectTimeoutRef.current.delete(dateKey)
+      }
+      
+      if (clickData) {
+        const timeDiff = now - clickData.time
+        if (timeDiff < 400) {
+          e.preventDefault()
+          e.stopPropagation()
+          dayButtonClicksRef.current.delete(dateKey)
+          handleDateDoubleClick(day.date)
+          return
+        }
+      }
+
+      dayButtonClicksRef.current.set(dateKey, { time: now, count: 1 })
+      
+      const timeout = setTimeout(() => {
+        onClick?.(e)
+        dayButtonClicksRef.current.delete(dateKey)
+        selectTimeoutRef.current.delete(dateKey)
+      }, 400)
+      
+      selectTimeoutRef.current.set(dateKey, timeout)
+    }
+
+    return (
+      <CalendarDayButton
+        {...restProps}
+        day={day}
+        onClick={handleClick}
+      />
+    )
+  }
+
+  const handleDateDoubleClick = (selectedDate: Date) => {
+    setDate(selectedDate)
+    setAppointmentDate(selectedDate)
+    setShowAddModal(true)
+  }
+
   const handleAddAppointment = async () => {
     setSendAppointmentLoading(true);
     if (!selectedLead) {
       toast.error('Please select a lead')
+      setSendAppointmentLoading(false)
       return
     }
     if (!appointmentDate) {
       toast.error('Please select a date')
+      setSendAppointmentLoading(false)
       return
     }
     if (!appointmentTime) {
       toast.error('Please select time')
+      setSendAppointmentLoading(false)
       return
     }
 
@@ -139,6 +244,7 @@ export const Appointments = () => {
       const { data: authData, error: authError } = await supabase.auth.getUser()
       if (authError || !authData?.user) {
         toast.error('User not logged in')
+        setSendAppointmentLoading(false)
         return
       }
       const userId = authData.user.id
@@ -160,6 +266,7 @@ export const Appointments = () => {
       if (checkError) {
         console.error('Error checking existing appointments:', checkError)
         toast.error('Failed to check appointment availability')
+        setSendAppointmentLoading(false)
         return
       }
 
@@ -176,6 +283,7 @@ export const Appointments = () => {
           
           if (timeDifference < 60) {
             toast.error(`Appointment time must be at least 1 hour apart from existing appointments.`)
+            setSendAppointmentLoading(false)
             return
           }
         }
@@ -194,6 +302,7 @@ export const Appointments = () => {
       if (updateError) {
         console.error('Error updating appointment:', updateError)
         toast.error('Failed to set appointment')
+        setSendAppointmentLoading(false)
         return
       }
 
@@ -287,7 +396,7 @@ export const Appointments = () => {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={setDate}
+                onSelect={handleDateSelect}
                 className="rounded-md w-full border shadow-sm calendar-appointments"
                 captionLayout="dropdown"
                 fromYear={new Date().getFullYear() - 5}
@@ -301,6 +410,9 @@ export const Appointments = () => {
                 }}
                 modifiersClassNames={{
                   hasAppointment: 'has-appointment'
+                }}
+                components={{
+                  DayButton: CustomDayButton
                 }}
               />
               <style dangerouslySetInnerHTML={{
@@ -319,6 +431,14 @@ export const Appointments = () => {
                     border-radius: 50%;
                     background-color: #3b82f6;
                     z-index: 1;
+                  }
+                  .calendar-appointments button[data-selected-single="true"] {
+                    background-color: #122E5F !important;
+                    color: white !important;
+                    font-weight: 600 !important;
+                  }
+                  .calendar-appointments button[data-selected-single="true"]:hover {
+                    background-color: #122E5F !important;
                   }
                   .calendar-appointments button[aria-label*="Next"],
                   .calendar-appointments .rdp-button_next {
@@ -529,14 +649,56 @@ export const Appointments = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="time" className="text-sm font-medium mb-2 block text-black">Select Time</Label>
-                  <Input
-                    id="time"
-                    type="time"
-                    value={appointmentTime}
-                    onChange={(e) => setAppointmentTime(e.target.value)}
-                    className="w-full text-black"
-                  />
+                  <Label className="text-sm font-medium mb-2 block text-black">Select Time</Label>
+                  <div className="border rounded-md p-4 max-h-[200px] overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-2">
+                      {Array.from({ length: 24 }, (_, i) => {
+                        const hour = i
+                        const time24 = `${hour.toString().padStart(2, '0')}:00`
+                        const time12 = hour === 0 ? '12:00 AM' : hour < 12 ? `${hour}:00 AM` : hour === 12 ? '12:00 PM' : `${hour - 12}:00 PM`
+                        const currentHour = appointmentTime ? parseInt(appointmentTime.split(':')[0]) : null
+                        const isSelected = currentHour === hour
+                        const isPast = appointmentDate && (() => {
+                          const today = new Date()
+                          const selectedDate = new Date(appointmentDate)
+                          selectedDate.setHours(hour, 0, 0, 0)
+                          const todayDate = format(today, 'yyyy-MM-dd')
+                          const selectedDateStr = format(selectedDate, 'yyyy-MM-dd')
+                          return todayDate === selectedDateStr && selectedDate < today
+                        })()
+                        
+                        return (
+                          <button
+                            key={hour}
+                            type="button"
+                            onClick={() => setAppointmentTime(time24)}
+                            disabled={isPast}
+                            className={`
+                              px-4 py-2 rounded-md text-sm font-medium transition-colors
+                              ${isSelected 
+                                ? 'bg-[#122E5F] text-white' 
+                                : isPast
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                              }
+                            `}
+                          >
+                            {time12}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Label htmlFor="time" className="text-sm font-medium mb-2 block text-black">Or enter custom time</Label>
+                    <Input
+                      id="time"
+                      type="time"
+                      value={appointmentTime}
+                      onChange={(e) => setAppointmentTime(e.target.value)}
+                      className="w-full text-black"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

@@ -332,21 +332,25 @@ export const AppointmentsRequest = () => {
     setSendAppointmentLoading(true);
     if (!selectedLead) {
       toast.error('Please select a lead');
+      setSendAppointmentLoading(false);
       return;
     }
     
     if (!appointmentDate) {
       toast.error('Please select a date');
+      setSendAppointmentLoading(false);
       return;
     }
     
     if (!appointmentTime) {
       toast.error('Please select a time');
+      setSendAppointmentLoading(false);
       return;
     }
 
     if (!selectedAppointmentRequest) {
       toast.error('Appointment request not found');
+      setSendAppointmentLoading(false);
       return;
     }
 
@@ -994,14 +998,56 @@ export const AppointmentsRequest = () => {
                   }} />
                 </div>
                 <div>
-                  <Label htmlFor="time" className="text-sm font-medium mb-2 block text-black">Select Time</Label>
-                  <Input
-                    id="time"
-                    type="time"
-                    value={appointmentTime}
-                    onChange={(e) => setAppointmentTime(e.target.value)}
-                    className="w-full text-black"
-                  />
+                  <Label className="text-sm font-medium mb-2 block text-black">Select Time</Label>
+                  <div className="border rounded-md p-4 max-h-[200px] overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-2">
+                      {Array.from({ length: 24 }, (_, i) => {
+                        const hour = i
+                        const time24 = `${hour.toString().padStart(2, '0')}:00`
+                        const time12 = hour === 0 ? '12:00 AM' : hour < 12 ? `${hour}:00 AM` : hour === 12 ? '12:00 PM' : `${hour - 12}:00 PM`
+                        const currentHour = appointmentTime ? parseInt(appointmentTime.split(':')[0]) : null
+                        const isSelected = currentHour === hour
+                        const isPast = appointmentDate && (() => {
+                          const today = new Date()
+                          const selectedDate = new Date(appointmentDate)
+                          selectedDate.setHours(hour, 0, 0, 0)
+                          const todayDate = format(today, 'yyyy-MM-dd')
+                          const selectedDateStr = format(selectedDate, 'yyyy-MM-dd')
+                          return todayDate === selectedDateStr && selectedDate < today
+                        })()
+                        
+                        return (
+                          <button
+                            key={hour}
+                            type="button"
+                            onClick={() => setAppointmentTime(time24)}
+                            disabled={isPast}
+                            className={`
+                              px-4 py-2 rounded-md text-sm font-medium transition-colors
+                              ${isSelected 
+                                ? 'bg-[#122E5F] text-white' 
+                                : isPast
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                              }
+                            `}
+                          >
+                            {time12}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <Label htmlFor="time" className="text-sm font-medium mb-2 block text-black">Or enter custom time</Label>
+                    <Input
+                      id="time"
+                      type="time"
+                      value={appointmentTime}
+                      onChange={(e) => setAppointmentTime(e.target.value)}
+                      className="w-full text-black"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
