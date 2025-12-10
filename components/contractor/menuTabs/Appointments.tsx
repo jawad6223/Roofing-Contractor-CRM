@@ -596,9 +596,9 @@ export const Appointments = () => {
                                 <User className="h-3 w-3 text-gray-400" />
                                 <span className="truncate">{selectedLeadData['First Name']} {selectedLeadData['Last Name']}</span>
                               </div>
-                              <div className="flex gap-1.5 text-xs text-gray-600">
-                                <MapPin className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                                <span className="truncate">{selectedLeadData['Property Address']}</span>
+                              <div className="flex gap-1.5 text-xs text-gray-600 items-start">
+                                <MapPin className="h-3 w-3 text-gray-400 flex-shrink-0 mt-0.5" />
+                                <span className="line-clamp-2 break-words flex-1 text-left">{selectedLeadData['Property Address']}</span>
                               </div>
                             </div>
                           );
@@ -645,7 +645,7 @@ export const Appointments = () => {
                                     </div>
                                     <div className="flex items-start gap-1.5 text-xs text-gray-600">
                                       <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
-                                      <span className="break-words leading-relaxed min-w-0">{lead['Property Address']}</span>
+                                      <span className="line-clamp-2 break-words leading-relaxed min-w-0">{lead['Property Address']}</span>
                                     </div>
                                   </div>
                                 </div>
