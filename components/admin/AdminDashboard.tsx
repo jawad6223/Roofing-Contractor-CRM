@@ -26,9 +26,10 @@ import Image from "next/image";
 import { AdminDashboardProps } from "@/types/AdminTypes";
 
 export default function AdminDashboard({ children }: AdminDashboardProps) {
-  const { logoutAdmin, admin, getCurrentAdminName, loading } = useAuth();
+  const { logoutAdmin, getCurrentAdminName, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const {admin, adminEmail } = getCurrentAdminName();
 
   const handleLogout = () => {
     logoutAdmin();
@@ -113,10 +114,10 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {loading ? "Loading..." : getCurrentAdminName()}
+                  {admin}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {loading ? "Loading..." : admin}
+                  {adminEmail}
                 </p>
               </div>
             </div>

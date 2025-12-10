@@ -7,27 +7,60 @@ import { supabase } from "@/lib/supabase";
 export const useAuth = () => {
   const [user, setUser] = useState<string | null>(null);
   const [admin, setAdmin] = useState<string | null>(null);
+  const [adminEmail, setAdminEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [userFullName, setUserFullName] = useState<string | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const loggedInUser = localStorage.getItem("loggedInUser");
-        const loggedInAdmin = localStorage.getItem("adminLoggedInUser");
+  // useEffect(() => {
+  //   if (typeof window !== 'undefined') {
+  //     try {
+  //       const loggedInUser = localStorage.getItem("loggedInUser");
+  //       const loggedInAdmin = localStorage.getItem("adminLoggedInUser");
         
-        if (loggedInUser) {
-          setUser(loggedInUser);
+  //       if (loggedInUser) {
+  //         setUser(loggedInUser);
+  //       }
+  //       if (loggedInAdmin) {
+  //         setAdmin(loggedInAdmin);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error accessing localStorage:', error);
+  //     }
+  //   }
+  //   setLoading(false);
+  // }, []);
+
+  // Fetch user full name from Supabase
+  
+
+  useEffect(() => {
+    const fetchAdminFullName = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("Admin_Data")
+          .select('"Full Name", "Email Address"')
+          .maybeSingle();
+
+        if (error) {
+          console.error("Error fetching admin full name:", error);
+          setLoading(false);
+          return;
         }
-        if (loggedInAdmin) {
-          setAdmin(loggedInAdmin);
+
+        if (data) {
+          setAdmin(data["Full Name"] || null);
+          setAdminEmail(data["Email Address"] || null);
         }
+        setLoading(false);
       } catch (error) {
-        console.error('Error accessing localStorage:', error);
+        console.error("Error in fetchAdminFullName:", error);
+        setAdmin(null);
+        setLoading(false);
       }
-    }
-    setLoading(false);
+    };
+
+    fetchAdminFullName();
   }, []);
 
   // Fetch user full name from Supabase
@@ -37,6 +70,7 @@ export const useAuth = () => {
         const { data: authData, error: authError } = await supabase.auth.getUser();
         if (authError || !authData?.user) {
           setUserFullName(null);
+          setLoading(false);
           return;
         }
 
@@ -49,15 +83,18 @@ export const useAuth = () => {
         if (error) {
           console.error("Error fetching user full name:", error);
           setUserFullName(null);
+          setLoading(false);
           return;
         }
 
         if (data) {
           setUserFullName(data["Full Name"] || null);
         }
+        setLoading(false);
       } catch (error) {
         console.error("Error in fetchUserFullName:", error);
         setUserFullName(null);
+        setLoading(false);
       }
     };
 
@@ -76,7 +113,6 @@ export const useAuth = () => {
     if (typeof window !== 'undefined') {
       localStorage.setItem("adminLoggedInUser", emailAddress);
     }
-    setAdmin(emailAddress);
     router.push("/admin");
   };
 
@@ -132,21 +168,20 @@ export const useAuth = () => {
       return 'Loading...';
     }
     
-    return userFullName || user || 'User';
+    return userFullName || '';
   };
 
   // Get the admin name
   const getCurrentAdminName = () => {
     if (typeof window === 'undefined' || loading) {
-      return 'Loading...';
+      return { admin: 'Loading...', adminEmail: 'Loading...', loading: true };
     }
     
-    return admin || 'Admin';
+    return { admin: admin || 'Admin', adminEmail: adminEmail || '', loading: false };
   };
 
   return {
     user,
-    admin,
     loading,
     login,
     logout,

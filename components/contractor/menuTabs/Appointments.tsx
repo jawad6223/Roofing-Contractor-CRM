@@ -734,32 +734,78 @@ export const Appointments = () => {
       </Dialog>
 
       <Dialog open={showPurchasedModal} onOpenChange={setShowPurchasedModal}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Buy Lead Appointment – ${appointmentPrice}</DialogTitle>
+            <DialogTitle className="text-lg font-bold text-black">Purchase Pre-Scheduled Appointments</DialogTitle>
           </DialogHeader>
           
-          <div className="py-4">
-            <div className="text-center space-y-4">
-              <p className="text-gray-600">
-                Buy pre-scheduled appointments and connect directly with ready-to-meet leads.
+          <div className="py-3 space-y-3">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-xs font-semibold text-blue-900 mb-1">What are Pre-Scheduled Appointments?</p>
+              <p className="text-xs text-blue-800">
+                Leads that have confirmed availability and are ready to meet. Pre-qualified and actively seeking roofing services.
               </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-start gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#122E5F] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
+                  1
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-900">Ready-to-Meet Leads</p>
+                  <p className="text-xs text-gray-600">Connect with leads who have scheduled appointment times</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#122E5F] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
+                  2
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-900">Pre-Qualified Prospects</p>
+                  <p className="text-xs text-gray-600">Verified leads interested in your services</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-5 h-5 rounded-full bg-[#122E5F] text-white flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
+                  3
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-900">Save Time & Effort</p>
+                  <p className="text-xs text-gray-600">Skip scheduling and meet potential clients directly</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t pt-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-gray-700">Price per Appointment:</span>
+                <span className="text-xl font-bold text-[#122E5F]">${appointmentPrice}</span>
+              </div>
             </div>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="mt-2">
             <Button
               variant="outline"
               onClick={() => setShowPurchasedModal(false)}
+              className="text-sm"
             >
               Cancel
             </Button>
             <Button
               onClick={() => {handleBuyAppointments()}}
-              className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
+              className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white text-sm"
               disabled={isLoading}
             >
-              {isLoading ? 'Processing...' : 'Buy Now'}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                'Proceed to Checkout'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>
