@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       mode: "payment",
       success_url: `${request.headers.get("origin")}/appointment-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${request.headers.get("origin")}/cancel`,
-      allow_promotion_codes: true,
+      // allow_promotion_codes: true,
       metadata: {
         contractor_id: contractorId,
         appointment_amount: appointmentAmount.toString(),
