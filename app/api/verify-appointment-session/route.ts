@@ -13,15 +13,16 @@ const supabase = createClient(
 
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get("session_id");
-  if (!sessionId) return NextResponse.json({ paid: false, error: "Missing session_id" });
+  if (!sessionId)
+    return NextResponse.json({ paid: false, error: "Missing session_id" });
 
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
     if (session.payment_status === "paid") {
       const contractorId = session.metadata?.contractor_id || null;
-      const appointmentAmount = session.metadata?.appointment_amount 
-        ? parseFloat(session.metadata.appointment_amount) 
+      const appointmentAmount = session.metadata?.appointment_amount
+        ? parseFloat(session.metadata.appointment_amount)
         : 350;
 
       if (contractorId) {
@@ -40,17 +41,31 @@ export async function GET(req: NextRequest) {
         if (insertError) {
           console.error("Error inserting appointment request:", insertError);
           console.error("Error details:", JSON.stringify(insertError, null, 2));
-          return NextResponse.json({ 
-            paid: true, 
+          return NextResponse.json({
+            paid: true,
             error: "Failed to create appointment request",
-            details: insertError.message 
+            details: insertError.message,
           });
         }
 
-        console.log("✅ Appointment request created successfully:", insertedData);
+        console.log(
+          "✅ Appointment request created successfully:",
+          insertedData
+        );
       }
 
-      return NextResponse.json({ paid: true, alreadyProcessed: false });
+      const { data: calendly, error } = await supabase
+        .from("contractor_calendly")
+        .select("calendly_access_token")
+        .eq("contractor_id", contractorId)
+        .single();
+
+      const calendlyConnected = !!calendly?.calendly_access_token;
+
+      return NextResponse.json({
+        paid: true,
+        calendlyConnected: calendlyConnected,
+      });
     } else {
       return NextResponse.json({ paid: false });
     }
@@ -59,4 +74,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ paid: false, error: "Verification failed" });
   }
 }
-

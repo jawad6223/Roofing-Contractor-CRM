@@ -37,23 +37,6 @@ export const AppointmentsRequest = () => {
   const [sendAppointmentLoading, setSendAppointmentLoading] = useState(false);
   const itemsPerPage = 10;
 
-  const [calendlyUrl, setCalendlyUrl] = useState<string | null>(null);
-  const [selectedContractorId, setSelectedContractorId] = useState<string | null>(null);
-
-useEffect(() => {
-  if (!selectedContractorId) return;
-
-  fetch(`/api/calendly/first-event?contractor_id=${selectedContractorId}`)
-    .then((res) => res.json())
-    .then((event) => {
-      if (event.scheduling_url) setCalendlyUrl(event.scheduling_url);
-      else console.error(event.error);
-    });
-}, [selectedContractorId]);
-
-
-console.log('selectedContractorId', selectedContractorId);
-
   useEffect(() => {
     const fetchOpenLeads = async () => {
       try {
@@ -212,7 +195,6 @@ console.log('selectedContractorId', selectedContractorId);
 
   const handleSendAppointments = async (request: any) => {
     setSelectedAppointmentRequest(request);
-    setSelectedContractorId(request.Contractor_Id);
     setShowSendModal(true);
     
     if (request.Contractor_Id) {
@@ -360,11 +342,11 @@ console.log('selectedContractorId', selectedContractorId);
       return;
     }
     
-    // if (!appointmentTime) {
-    //   toast.error('Please select a time');
-    //   setSendAppointmentLoading(false);
-    //   return;
-    // }
+    if (!appointmentTime) {
+      toast.error('Please select a time');
+      setSendAppointmentLoading(false);
+      return;
+    }
 
     if (!selectedAppointmentRequest) {
       toast.error('Appointment request not found');
@@ -473,7 +455,7 @@ console.log('selectedContractorId', selectedContractorId);
               "Latitude": selectedLeadData["Latitude"],
               "Longitude": selectedLeadData["Longitude"],
               Appointment_Date: formattedDate,
-              // Appointment_Time: formattedTime,
+              Appointment_Time: formattedTime,
               Appointment_Status: "Yes",
               appointment_request_id: selectedAppointmentRequest.id,
               status: "open",
@@ -976,8 +958,7 @@ console.log('selectedContractorId', selectedContractorId);
                 )}
               </div>
 
-                {/* here want user calendly not event type want a proper calender show */}
-              {/* <div className="space-y-4">
+              <div className="space-y-4">
                 <div>
                   <Label className="text-sm font-medium mb-2 block text-black">Select Date</Label>
                   <Calendar
@@ -1068,26 +1049,7 @@ console.log('selectedContractorId', selectedContractorId);
                     />
                   </div>
                 </div>
-              </div> */}
-
-<div className="space-y-2">
-  <Label className="text-sm font-medium text-black">
-    Contractor Availability
-  </Label>
-
-  {calendlyUrl ? (
-    <iframe
-      src={calendlyUrl}
-      className="w-full h-[700px] rounded-lg border"
-      frameBorder="0"
-    />
-  ) : (
-    <p className="text-sm text-gray-500">
-      Loading contractor calendar...
-    </p>
-  )}
-</div>
-
+              </div>
             </div>
           </div>
 
