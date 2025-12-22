@@ -146,8 +146,8 @@ console.log('selectedContractorId', selectedContractorId);
     { key: "propertyAddress", label: "Property Address" },
     { key: "phone", label: "Phone No" },
     { key: "email", label: "Email" },
-    { key: "date", label: "Appointment Date" },
-    { key: "time", label: "Appointment Time" },
+    { key: "company", label: "Insurance Company" },
+    { key: "policy", label: "Policy Number" },
   ];
 
   const handleViewAssignedAppointment = async (request: any) => {
@@ -165,9 +165,9 @@ console.log('selectedContractorId', selectedContractorId);
         .from("Contractor_Leads")
         .select("*")
         .eq("appointment_request_id", request.id)
-        .eq("Appointment_Status", "Yes")
-        .not("Appointment_Date", "is", null)
-        .not("Appointment_Time", "is", null)
+        // .eq("Appointment_Status", "Yes")
+        // .not("Appointment_Date", "is", null)
+        // .not("Appointment_Time", "is", null)
         .maybeSingle();
 
       if (error) {
@@ -185,12 +185,12 @@ console.log('selectedContractorId', selectedContractorId);
           : '';
 
         const transformedLead = {
-          name: `${lead['First Name'] || ''} ${lead['Last Name'] || ''}`.trim(),
-          propertyAddress: lead['Property Address'] || '',
-          phone: lead['Phone Number'] || '',
-          email: lead['Email Address'] || '',
-          date: format(appointmentDate, 'yyyy-MM-dd'),
-          time: formattedTime,
+          name: `${lead['First Name']} ${lead['Last Name']}`.trim(),
+          propertyAddress: lead['Property Address'],
+          phone: lead['Phone Number'],
+          email: lead['Email Address'],
+          company: lead['Insurance Company'],
+          policy: lead['Policy Number'],
         };
         setAssignedLeadsData([transformedLead]);
       } else {
@@ -238,9 +238,9 @@ console.log('selectedContractorId', selectedContractorId);
           .from("Contractor_Leads")
           .select("*")
           .eq("contractor_id", request.Contractor_Id)
-          .eq("Appointment_Status", "Yes")
-          .not("Appointment_Date", "is", null)
-          .not("Appointment_Time", "is", null)
+          // .eq("Appointment_Status", "Yes")
+          // .not("Appointment_Date", "is", null)
+          // .not("Appointment_Time", "is", null)
           .order("Appointment_Date", { ascending: true })
           .order("Appointment_Time", { ascending: true });
 
