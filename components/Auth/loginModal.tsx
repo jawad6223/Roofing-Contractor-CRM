@@ -13,6 +13,7 @@ import Image from "next/image";
 export default function LoginModal() {
   const router = useRouter();
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {
     register,
@@ -23,6 +24,7 @@ export default function LoginModal() {
   });
 
   const onSubmit = async (data: FormDataType) => {
+    setIsLoading(true);
     try {
       const { data: authData, error } = await supabase.auth.signInWithPassword({
         email: data.emailAddress.toLowerCase(),
@@ -84,6 +86,8 @@ export default function LoginModal() {
     } catch (err: any) {
       console.error("Login error:", err);
       toast.error("Login failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -176,9 +180,10 @@ export default function LoginModal() {
             <div className="flex space-x-3">
               <button
                 type="submit"
-                className="flex-1 bg-[#122E5F] hover:bg-[#0f2347] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg"
+                disabled={isLoading}
+                className="flex-1 bg-[#122E5F] hover:bg-[#0f2347] text-white font-semibold py-3 px-4 rounded-xl transition-all duration-300 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Login
+                {isLoading ? "Logging in..." : "Login"}
               </button>
             </div>
           </form>

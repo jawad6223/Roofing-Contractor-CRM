@@ -45,7 +45,7 @@ export async function GET(req: Request) {
 
     // ✅ ALWAYS redirect back to appointment page
     return NextResponse.redirect(
-      new URL("/contractor/appointments", req.url)
+      new URL("/contractor/appointment-info", req.url)
     );
 
   } catch (err) {
