@@ -110,6 +110,7 @@ export const fetchRequestAppointments = async () => {
         Time: appointment.Time || "",
         name: "",
         phone: "",
+        email: "",
         address: "",
         price: appointment.Price || 0,
         status: appointment.Status || "Pending",
@@ -118,7 +119,7 @@ export const fetchRequestAppointments = async () => {
 
     const { data: contractors, error: contractorsError } = await supabase
       .from("Roofing_Auth")
-      .select('user_id, "Full Name", "Phone Number", "Business Address", "Email Address"')
+      .select('user_id, "Full Name", "Phone Number", "Email Address", "Business Address", "Email Address"')
       .in("user_id", contractorIds);
 
     if (contractorsError) {
@@ -141,6 +142,7 @@ export const fetchRequestAppointments = async () => {
         Time: appointment.Time || "",
         name: contractor?.["Full Name"] || "",
         phone: contractor?.["Phone Number"] || "",
+        email: contractor?.["Email Address"] || "",
         address: contractor?.["Business Address"] || "",
         price: appointment.Price || 0,
         status: appointment.Status || "Pending",

@@ -91,6 +91,7 @@ console.log('selectedContractorId', selectedContractorId);
       request["Name"].toLowerCase().includes(searchTerm.toLowerCase()) ||
       request["Business Address"].toLowerCase().includes(searchTerm.toLowerCase()) ||
       request["Phone Number"].toString().includes(searchTerm) ||
+      request["Email Address"].toLowerCase().includes(searchTerm.toLowerCase()) ||
       request["Date"].includes(searchTerm) ||
       request["Time"].toString().includes(searchTerm) ||
       request["Status"].includes(searchTerm)
@@ -600,13 +601,14 @@ console.log('selectedContractorId', selectedContractorId);
                           className={`hover:bg-gray-50 ${assignCurrentData.indexOf(request) % 2 === 1 ? "bg-gray-50" : ""}`}
                         >
                           <td className="px-2 py-2 whitespace-nowrap">
-                            <div className="flex flex-col items-center">
-                              <div className="text-sm font-bold text-[#122E5F]">
+                            <div className="flex flex-col items-start ml-2">
+                              <div className="flex items-center text-sm text-start font-bold text-[#122E5F]">
+                                <User className="h-3 w-3 text-gray-400 mr-1" />
                                 {request.name}
                               </div>
                               <div className="flex items-center text-sm text-gray-400">
-                                <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                {request.phone}
+                                <Mail className="h-3 w-3 text-gray-400 mr-1" />
+                                {request.email}
                               </div>
                             </div>
                           </td>
@@ -720,8 +722,8 @@ console.log('selectedContractorId', selectedContractorId);
                                 {request.name}
                               </div>
                               <div className="flex items-center text-sm text-gray-400">
-                                <Phone className="h-3 w-3 text-gray-400 mr-1" />
-                                {request.phone}
+                                <Mail className="h-3 w-3 text-gray-400 mr-1" />
+                                {request.email}
                               </div>
                             </div>
                           </td>
@@ -851,6 +853,10 @@ console.log('selectedContractorId', selectedContractorId);
                                 <User className="h-3 w-3 text-gray-400" />
                                 <span className="truncate">{selectedLeadData["First Name"]} {selectedLeadData["Last Name"]}</span>
                               </div>
+                              <div className="flex gap-1.5 text-xs font-semibold text-gray-600">
+                                <Mail className="h-3 w-3 text-gray-400" />
+                                <span className="truncate">{selectedLeadData["Email Address"]}</span>
+                              </div>
                               <div className="flex gap-1.5 text-xs text-gray-600">
                                 <MapPin className="h-3 w-3 text-gray-400 flex-shrink-0" />
                                 <span className="truncate">{selectedLeadData["Property Address"]}</span>
@@ -899,6 +905,10 @@ console.log('selectedContractorId', selectedContractorId);
                                       <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
                                         <User className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
                                         <span className="truncate">{lead["First Name"]} {lead["Last Name"]}</span>
+                                      </div>
+                                      <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
+                                        <Mail className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
+                                        <span className="truncate">{lead["Email Address"]}</span>
                                       </div>
                                       <div className="flex items-start gap-1.5 text-xs text-gray-600">
                                         <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />

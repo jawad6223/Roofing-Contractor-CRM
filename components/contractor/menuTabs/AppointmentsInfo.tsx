@@ -229,8 +229,8 @@ export const AppointmentsInfo = () => {
   const leadDetailsColumns = [
     { key: "name", label: "Name" },
     { key: "phoneno", label: "Phone" },
-    { key: "appointment_date", label: "Appointment Date" },
-    { key: "appointment_time", label: "Appointment Time" },
+    // { key: "appointment_date", label: "Appointment Date" },
+    // { key: "appointment_time", label: "Appointment Time" },
     { key: "email", label: "Email" },
     { key: "location", label: "Location" },
     { key: "company", label: "Insurance Company" },
@@ -260,8 +260,8 @@ export const AppointmentsInfo = () => {
     return getFilteredLeadsForModal().map(lead => ({
       ...lead,
       name: `${lead.firstName || ''} ${lead.lastName || ''}`.trim(),
-      appointment_date: lead.appointment_date || '',
-      appointment_time: lead.appointment_time || ''
+      // appointment_date: lead.appointment_date || '',
+      // appointment_time: lead.appointment_time || ''
     }));
   };
 
@@ -405,12 +405,6 @@ export const AppointmentsInfo = () => {
                       Purchase Date
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Appointment Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Appointment Time
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Price
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -446,30 +440,6 @@ export const AppointmentsInfo = () => {
                           <div className="flex items-center">
                             <Calendar className="h-3 w-3 text-gray-400 mr-1" />
                             {appointment["Date"]}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-black">
-                          <div className="flex items-center">
-                            <Calendar className="h-3 w-3 text-gray-400 mr-1" />
-                            {appointment["Appointment Date"] ? (
-                              <div className="flex flex-col">
-                                <span className="text-sm text-gray-900">{appointment["Appointment Date"]}</span>
-                              </div>
-                            ) : (
-                              <span className="text-sm text-gray-400 italic">Not scheduled</span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-black">
-                          <div className="flex items-center">
-                            <Calendar className="h-3 w-3 text-gray-400 mr-1" />
-                            {appointment["Appointment Time"] ? (
-                              <div className="flex flex-col">
-                                <span className="text-sm text-gray-900">{appointment["Appointment Time"]}</span>
-                              </div>
-                            ) : (
-                              <span className="text-sm text-gray-400 italic">Not scheduled</span>
-                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
