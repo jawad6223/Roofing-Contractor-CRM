@@ -1,40 +1,9 @@
 import { Button } from "@/components/ui/button";
-import {
-  Plus,
-  ShoppingCart,
-  Clock,
-  MapPin,
-  Phone,
-  Mail,
-  User,
-  Calendar as CalendarIcon,
-  Search,
-  Loader2,
-} from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { ShoppingCart, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
-import { DayButton } from "react-day-picker";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
-import { appointmentType, purchasedLeadType } from "@/types/DashboardTypes";
-import { fetchContractorLeads } from "./Data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { supabase } from "@/lib/supabase";
 import { toast } from "react-toastify";
 import { fetchAppointmentPrice } from "@/lib/AppointmentPrice";
@@ -92,22 +61,6 @@ export const Appointments = () => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">My Appointments</h2>
           <p className="text-gray-600">Manage and track your appointments</p>
-        </div>
-        <div className="flex flex-col w-full lg:w-auto md:flex-row gap-3">
-          {/* <Button
-            onClick={() => router.push("/contractor/purchase-leads")}
-            className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            <span>Purchase Leads</span>
-          </Button> */}
-          {/* <Button
-            onClick={() => setShowPurchasedModal(true)}
-            className="bg-[#286BBD] hover:bg-[#1d4ed8] text-white"
-          >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            <span>Purchased Appointments</span>
-          </Button> */}
         </div>
       </div>
 

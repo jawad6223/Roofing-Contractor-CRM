@@ -39,9 +39,7 @@ export const AppointmentsRequest = () => {
   const [calendlyUrl, setCalendlyUrl] = useState<string | null>(null);
   const [calendarError, setCalendarError] = useState<string | null>(null);
   const [loadingCalendar, setLoadingCalendar] = useState(false);
-  const [selectedContractorId, setSelectedContractorId] = useState<
-    string | null
-  >(null);
+  const [selectedContractorId, setSelectedContractorId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedContractorId) return;

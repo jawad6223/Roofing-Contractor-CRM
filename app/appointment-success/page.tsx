@@ -27,7 +27,7 @@ function SuccessContent() {
 
       if (paid && !error) {
         if (calendlyConnected) {
-          router.push("/contractor/appointments");
+          router.push("/contractor/appointment-info");
         } else {
           setStatus("connect-calendly");
         }
