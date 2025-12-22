@@ -1,17 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Search,
-  MapPin,
-  Phone,
-  Eye,
-  Calendar as CalendarIcon,
-  User,
-  Send,
-  FileText,
-  Clock,
-  Mail,
-  Loader2,
-} from "lucide-react";
+import { Search, MapPin, Eye, Calendar as CalendarIcon, User, Send, FileText, Mail, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -21,25 +9,12 @@ import { Pagination } from "@/components/ui/pagination";
 import { fetchRequestAppointments } from "./Data";
 import { toast } from "react-toastify";
 import { TablePopup } from "@/components/ui/TablePopup";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/lib/supabase";
-import { fetchLeads } from "./Data";
 import { calculateDistance } from "@/lib/distanceFormula";
+import { fetchLeads } from "./Data";
 
 export const AppointmentsRequest = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,25 +23,16 @@ export const AppointmentsRequest = () => {
   const [showSendModal, setShowSendModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState<string>("");
   const [leadSearchTerm, setLeadSearchTerm] = useState("");
-  const [appointmentDate, setAppointmentDate] = useState<Date | undefined>(
-    new Date()
-  );
+  const [appointmentDate, setAppointmentDate] = useState<Date | undefined>(new Date());
   const [appointmentTime, setAppointmentTime] = useState("");
   const [leads, setLeads] = useState<any[]>([]);
-  const [appointmentRequestsData, setAppointmentRequestsData] = useState<any[]>(
-    []
-  );
+  const [appointmentRequestsData, setAppointmentRequestsData] = useState<any[]>([]);
   const [assignCurrentPage, setAssignCurrentPage] = useState(1);
   const [pendingCurrentPage, setPendingCurrentPage] = useState(1);
-  const [selectedAppointmentRequest, setSelectedAppointmentRequest] =
-    useState<any>(null);
+  const [selectedAppointmentRequest, setSelectedAppointmentRequest] = useState<any>(null);
   const [contractorData, setContractorData] = useState<any>(null);
-  const [contractorAppointmentDates, setContractorAppointmentDates] = useState<
-    Date[]
-  >([]);
-  const [contractorAppointments, setContractorAppointments] = useState<any[]>(
-    []
-  );
+  const [contractorAppointmentDates, setContractorAppointmentDates] = useState<Date[]>([]);
+  const [contractorAppointments, setContractorAppointments] = useState<any[]>([]);
   const [sendAppointmentLoading, setSendAppointmentLoading] = useState(false);
   const itemsPerPage = 10;
 
