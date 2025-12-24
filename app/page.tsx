@@ -2,6 +2,7 @@ import { Hero } from '@/components/Hero';
 import { HowItWorks } from '@/components/HowItWorks';
 import { SuccessStories } from '@/components/SuccessStories';
 import { LeadQualityGuarantee } from '@/components/LeadQualityGuarantee';
+import { AppointmentBook } from '@/components/AppointmentBook';
 import { WhyChooseUs } from '@/components/WhyChooseUs';
 import { FAQ } from '@/components/FAQ';
 import { Header } from '@/components/layout/Header';
@@ -16,6 +17,7 @@ export default function Home() {
       <Hero />
       <HowItWorks />
       <LeadQualityGuarantee />
+      <AppointmentBook />
       <WhyChooseUs />
       <SuccessStories />
       <FAQ />

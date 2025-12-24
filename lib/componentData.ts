@@ -22,6 +22,10 @@ export const stats = [
     {
       title: 'Complete CRM System',
       description: 'Track leads, manage projects, and grow your business efficiently'
+    },
+    {
+      title: 'Already set appointments',
+      description: 'Confirmed appointments are already scheduled and approved for your convenience'
     }
   ];
 
