@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Search, MapPin, Eye, Calendar as CalendarIcon, User, Send, FileText, Mail, Loader2 } from "lucide-react";
+import { Search, MapPin, Eye, Calendar as CalendarIcon, User, Send, FileText, Mail, Loader2, CheckCircle2 } from "lucide-react";
 import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -918,16 +918,29 @@ export const AppointmentsRequest = () => {
       />
 
       <Dialog open={showSendModal} onOpenChange={setShowSendModal}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-black">Send Leads</DialogTitle>
+        <DialogContent className="max-w-6xl p-0 flex flex-col">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b bg-gradient-to-r from-[#122E5F] to-[#1e4a7e] text-white">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                <Send className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <DialogTitle className="text-xl font-bold text-white">
+                  Send Appointment to Contractor
+                </DialogTitle>
+                <p className="text-sm text-blue-100 mt-1">
+                  Select a lead and schedule an appointment
+                </p>
+              </div>
+            </div>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-4 md:col-span-2">
+          <div className="overflow-y-auto max-h-[calc(95vh-180px)] px-6 py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-1 space-y-4">
                 <div>
-                  <Label className="text-sm font-medium mb-2 block text-black">
+                  <Label className="text-sm font-semibold mb-3 flex items-center gap-2 text-gray-900">
+                    <User className="h-4 w-4 text-[#122E5F]" />
                     Select Lead
                   </Label>
                   <Select
@@ -937,7 +950,7 @@ export const AppointmentsRequest = () => {
                       setLeadSearchTerm("");
                     }}
                   >
-                    <SelectTrigger className="text-black h-auto py-3 px-4">
+                    <SelectTrigger className="h-auto py-3 px-4 border-2 hover:border-[#122E5F]/50 transition-colors">
                       {selectedLead ? (
                         (() => {
                           const selectedLeadData = leads.find(
@@ -946,22 +959,16 @@ export const AppointmentsRequest = () => {
                           if (!selectedLeadData)
                             return <SelectValue placeholder="Choose a lead" />;
                           return (
-                            <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-                              <div className="flex gap-1.5 text-xs font-semibold text-gray-600">
-                                <User className="h-3 w-3 text-gray-400" />
+                            <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+                              <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                <User className="h-4 w-4 text-[#122E5F] flex-shrink-0" />
                                 <span className="truncate">
                                   {selectedLeadData["First Name"]}{" "}
                                   {selectedLeadData["Last Name"]}
                                 </span>
                               </div>
-                              <div className="flex gap-1.5 text-xs font-semibold text-gray-600">
-                                <Mail className="h-3 w-3 text-gray-400" />
-                                <span className="truncate">
-                                  {selectedLeadData["Email Address"]}
-                                </span>
-                              </div>
-                              <div className="flex gap-1.5 text-xs text-gray-600">
-                                <MapPin className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                              <div className="flex items-start gap-2 text-xs text-gray-600">
+                                <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
                                 <span className="truncate">
                                   {selectedLeadData["Property Address"]}
                                 </span>
@@ -970,27 +977,27 @@ export const AppointmentsRequest = () => {
                           );
                         })()
                       ) : (
-                        <SelectValue placeholder="Choose a lead" />
+                        <SelectValue placeholder="Choose a lead to send" />
                       )}
                     </SelectTrigger>
                     <SelectContent
                       position="popper"
-                      className="max-h-[400px] overflow-hidden w-[var(--radix-select-trigger-width)]"
+                      className="max-h-[450px] overflow-hidden w-[var(--radix-select-trigger-width)] shadow-xl border-2"
                     >
-                      <div className="sticky top-0 z-10 bg-white border-b px-3 py-2">
+                      <div className="sticky top-0 z-10 bg-gradient-to-r from-gray-50 to-white border-b px-3 py-3">
                         <div className="relative">
-                          <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                           <Input
-                            placeholder="Search leads..."
+                            placeholder="Search leads by name, email, or address..."
                             value={leadSearchTerm}
                             onChange={(e) => setLeadSearchTerm(e.target.value)}
-                            className="pl-8 h-9 text-sm"
+                            className="pl-10 h-10 text-sm border-2 focus:border-[#122E5F]"
                             onClick={(e) => e.stopPropagation()}
                             onKeyDown={(e) => e.stopPropagation()}
                           />
                         </div>
                       </div>
-                      <div className="max-h-[300px] overflow-y-auto">
+                      <div className="max-h-[350px] overflow-y-auto">
                         {leads
                           .filter((lead) => {
                             if (!leadSearchTerm) return true;
@@ -1017,23 +1024,23 @@ export const AppointmentsRequest = () => {
                               <SelectItem
                                 key={lead.id}
                                 value={lead.id.toString()}
-                                className="py-3 px-4 cursor-pointer hover:bg-gray-50 focus:bg-gray-50"
+                                className="py-3 px-4 cursor-pointer hover:bg-blue-50 focus:bg-blue-50 border-b last:border-b-0 transition-colors"
                               >
-                                <div className="flex items-start justify-between gap-4 w-full ml-3 min-w-0">
-                                  <div className="flex flex-col gap-1 flex-1 min-w-0">
-                                    <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
-                                      <User className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
+                                <div className="flex items-start justify-between gap-3 w-full min-w-0">
+                                  <div className="flex flex-col ml-2 gap-1.5 flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                                      <User className="h-3.5 w-3.5 text-[#122E5F] flex-shrink-0" />
                                       <span className="truncate">
                                         {lead["First Name"]} {lead["Last Name"]}
                                       </span>
                                     </div>
-                                    <div className="font-semibold flex items-start gap-1.5 text-xs text-gray-600">
-                                      <Mail className="h-3 w-3 text-gray-400 mr-1 flex-shrink-0" />
+                                    <div className="flex items-center gap-2 text-xs text-gray-600">
+                                      <Mail className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
                                       <span className="truncate">
                                         {lead["Email Address"]}
                                       </span>
                                     </div>
-                                    <div className="flex items-start gap-1.5 text-xs text-gray-600">
+                                    <div className="flex items-start gap-2 text-xs text-gray-600">
                                       <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
                                       <span className="break-words leading-relaxed min-w-0">
                                         {lead["Property Address"]}
@@ -1071,59 +1078,202 @@ export const AppointmentsRequest = () => {
                           );
                         }).length === 0 &&
                           leadSearchTerm && (
-                            <div className="py-6 text-center text-sm text-gray-500">
-                              No leads found matching "{leadSearchTerm}"
+                            <div className="py-8 text-center">
+                              <Search className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+                              <p className="text-sm text-gray-500 font-medium">
+                                No leads found
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">
+                                Try a different search term
+                              </p>
                             </div>
                           )}
                       </div>
                     </SelectContent>
                   </Select>
                 </div>
+
+                {selectedLead && (
+                  <Card className="border-2 border-blue-100 bg-gradient-to-br from-blue-50 to-white shadow-sm">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-[#122E5F] rounded-lg flex items-center justify-center">
+                          <CheckCircle2 className="h-4 w-4 text-white" />
+                        </div>
+                        <p className="text-sm font-semibold text-gray-900">
+                          Selected Lead
+                        </p>
+                      </div>
+                      {(() => {
+                        const selectedLeadData = leads.find(
+                          (lead) => lead.id.toString() === selectedLead
+                        );
+                        if (!selectedLeadData) return null;
+                        return (
+                          <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2 text-gray-700">
+                              <User className="h-4 w-4 text-[#122E5F]" />
+                              <span className="font-medium">
+                                {selectedLeadData["First Name"]}{" "}
+                                {selectedLeadData["Last Name"]}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 text-gray-600">
+                              <Mail className="h-4 w-4 text-gray-400" />
+                              <span className="truncate">
+                                {selectedLeadData["Email Address"]}
+                              </span>
+                            </div>
+                            <div className="flex items-start gap-2 text-gray-600">
+                              <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0 mt-0.5" />
+                              <span className="text-xs">
+                                {selectedLeadData["Property Address"]}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
-              <div className="space-y-2">
-                <Label className="text-sm font-medium text-black">
-                  Contractor Availability
-                </Label>
+              <div className="lg:col-span-2 space-y-4">
+                <div>
+                  <Label className="text-sm font-semibold mb-3 flex items-center gap-2 text-gray-900">
+                    <CalendarIcon className="h-4 w-4 text-[#122E5F]" />
+                    Contractor Availability
+                  </Label>
 
-                <div className="w-full">
-                  {loadingCalendar && (
-                    <p className="text-sm text-gray-500">
-                      Loading contractor calendar...
-                    </p>
-                  )}
+                  <Card className="border-2 shadow-lg">
+                    <CardContent className="p-0">
+                      {loadingCalendar && (
+                        <div className="flex flex-col items-center justify-center py-16 bg-gray-50">
+                          <Loader2 className="h-8 w-8 text-[#122E5F] animate-spin mb-3" />
+                          <p className="text-sm font-medium text-gray-600">
+                            Loading contractor calendar...
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Please wait while we fetch availability
+                          </p>
+                        </div>
+                      )}
 
-                  {!loadingCalendar && calendarError && (
-                    <div className="p-4 border rounded-lg bg-yellow-50 text-yellow-800">
-                      ⚠️ {calendarError}
-                    </div>
-                  )}
+                      {!loadingCalendar && calendarError && (
+                        <div className="p-6 bg-gradient-to-br from-yellow-50 to-orange-50 border-l-4 border-yellow-400">
+                          <div className="flex items-start gap-3">
+                            <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0">
+                              <span className="text-yellow-900 font-bold text-sm">!</span>
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold text-yellow-900 mb-1">
+                                Calendar Error
+                              </p>
+                              <p className="text-xs text-yellow-800">
+                                {calendarError}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
-                  {!loadingCalendar && calendlyUrl && (
-                    <iframe
-                      src={calendlyUrl}
-                      className="w-full h-[700px] rounded-lg border"
-                      frameBorder="0"
-                    />
-                  )}
+                      {!loadingCalendar && calendlyUrl && (
+                        <div className="relative">
+                          <style dangerouslySetInnerHTML={{
+                            __html: `
+                              .calendly-scroll-container {
+                                overflow: auto;
+                                scrollbar-width: none;
+                                -ms-overflow-style: none;
+                                height: 700px;
+                                width: 100%;
+                              }
+                              .calendly-scroll-container::-webkit-scrollbar {
+                                display: none;
+                                width: 0;
+                                height: 0;
+                                background: transparent;
+                              }
+                              .calendly-iframe-wrapper {
+                                position: relative;
+                                width: 100%;
+                                height: 700px;
+                                overflow: hidden;
+                              }
+                              .calendly-iframe-wrapper iframe {
+                                width: calc(100% + 17px);
+                                height: 700px;
+                                border: none;
+                                margin-right: -17px;
+                                padding-right: 17px;
+                              }
+                              @media (max-width: 768px) {
+                                .calendly-iframe-wrapper iframe {
+                                  width: calc(100% + 15px);
+                                  margin-right: -15px;
+                                  padding-right: 15px;
+                                }
+                              }
+                            `
+                          }} />
+                          <div className="calendly-scroll-container">
+                            <div className="calendly-iframe-wrapper">
+                              <iframe
+                                src={calendlyUrl}
+                                frameBorder="0"
+                                title="Contractor Calendar"
+                                scrolling="yes"
+                                style={{
+                                  scrollbarWidth: 'none',
+                                  msOverflowStyle: 'none'
+                                }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {!loadingCalendar && !calendlyUrl && !calendarError && (
+                        <div className="flex flex-col items-center justify-center py-16 bg-gray-50">
+                          <CalendarIcon className="h-12 w-12 text-gray-300 mb-3" />
+                          <p className="text-sm font-medium text-gray-600">
+                            No calendar available
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            Contractor calendar will appear here
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={handleCloseSendModal}>
+          <DialogFooter className="px-6 py-4 border-t bg-gray-50 flex-shrink-0 flex items-center justify-end gap-3">
+            <Button
+              variant="outline"
+              onClick={handleCloseSendModal}
+              className="px-6 py-2 border-2 hover:bg-gray-100 min-w-[100px]"
+            >
               Cancel
             </Button>
             <Button
               onClick={() => sendAppointments(selectedLead, appointmentTime)}
-              className="bg-[#122E5F] hover:bg-[#0f2347]/80 text-white"
-              disabled={sendAppointmentLoading}
+              className="bg-[#122E5F] hover:bg-[#0f2347] text-white px-6 py-2 shadow-lg hover:shadow-xl transition-all min-w-[150px] flex items-center justify-center"
+              disabled={sendAppointmentLoading || !selectedLead}
             >
               {sendAppointmentLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Sending...
+                </>
               ) : (
-                "Send"
+                <>
+                  <Send className="w-4 h-4 mr-2" />
+                  Send Appointment
+                </>
               )}
             </Button>
           </DialogFooter>
