@@ -13,12 +13,14 @@ export const Appointments = () => {
   const [showPurchasedModal, setShowPurchasedModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [appointmentPrice, setAppointmentPrice] = useState<number>(0);
+  const [priceLoaded, setPriceLoaded] = useState(false);
 
   useEffect(() => {
     const fetchAppointmentPriceData = async () => {
       const appointmentPriceData = await fetchAppointmentPrice();
       if (appointmentPriceData) {
         setAppointmentPrice(appointmentPriceData["Price Per Appointment"]);
+        setPriceLoaded(true);
       }
     };
     fetchAppointmentPriceData();
@@ -56,6 +58,10 @@ export const Appointments = () => {
   // }
 
   async function handleBuyAppointments() {
+    if (!priceLoaded || appointmentPrice <= 0) {
+      toast.error("Appointment price not ready yet");
+      return;
+    }
     setIsLoading(true);
   
     try {
@@ -111,14 +117,18 @@ export const Appointments = () => {
     window.location.href = data.url;
   }
   
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
   
-    if (params.get("readyForPayment") === "true") {
+    if (
+      params.get("readyForPayment") === "true" &&
+      priceLoaded &&
+      appointmentPrice > 0
+    ) {
       handleBuyAppointments();
     }
-  }, []);
+  }, [priceLoaded, appointmentPrice]);
+  
   
   
 
