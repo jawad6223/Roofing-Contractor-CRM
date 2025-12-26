@@ -5,10 +5,23 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const code = searchParams.get("code");
-    const contractorId = searchParams.get("state");
+    const state = searchParams.get("state");
 
-    if (!code || !contractorId) {
-      return NextResponse.json({ error: "Missing code or state" }, { status: 400 });
+    if (!code || !state) {
+      return NextResponse.json(
+        { error: "Missing code or state" },
+        { status: 400 }
+      );
+    }
+
+    // 🔹 Decode state
+    const [contractorId, after] = state.split("|");
+
+    if (!contractorId) {
+      return NextResponse.json(
+        { error: "Invalid state" },
+        { status: 400 }
+      );
     }
 
     // 🔹 Exchange code for token
@@ -28,10 +41,13 @@ export async function GET(req: Request) {
 
     if (!token.access_token) {
       console.error("Calendly token error:", token);
-      return NextResponse.json({ error: "Token exchange failed" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Token exchange failed" },
+        { status: 400 }
+      );
     }
 
-    // 🔹 Save / update calendly connection
+    // 🔹 Save Calendly connection
     await getSupabaseAdmin()
       .from("contractor_calendly")
       .upsert({
@@ -43,20 +59,34 @@ export async function GET(req: Request) {
         ).toISOString(),
       });
 
-    // ✅ ALWAYS redirect back to appointment page
+    // 🔁 Redirect based on intent
+    if (after === "checkout") {
+      return NextResponse.redirect(
+        new URL(
+          "/contractor/appointments?readyForPayment=true",
+          req.url
+        )
+      );
+    }
+
+    // default / settings flow
     return NextResponse.redirect(
       new URL("/contractor/appointment-info", req.url)
     );
 
   } catch (err) {
     console.error("Calendly callback error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
 
+
 // import { NextResponse } from "next/server";
-// import { createClient } from "@supabase/supabase-js";
+// import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 
 // export async function GET(req: Request) {
 //   try {
@@ -88,56 +118,22 @@ export async function GET(req: Request) {
 //       return NextResponse.json({ error: "Token exchange failed" }, { status: 400 });
 //     }
 
-//     const supabase = createClient(
-//       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-//       process.env.SUPABASE_SERVICE_ROLE_KEY!
-//     );
-
 //     // 🔹 Save / update calendly connection
-//     await supabase
+//     await getSupabaseAdmin()
 //       .from("contractor_calendly")
 //       .upsert({
 //         contractor_id: contractorId,
 //         calendly_access_token: token.access_token,
 //         calendly_refresh_token: token.refresh_token,
-//         calendly_expires_at: new Date(Date.now() + token.expires_in * 1000).toISOString(),
+//         calendly_expires_at: new Date(
+//           Date.now() + token.expires_in * 1000
+//         ).toISOString(),
 //       });
 
-//     // 🔹 Fetch the contractor's Calendly user URI
-//     const userRes = await fetch("https://api.calendly.com/users/me", {
-//       headers: { Authorization: `Bearer ${token.access_token}` },
-//     });
-
-//     const userJson = await userRes.json();
-//     console.log(userJson.resource.timezone);
-//     const userUri = userJson?.resource?.uri;
-
-//     if (!userUri) {
-//       console.error("Failed to fetch Calendly user URI", userJson);
-//     } else {
-//       // 🔹 Create webhook subscription for this contractor
-//       // const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/webhook`; // your webhook endpoint
-//       const callbackUrl = `https://mighty-lions-go.loca.lt/api/webhook`; // your webhook endpoint
-//       const webhookRes = await fetch("https://api.calendly.com/webhook_subscriptions", {
-//         method: "POST",
-//         headers: {
-//           Authorization: `Bearer ${token.access_token}`,
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           url: callbackUrl,
-//           events: ["invitee.created", "invitee.canceled"],
-//           scope: "user",
-//           user: userUri
-//         }),
-//       });
-
-//       const webhookData = await webhookRes.json();
-//       console.log("Webhook created:", webhookData);
-//     }
-
-//     // ✅ Redirect back to appointment page
-//     return NextResponse.redirect(new URL("/contractor/appointments", req.url));
+//     // ✅ ALWAYS redirect back to appointment page
+//     return NextResponse.redirect(
+//       new URL("/contractor/appointment-info", req.url)
+//     );
 
 //   } catch (err) {
 //     console.error("Calendly callback error:", err);

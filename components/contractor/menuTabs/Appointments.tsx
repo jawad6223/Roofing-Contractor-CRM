@@ -24,36 +24,93 @@ export const Appointments = () => {
     fetchAppointmentPriceData();
   }, []);
 
+  // async function handleBuyAppointments() {
+  //   setIsLoading(true);
+  //   try {
+  //     const { data: authData, error: authError } =
+  //       await supabase.auth.getUser();
+  //     if (authError || !authData?.user) {
+  //       toast.error("User not logged in");
+  //       setIsLoading(false);
+  //       return;
+  //     }
+  //     const contractorId = authData.user.id;
+
+  //     const response = await fetch("/api/create-appointment-checkout", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         appointmentAmount: appointmentPrice,
+  //         contractorId: contractorId,
+  //       }),
+  //     });
+
+  //     const { url } = await response.json();
+  //     router.push(url);
+  //   } catch (error) {
+  //     console.error(error);
+  //     toast.error("Failed to create checkout session");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
+
   async function handleBuyAppointments() {
     setIsLoading(true);
+  
     try {
-      const { data: authData, error: authError } =
-        await supabase.auth.getUser();
-      if (authError || !authData?.user) {
+      const { data } = await supabase.auth.getUser();
+      const contractorId = data?.user?.id;
+  
+      if (!contractorId) {
         toast.error("User not logged in");
-        setIsLoading(false);
         return;
       }
-      const contractorId = authData.user.id;
-
-      const response = await fetch("/api/create-appointment-checkout", {
+  
+      // 1️⃣ Check Calendly connection
+      const res = await fetch(
+        `/api/calendly/status?contractorId=${contractorId}`
+      );
+  
+      const { connected } = await res.json();
+  
+      // 2️⃣ If NOT connected → Calendly first
+      if (!connected) {
+        window.location.href =
+          `/api/calendly/connect?contractorId=${contractorId}&after=checkout`;
+        return;
+      }
+  
+      // 3️⃣ Calendly connected → Stripe
+      const checkoutRes = await fetch("/api/create-appointment-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           appointmentAmount: appointmentPrice,
-          contractorId: contractorId,
+          contractorId,
         }),
       });
-
-      const { url } = await response.json();
-      router.push(url);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to create checkout session");
+  
+      const { url } = await checkoutRes.json();
+      window.location.href = url;
+  
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong");
     } finally {
       setIsLoading(false);
     }
   }
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+  
+    if (params.get("readyForPayment") === "true") {
+      handleBuyAppointments();
+    }
+  }, []);
+  
+  
 
   return (
     <div className="space-y-6">
