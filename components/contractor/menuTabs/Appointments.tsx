@@ -80,19 +80,8 @@ export const Appointments = () => {
           `/api/calendly/connect?contractorId=${contractorId}&after=checkout`;
         return;
       }
-  
-      // 3️⃣ Calendly connected → Stripe
-      const checkoutRes = await fetch("/api/create-appointment-checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          appointmentAmount: appointmentPrice,
-          contractorId,
-        }),
-      });
-  
-      const { url } = await checkoutRes.json();
-      window.location.href = url;
+
+      await startStripeCheckout(contractorId);
   
     } catch (err) {
       console.error(err);
@@ -101,6 +90,27 @@ export const Appointments = () => {
       setIsLoading(false);
     }
   }
+
+  async function startStripeCheckout(contractorId: string) {
+    const checkoutRes = await fetch("/api/create-appointment-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        appointmentAmount: appointmentPrice,
+        contractorId,
+      }),
+    });
+  
+    const data = await checkoutRes.json();
+  
+    if (!data?.url) {
+      toast.error("Failed to start payment");
+      return;
+    }
+  
+    window.location.href = data.url;
+  }
+  
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
