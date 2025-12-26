@@ -102,13 +102,13 @@ export const Appointments = () => {
     }
   }
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+  // useEffect(() => {
+  //   const params = new URLSearchParams(window.location.search);
   
-    if (params.get("readyForPayment") === "true") {
-      handleBuyAppointments();
-    }
-  }, []);
+  //   if (params.get("readyForPayment") === "true") {
+  //     handleBuyAppointments();
+  //   }
+  // }, []);
   
   
 
