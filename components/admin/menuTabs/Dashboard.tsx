@@ -1,11 +1,25 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Activity, Phone, Mail, MapPin, User, ExternalLink, DollarSign, Hash, Search, Calendar, Building, FileText, Users } from "lucide-react";
+import {
+  Activity,
+  Phone,
+  Mail,
+  MapPin,
+  User,
+  ExternalLink,
+  DollarSign,
+  Hash,
+  Search,
+  Calendar,
+  Building,
+  FileText,
+  Users,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { DetailPopup } from "@/components/ui/DetailPopup";
-import { fetchRequestLeads, fetchLeads} from "./Data";
+import { fetchRequestLeads, fetchLeads } from "./Data";
 import Link from "next/link";
 import { LeadType, requestLeadType, ContractorType } from "@/types/AdminTypes";
 import { fetchContractors } from "./Data";
@@ -17,10 +31,13 @@ export const Dashboard = () => {
   const router = useRouter();
   const [selectedLead, setSelectedLead] = useState<LeadType>();
   const [isLeadModalOpen, setIsLeadModalOpen] = useState<boolean>(false);
-  const [selectedRequestLead, setSelectedRequestLead] = useState<requestLeadType>();
-  const [isRequestLeadModalOpen, setIsRequestLeadModalOpen] = useState<boolean>(false);
+  const [selectedRequestLead, setSelectedRequestLead] =
+    useState<requestLeadType>();
+  const [isRequestLeadModalOpen, setIsRequestLeadModalOpen] =
+    useState<boolean>(false);
   const [leads, setLeads] = useState<LeadType[]>([]);
   const [loadingLeads, setLoadingLeads] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [contractors, setContractors] = useState<ContractorType[]>([]);
   const [requestLeads, setRequestLeads] = useState<requestLeadType[]>([]);
   const handleLeadClick = (lead: LeadType) => {
@@ -74,43 +91,49 @@ export const Dashboard = () => {
       const currentDate = new Date();
       const currentYear = currentDate.getFullYear();
       const currentMonth = currentDate.getMonth();
-      
+
       const monthForString = currentMonth + 1;
-      const startOfMonthStr = `${currentYear}-${monthForString.toString().padStart(2, '0')}-01`;
-      
+      const startOfMonthStr = `${currentYear}-${monthForString
+        .toString()
+        .padStart(2, "0")}-01`;
+
       const lastDay = new Date(currentYear, currentMonth + 1, 0).getDate();
-      const endOfMonthStr = `${currentYear}-${monthForString.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
-      
+      const endOfMonthStr = `${currentYear}-${monthForString
+        .toString()
+        .padStart(2, "0")}-${lastDay.toString().padStart(2, "0")}`;
+
       const { data, error } = await supabase
         .from("Leads_Request")
-        .select("Price, \"No. of Leads\"")
+        .select('Price, "No. of Leads"')
         .gte("Purchase Date", startOfMonthStr)
         .lte("Purchase Date", endOfMonthStr);
-      
+
       if (error) {
         console.error("Error fetching sales data:", error);
         setTotalSales(0);
         return;
       }
-      
+
       const totalSalesAmount = (data || []).reduce((sum, item) => {
         const price = item.Price || 0;
         const numberOfLeads = item["No. of Leads"] || 0;
-        return sum + (price * numberOfLeads);
+        return sum + price * numberOfLeads;
       }, 0);
-      
+
       setTotalSales(totalSalesAmount);
     };
-    
+
     fetchTotalSales();
   }, []);
 
   useEffect(() => {
     const fetchContractorsData = async () => {
+      setIsLoading(true);
       const contractorsData = await fetchContractors();
       if (contractorsData) {
         setContractors(contractorsData);
       }
+      setIsLoading(false);
     };
     fetchContractorsData();
   }, []);
@@ -202,12 +225,25 @@ export const Dashboard = () => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Card onClick={()=>{router.push('/admin/leads')}} className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card
+          onClick={() => {
+            router.push("/admin/leads");
+          }}
+          className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Leads</p>
-                <div className="text-2xl font-bold text-gray-900">{leads.length ? leads.length : <LoadingDots />}</div>
+                <div className="text-2xl font-bold text-gray-900">
+                {loadingLeads ? (
+                  <LoadingDots />
+                ) : (
+                  <div className="text-2xl font-bold text-gray-900">
+                    {leads.length}
+                  </div>
+                )}
+                </div>
               </div>
               <div
                 className={`w-12 h-12 bg-[#122E5F] rounded-xl flex items-center justify-center`}
@@ -218,12 +254,25 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card onClick={()=>{router.push('/admin/contractors')}} className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card
+          onClick={() => {
+            router.push("/admin/contractors");
+          }}
+          className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Contractors</p>
-                <div className="text-2xl font-bold text-gray-900">{contractors.length ? contractors.length : <LoadingDots />}</div>
+                <p className="text-sm font-medium text-gray-600">
+                  Total Contractors
+                </p>
+                {isLoading ? (
+                  <LoadingDots />
+                ) : (
+                  <div className="text-2xl font-bold text-gray-900">
+                    {contractors.length}
+                  </div>
+                )}
               </div>
               <div
                 className={`w-12 h-12 bg-[#122E5F] rounded-xl flex items-center justify-center`}
@@ -234,13 +283,22 @@ export const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card onClick={()=>{router.push('/admin/leads-request')}} className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300">
+        <Card
+          onClick={() => {
+            router.push("/admin/leads-request");
+          }}
+          className="border-0 cursor-pointer shadow-lg hover:shadow-xl transition-all duration-300"
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-xs font-medium underline text-gray-500">This Month</span>
+                <span className="text-xs font-medium underline text-gray-500">
+                  This Month
+                </span>
                 <p className="text-sm font-medium text-gray-600">Total Sales</p>
-                <div className="text-2xl font-bold text-gray-900">${totalSales.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-gray-900">
+                  ${totalSales.toLocaleString()}
+                </div>
                 {/* <div className="text-2xl font-bold text-gray-900">{totalSales ? `$${totalSales.toLocaleString()}` : <LoadingDots />}</div> */}
               </div>
               <div
@@ -296,25 +354,29 @@ export const Dashboard = () => {
                       className="flex flex-col lg:flex-row items-center justify-center md:justify-between p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-all duration-200"
                     >
                       <div className="w-full md:w-1/2">
-                      <div className="text-sm flex items-center font-semibold text-gray-900 transition-colors">
-                        <User className="h-4 w-4 mr-1" />
-                        <h4 className="font-semibold text-gray-900 text-base">
-                          {lead["First Name"]} {lead["Last Name"]}
-                        </h4>
-                      </div>
-                      <div className="mt-1 flex items-center text-sm text-gray-600 transition-colors">
-                        <div className="flex items-center space-x-1">
-                          <MapPin className="h-4 w-4" />
-                          <span className="w-52 truncate">{lead["Property Address"]}</span>
+                        <div className="text-sm flex items-center font-semibold text-gray-900 transition-colors">
+                          <User className="h-4 w-4 mr-1" />
+                          <h4 className="font-semibold text-gray-900 text-base">
+                            {lead["First Name"]} {lead["Last Name"]}
+                          </h4>
+                        </div>
+                        <div className="mt-1 flex items-center text-sm text-gray-600 transition-colors">
+                          <div className="flex items-center space-x-1">
+                            <MapPin className="h-4 w-4" />
+                            <span className="w-52 truncate">
+                              {lead["Property Address"]}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    <div className="flex w-full md:w-auto flex-col mt-2 space-y-2">
-                      <div className="text-sm text-[#286BBD] flex md:justify-end hover:text-[#1d4ed8] transition-colors">
-                        <Phone className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{lead["Phone Number"]}</span>
+                      <div className="flex w-full md:w-auto flex-col mt-2 space-y-2">
+                        <div className="text-sm text-[#286BBD] flex md:justify-end hover:text-[#1d4ed8] transition-colors">
+                          <Phone className="h-4 w-4 mr-1" />
+                          <span className="font-medium">
+                            {lead["Phone Number"]}
+                          </span>
+                        </div>
                       </div>
-                    </div>
                     </div>
                   ))
               ) : (
@@ -367,19 +429,21 @@ export const Dashboard = () => {
                     <div className="w-full md:w-1/2">
                       <div className="text-sm flex items-center font-semibold text-gray-900 transition-colors">
                         <User className="h-4 w-4 mr-1" />
-                        <span className="font-medium">
-                          {reqLead["Name"]}
-                        </span>
+                        <span className="font-medium">{reqLead["Name"]}</span>
                       </div>
                       <div className="text-sm mt-1 flex items-center font-semibold md:w-96 text-gray-900 transition-colors">
                         <MapPin className="h-4 w-4 mr-1" />
-                        <span className="font-medium w-52 truncate">{reqLead["Business Address"]}</span>
+                        <span className="font-medium w-52 truncate">
+                          {reqLead["Business Address"]}
+                        </span>
                       </div>
                     </div>
                     <div className="flex w-full md:w-auto flex-col mt-2 space-y-2">
                       <div className="text-sm text-[#286BBD] flex hover:text-[#1d4ed8] transition-colors">
                         <Phone className="h-4 w-4 mr-1" />
-                        <span className="font-medium">{reqLead["Phone Number"]}</span>
+                        <span className="font-medium">
+                          {reqLead["Phone Number"]}
+                        </span>
                       </div>
                     </div>
                   </div>
