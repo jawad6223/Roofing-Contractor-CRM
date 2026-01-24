@@ -75,7 +75,7 @@ export function Footer() {
         <div className="mt-6 border-t border-blue-300">
             <div className="text-center">
               <p className="text-gray-500 text-sm relative top-6">
-                © 2025 Roof Claim Pros. All rights reserved.
+                © 2026 Roof Claim Pros. All rights reserved.
               </p>
           </div>
         </div>
